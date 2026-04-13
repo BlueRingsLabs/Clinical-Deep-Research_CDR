@@ -49,7 +49,7 @@ dependencies = [
     "anthropic>=0.25.0",
     
     # API
-    "fastapi>=0.111.0",
+    "fastapi>=0.135.3",
     "uvicorn[standard]>=0.29.0",
     
     # HTTP
