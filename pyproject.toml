@@ -19,7 +19,7 @@ classifiers = [
 dependencies = [
     # Core
     "pydantic>=2.0",
-    "pydantic-settings>=2.0",
+    "pydantic-settings>=2.13.1",
     
     # Orchestration
     "langgraph>=0.2.0",
