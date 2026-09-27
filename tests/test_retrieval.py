@@ -23,13 +23,10 @@ Reference: https://www.ncbi.nlm.nih.gov/books/NBK25497/#chapter2.Usage_Guideline
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import numpy as np
-
-from cdr.core.enums import RecordSource
-from cdr.core.schemas import Record
-
+import pytest
 
 # =============================================================================
 # PUBMED CLIENT TESTS

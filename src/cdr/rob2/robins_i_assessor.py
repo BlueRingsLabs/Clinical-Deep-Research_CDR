@@ -39,7 +39,7 @@ The 7 ROBINS-I Domains:
    - Did the study control for important confounders?
    - Were confounders measured validly and reliably?
    - Were confounders handled appropriately in analysis?
-   
+
 2. SELECTION (Bias in selection of participants into the study)
    - Was selection into the study based on participant characteristics observed after the start of intervention?
    - Did start of follow-up and start of intervention coincide?

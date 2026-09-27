@@ -8,7 +8,7 @@ Uses filesystem with structured directories per run.
 import hashlib
 import json
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -92,7 +92,7 @@ class ArtifactStore:
         # Write initial metadata
         meta = {
             "run_id": run_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "status": "initialized",
             **(metadata or {}),
         }
@@ -132,7 +132,7 @@ class ArtifactStore:
             raise StorageError(f"Run {run_id} not found")
         meta = self._read_json(meta_path)
         meta.update(updates)
-        meta["updated_at"] = datetime.now(timezone.utc).isoformat()
+        meta["updated_at"] = datetime.now(UTC).isoformat()
         self._write_json(meta_path, meta)
 
     # ==================== PDF Storage ====================

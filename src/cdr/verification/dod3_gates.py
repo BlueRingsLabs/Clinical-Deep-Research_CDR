@@ -23,13 +23,12 @@ References:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cdr.core.schemas import PICO, EvidenceClaim, Record, Snippet
@@ -59,7 +58,9 @@ class MismatchType(str, Enum):
     POPULATION_NOT_MENTIONED = "population_not_mentioned"
     POPULATION_CONTEXT_MISMATCH = "population_context_mismatch"
     # P0-04: Population dominance violations
-    POPULATION_INCIDENTAL = "population_incidental"  # Population mentioned but not as primary target
+    POPULATION_INCIDENTAL = (
+        "population_incidental"  # Population mentioned but not as primary target
+    )
 
     # Intervention mismatches (I)
     INTERVENTION_NOT_FOUND = "intervention_not_found"
@@ -532,7 +533,7 @@ class PICOMatchGate:
         return False, None
 
     def _check_population_match(
-        self, text: str, pico: "PICO"
+        self, text: str, pico: PICO
     ) -> tuple[float, bool, str | None, PopulationRole]:
         """
         Check population match with P0-04 Population Dominance.
@@ -600,9 +601,7 @@ class PICOMatchGate:
             # Check for incidental mention with synonyms
             for pattern in incidental_patterns:
                 match = re.search(pattern, text_lower)
-                if match and any(
-                    term in text_lower[match.start() :] for term in matched_terms
-                ):
+                if match and any(term in text_lower[match.start() :] for term in matched_terms):
                     return 0.3, False, None, PopulationRole.INCIDENTAL_MENTION
 
             # Synonym match as primary target
@@ -613,7 +612,7 @@ class PICOMatchGate:
         # No match
         return 0.0, False, None, PopulationRole.NOT_MENTIONED
 
-    def _check_intervention_match(self, text: str, pico: "PICO") -> tuple[float, bool]:
+    def _check_intervention_match(self, text: str, pico: PICO) -> tuple[float, bool]:
         """
         Check intervention match.
 
@@ -635,7 +634,7 @@ class PICOMatchGate:
         score = min(1.0, matches / max(2, len(intervention_terms) // 2))
         return score, False
 
-    def _check_outcome_match(self, text: str, pico: "PICO") -> float:
+    def _check_outcome_match(self, text: str, pico: PICO) -> float:
         """Check outcome match."""
         outcome_terms = self._get_synonyms(pico.outcome, self.OUTCOME_SYNONYMS)
         text_lower = text.lower()
@@ -653,7 +652,7 @@ class PICOMatchGate:
 
         return score
 
-    def _check_comparator_match(self, text: str, pico: "PICO") -> tuple[float, str | None, bool]:
+    def _check_comparator_match(self, text: str, pico: PICO) -> tuple[float, str | None, bool]:
         """
         Check comparator match.
 
@@ -697,7 +696,7 @@ class PICOMatchGate:
 
         return score, detected_comparators[0] if detected_comparators else None, False
 
-    def check_snippet(self, snippet: "Snippet", pico: "PICO") -> GateCheckResult:
+    def check_snippet(self, snippet: Snippet, pico: PICO) -> GateCheckResult:
         """Full PICO validation on a snippet."""
         violations = []
         text = snippet.text
@@ -856,9 +855,8 @@ class PICOMatchGate:
             },
         )
 
-    def check_record(self, record: "Record", pico: "PICO") -> GateCheckResult:
+    def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Full PICO validation on a record (abstract + title)."""
-        from cdr.core.schemas import Snippet, SourceRef
 
         # Create synthetic snippet from record
         text = f"{record.title}\n\n{record.abstract or ''}"
@@ -1028,7 +1026,7 @@ class StudyTypeEnforcementGate:
         self.strict = strict
         self.allow_stratification = allow_stratification
 
-    def _detect_study_type(self, record: "Record") -> tuple[str | None, str | None]:
+    def _detect_study_type(self, record: Record) -> tuple[str | None, str | None]:
         """
         Detect study type from record.
 
@@ -1092,7 +1090,7 @@ class StudyTypeEnforcementGate:
 
         return None, None
 
-    def check_record(self, record: "Record", pico: "PICO") -> GateCheckResult:
+    def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Check study type compliance with PICO requirements."""
         from cdr.core.enums import StudyType
 
@@ -1274,8 +1272,8 @@ class ContextPurityGate:
 
     def check_claim_purity(
         self,
-        claim: "EvidenceClaim",
-        snippets: list["Snippet"],
+        claim: EvidenceClaim,
+        snippets: list[Snippet],
     ) -> GateCheckResult:
         """
         Check if claim mixes incompatible contexts.
@@ -1432,8 +1430,8 @@ class AssertionCoverageGate:
 
     def extract_assertions(
         self,
-        claim: "EvidenceClaim",
-        snippets: list["Snippet"],
+        claim: EvidenceClaim,
+        snippets: list[Snippet],
     ) -> list[Assertion]:
         """Extract atomic assertions from a claim."""
         assertions = []
@@ -1474,9 +1472,9 @@ class AssertionCoverageGate:
     def check_assertion_coverage(
         self,
         assertions: list[Assertion],
-        snippets: list["Snippet"],
-        pico: "PICO",
-        records: list["Record"] | None = None,
+        snippets: list[Snippet],
+        pico: PICO,
+        records: list[Record] | None = None,
     ) -> GateCheckResult:
         """
         Validate assertion coverage.
@@ -1499,7 +1497,7 @@ class AssertionCoverageGate:
         )
 
         # Build record lookup for study type validation
-        record_lookup: dict[str, "Record"] = {}
+        record_lookup: dict[str, Record] = {}
         if records:
             for r in records:
                 record_lookup[r.record_id] = r
@@ -1518,7 +1516,11 @@ class AssertionCoverageGate:
                             has_full_match = True
 
                         # P0-05: Check study type of the record this snippet comes from
-                        if pico_requires_rct and snippet.source_ref and snippet.source_ref.record_id:
+                        if (
+                            pico_requires_rct
+                            and snippet.source_ref
+                            and snippet.source_ref.record_id
+                        ):
                             record = record_lookup.get(snippet.source_ref.record_id)
                             if record:
                                 type_result = study_type_gate.check_record(record, pico)
@@ -1550,7 +1552,7 @@ class AssertionCoverageGate:
                             mismatch_type=MismatchType.ASSERTION_UNSUPPORTED,
                             result=GateResult.FAIL if self.strict else GateResult.WARN,
                             claim_id=assertion.claim_id,
-                            message=f"Strong assertion lacks snippet with full PICO match",
+                            message="Strong assertion lacks snippet with full PICO match",
                         )
                     )
 
@@ -1666,10 +1668,10 @@ class EvidenceAnchoringGate:
 
     def check_claim_anchoring(
         self,
-        claim: "EvidenceClaim",
-        snippets: list["Snippet"],
-        records: list["Record"],
-        pico: "PICO",
+        claim: EvidenceClaim,
+        snippets: list[Snippet],
+        records: list[Record],
+        pico: PICO,
     ) -> GateCheckResult:
         """
         Check that a claim is properly anchored to direct RCT evidence.
@@ -1683,9 +1685,7 @@ class EvidenceAnchoringGate:
         violations = []
 
         # Get supporting snippets for this claim
-        supporting_snippets = [
-            s for s in snippets if s.snippet_id in claim.supporting_snippet_ids
-        ]
+        supporting_snippets = [s for s in snippets if s.snippet_id in claim.supporting_snippet_ids]
 
         if not supporting_snippets:
             # No support = unsupported (handled elsewhere)
@@ -1705,15 +1705,13 @@ class EvidenceAnchoringGate:
 
         for snippet in supporting_snippets:
             # Get the record for this snippet
-            record = record_lookup.get(
-                snippet.source_ref.record_id if snippet.source_ref else None
-            )
+            record = record_lookup.get(snippet.source_ref.record_id if snippet.source_ref else None)
 
             # Check snippet text
             snippet_text = snippet.text
             is_direct, _ = self._is_direct_rct_source(snippet_text)
-            is_secondary, secondary_type = self._is_secondary_source(snippet_text)
-            is_subanalysis, subanalysis_type = self._is_subanalysis(snippet_text)
+            is_secondary, _secondary_type = self._is_secondary_source(snippet_text)
+            is_subanalysis, _subanalysis_type = self._is_subanalysis(snippet_text)
 
             # Also check record title/abstract if available
             if record:
@@ -1951,10 +1949,10 @@ class GateReportGenerator:
     def validate_run(
         self,
         run_id: str,
-        pico: "PICO",
-        records: list["Record"],
-        snippets: list["Snippet"],
-        claims: list["EvidenceClaim"],
+        pico: PICO,
+        records: list[Record],
+        snippets: list[Snippet],
+        claims: list[EvidenceClaim],
         *,  # keyword-only after this
         included_record_ids: set[str] | None = None,
         included_snippet_ids: set[str] | None = None,
@@ -2005,9 +2003,9 @@ class GateReportGenerator:
 
             # Check if this violation is from included or excluded evidence
             is_included = False
-            if v.record_id and v.record_id in included_record_ids:
-                is_included = True
-            elif v.snippet_id and v.snippet_id in included_snippet_ids:
+            if (v.record_id and v.record_id in included_record_ids) or (
+                v.snippet_id and v.snippet_id in included_snippet_ids
+            ):
                 is_included = True
             elif not v.record_id and not v.snippet_id:
                 # Claim-level violations (no specific record/snippet)
@@ -2138,9 +2136,7 @@ class GateReportGenerator:
         # 6. P0-03: Evidence Anchoring Gate - verify claims use direct RCT evidence
         anchoring_violations_list = []
         for claim in claims:
-            result = self.anchoring_gate.check_claim_anchoring(
-                claim, snippets, records, pico
-            )
+            result = self.anchoring_gate.check_claim_anchoring(claim, snippets, records, pico)
             report.total_checks += 1
             if result.failed:
                 report.failed_checks += 1
@@ -2304,7 +2300,7 @@ class DoD3Validator:
         self.assertion_gate = AssertionCoverageGate(strict=strict)
         self.report_generator = GateReportGenerator()
 
-    def validate_record(self, record: "Record", pico: "PICO") -> tuple[bool, list[GateViolation]]:
+    def validate_record(self, record: Record, pico: PICO) -> tuple[bool, list[GateViolation]]:
         """Validate a single record against PICO."""
         violations = []
 
@@ -2320,9 +2316,7 @@ class DoD3Validator:
 
         return len(violations) == 0, violations
 
-    def validate_snippet(
-        self, snippet: "Snippet", pico: "PICO"
-    ) -> tuple[bool, list[GateViolation]]:
+    def validate_snippet(self, snippet: Snippet, pico: PICO) -> tuple[bool, list[GateViolation]]:
         """Validate a single snippet against PICO."""
         result = self.pico_gate.check_snippet(snippet, pico)
         return result.passed, result.violations
@@ -2330,10 +2324,10 @@ class DoD3Validator:
     def validate(
         self,
         run_id: str,
-        pico: "PICO",
-        records: list["Record"],
-        snippets: list["Snippet"],
-        claims: list["EvidenceClaim"],
+        pico: PICO,
+        records: list[Record],
+        snippets: list[Snippet],
+        claims: list[EvidenceClaim],
     ) -> DoD3ValidationResult:
         """Run full DoD3 validation.
 
@@ -2355,7 +2349,7 @@ class DoD3Validator:
         # STEP 1: Validate records and identify exclusions
         # =========================================================================
         for record in records:
-            passed, violations = self.validate_record(record, pico)
+            passed, _violations = self.validate_record(record, pico)
             if not passed:
                 excluded_records.append(record.record_id)
 
@@ -2363,7 +2357,7 @@ class DoD3Validator:
         # STEP 2: Validate snippets and identify exclusions
         # =========================================================================
         for snippet in snippets:
-            passed, violations = self.validate_snippet(snippet, pico)
+            passed, _violations = self.validate_snippet(snippet, pico)
             if not passed:
                 excluded_snippets.append(snippet.snippet_id)
 

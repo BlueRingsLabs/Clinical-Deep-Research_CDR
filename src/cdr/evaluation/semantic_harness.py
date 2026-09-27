@@ -22,9 +22,8 @@ import json
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
-from cdr.core.enums import ComparatorSource, TherapeuticContext, GRADECertainty
+from cdr.core.enums import ComparatorSource, GRADECertainty, TherapeuticContext
 from cdr.core.schemas import PICO, EvidenceClaim
 from cdr.verification.assertion_gate import AssertionGate, AssertionGateResult
 

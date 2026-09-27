@@ -23,13 +23,8 @@ import pytest
 from cdr.composition import CompositionEngine
 from cdr.composition.schemas import (
     ComposedHypothesis,
-    HypothesisStrength,
-    MechanisticRelation,
-    ProposedStudyDesign,
-    ThreatAnalysis,
 )
-from cdr.core.schemas import EvidenceClaim, PICO
-
+from cdr.core.schemas import PICO, EvidenceClaim
 
 # =============================================================================
 # REALISTIC LLM MOCK

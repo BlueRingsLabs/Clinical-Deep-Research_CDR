@@ -189,7 +189,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
 
                 # P0-07: Use gate_report's status_reason as single source of truth
                 gate_status_reason = dod3_validation_result.gate_report.status_reason
-                gate_status_reason_code = dod3_validation_result.gate_report.status_reason_code
+                gate_status_reason_code = dod3_validation_result.gate_report.status_reason_code  # noqa: F841 — loose end: parsed but not used yet
 
                 # If DoD3 gates fail, determine if UNPUBLISHABLE or PARTIALLY_PUBLISHABLE
                 # FIX 7: PARTIALLY_PUBLISHABLE if:
@@ -251,7 +251,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                     # P0-07: Even on success, use gate_report status_reason
                     if not status_reason:
                         status_reason = gate_status_reason
-                    print(f"[Publish] ✅ DoD3 gates passed - run is publishable")
+                    print("[Publish] ✅ DoD3 gates passed - run is publishable")
 
                 # =========================================================
                 # HARD ENFORCEMENT: Apply exclusions to evidence chain
@@ -688,9 +688,9 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
         # EVALUATION INTEGRATION: Generate EvaluationReport per run
         # Refs: CDR SOTA requirements, DoD Level 2/3 metrics
         # =============================================================
-        from cdr.evaluation.metrics import evaluate_cdr_output
         from cdr.composition.schemas import ComposedHypothesis
         from cdr.core.schemas import VerificationResult
+        from cdr.evaluation.metrics import evaluate_cdr_output
 
         # Build verification results dict for evaluator
         verification_dict: dict[str, VerificationResult] = {}

@@ -14,9 +14,7 @@ Run with:
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -25,13 +23,11 @@ from cdr.core.enums import ComparatorSource, RecordSource, StudyType
 from cdr.core.schemas import PICO, Record
 from cdr.verification.evidence_gates import (
     ComparatorAlignmentGate,
-    DeduplicationGate,
     EvidenceValidator,
     GateResult,
     PopulationMatchGate,
     StudyTypeConsistencyGate,
 )
-
 
 # =============================================================================
 # TEST FIXTURES
@@ -432,7 +428,7 @@ def run_tests():
 
     if failed_tests:
         print("\nFailed tests:")
-        for class_name, method_name, error in failed_tests:
+        for class_name, method_name, _error in failed_tests:
             print(f"  - {class_name}.{method_name}")
         return 1
 

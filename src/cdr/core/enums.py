@@ -5,7 +5,7 @@ This module defines all enumerations used throughout the CDR system.
 These are critical for maintaining type safety and consistent vocabulary.
 """
 
-from enum import Enum, auto
+from enum import Enum
 
 
 class StudyType(str, Enum):

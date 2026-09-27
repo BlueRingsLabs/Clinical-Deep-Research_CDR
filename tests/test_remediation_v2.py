@@ -15,8 +15,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cdr.core.enums import GraphNode, RunStatus
-from cdr.core.schemas import CDRState, PICO, SearchPlan
+from cdr.core.enums import GraphNode
+from cdr.core.schemas import PICO, CDRState, SearchPlan
 
 
 def _make_pico(**overrides) -> PICO:
@@ -360,6 +360,7 @@ class TestFulltextRetrievalDefault:
     def test_fulltext_enabled_by_default(self):
         """parse_documents_node should attempt fulltext retrieval by default."""
         import inspect
+
         from cdr.orchestration.nodes.screening_nodes import parse_documents_node
 
         source = inspect.getsource(parse_documents_node)
@@ -381,6 +382,7 @@ class TestRoB2MethodsPrioritization:
     def test_rob2_node_uses_sections_when_available(self):
         """assess_rob2_node should use structured sections for RoB2 assessment."""
         import inspect
+
         from cdr.orchestration.nodes.analysis_nodes import assess_rob2_node
 
         source = inspect.getsource(assess_rob2_node)
@@ -411,8 +413,8 @@ class TestConditionalEdgesPostRefactor:
 
     def test_should_continue_after_retrieve_with_records(self):
         """Route to deduplicate when records found."""
-        from cdr.orchestration.graph import should_continue_after_retrieve
         from cdr.core.schemas import Record
+        from cdr.orchestration.graph import should_continue_after_retrieve
 
         record = Record(
             record_id="r1",

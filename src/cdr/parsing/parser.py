@@ -93,8 +93,8 @@ class PDFParser:
             import fitz
 
             self._fitz = fitz
-        except ImportError:
-            raise ParsingError("PyMuPDF not installed. Run: pip install pymupdf")
+        except ImportError as e:
+            raise ParsingError("PyMuPDF not installed. Run: pip install pymupdf") from e
 
     def parse(self, path: str | Path) -> ParsedDocument:
         """
@@ -189,8 +189,8 @@ class UnstructuredParser:
             from unstructured.partition.auto import partition
 
             self._partition = partition
-        except ImportError:
-            raise ParsingError("unstructured not installed. Run: pip install unstructured")
+        except ImportError as e:
+            raise ParsingError("unstructured not installed. Run: pip install unstructured") from e
 
     def parse(self, path: str | Path) -> ParsedDocument:
         """

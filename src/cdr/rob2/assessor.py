@@ -8,14 +8,16 @@ Documentation: https://methods.cochrane.org/bias/resources/rob-2-revised-cochran
 """
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from cdr.core.enums import RoB2Domain, RoB2Judgment
-from cdr.core.schemas import RoB2DomainResult, RoB2Result
 from cdr.core.exceptions import ExtractionError
-from cdr.llm import create_provider, build_messages
-from cdr.observability import get_tracer, get_cdr_metrics
+from cdr.core.schemas import RoB2DomainResult, RoB2Result
+from cdr.llm import build_messages, create_provider
+from cdr.observability import get_cdr_metrics, get_tracer
 
+if TYPE_CHECKING:
+    from cdr.llm.base import BaseLLMProvider
 
 ROB2_SYSTEM_PROMPT = """You are an expert in assessing risk of bias for randomized controlled trials using the Cochrane Risk of Bias 2 (RoB2) tool.
 
@@ -202,7 +204,7 @@ Assess the risk of bias for this randomized trial across all 5 RoB2 domains."""
         except json.JSONDecodeError as e:
             # If still fails, log the content for debugging
             print(f"[RoB2] Failed to parse JSON. Content (first 200 chars): {content[:200]}")
-            raise ExtractionError(f"Failed to parse RoB2 JSON: {e}")
+            raise ExtractionError(f"Failed to parse RoB2 JSON: {e}") from e
 
         domains_data = data.get("domains", [])
 

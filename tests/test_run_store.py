@@ -12,7 +12,6 @@ Tests:
 5. Error handling and edge cases
 """
 
-import json
 import tempfile
 from pathlib import Path
 
@@ -41,14 +40,14 @@ class TestRunStoreInit:
 
     def test_creates_database_file(self, temp_db):
         """Database file is created on init."""
-        store = RunStore(db_path=temp_db)
+        RunStore(db_path=temp_db)
         assert temp_db.exists()
 
     def test_creates_parent_directories(self):
         """Parent directories are created if needed."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "subdir" / "deep" / "test.db"
-            store = RunStore(db_path=db_path)
+            RunStore(db_path=db_path)
             assert db_path.exists()
 
     def test_schema_is_initialized(self, store):

@@ -6,8 +6,9 @@ Tests for citation verification and entailment checking.
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 
 from cdr.core.enums import GRADECertainty, VerificationStatus
 from cdr.core.schemas import (
@@ -17,7 +18,6 @@ from cdr.core.schemas import (
     VerificationCheck,
     VerificationResult,
 )
-
 
 # =============================================================================
 # VERIFIER TESTS

@@ -96,14 +96,6 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
         llm = configurable.get("llm_provider")
         model = configurable.get("model", "gpt-4o")
 
-        from cdr.rob2.assessor import RoB2Assessor
-        from cdr.rob2.robins_i_assessor import ROBINSIAssessor
-        from cdr.core.schemas import (
-            RoB2Result,
-            RoB2DomainResult,
-            ROBINSIResult,
-            ROBINSIDomainResult,
-        )
         from cdr.core.enums import (
             RoB2Domain,
             RoB2Judgment,
@@ -111,6 +103,14 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
             ROBINSIJudgment,
             StudyType,
         )
+        from cdr.core.schemas import (
+            RoB2DomainResult,
+            RoB2Result,
+            ROBINSIDomainResult,
+            ROBINSIResult,
+        )
+        from cdr.rob2.assessor import RoB2Assessor
+        from cdr.rob2.robins_i_assessor import ROBINSIAssessor
 
         # Study types that use ROBINS-I (observational studies)
         ROBINS_I_STUDY_TYPES = {
@@ -181,7 +181,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                 rob2_results.append(result)
                 print(f"[RoB2] Assessed {card.record_id}: {result.overall_judgment.value}")
             except Exception as e:
-                error_msg = f"RoB2 assessment failed for {card.record_id}: {str(e)}"
+                error_msg = f"RoB2 assessment failed for {card.record_id}: {e!s}"
                 print(f"[RoB2] ERROR: {error_msg}")
                 assessment_errors.append(error_msg)
                 span.set_attribute(f"rob2_error_{card.record_id}", str(e))
@@ -190,7 +190,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                     RoB2DomainResult(
                         domain=domain,
                         judgment=RoB2Judgment.HIGH,
-                        rationale=f"ASSESSMENT FAILED: {str(e)}",
+                        rationale=f"ASSESSMENT FAILED: {e!s}",
                         supporting_snippet_ids=[],
                     )
                     for domain in RoB2Domain
@@ -199,7 +199,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                     record_id=card.record_id,
                     domains=failed_domains,
                     overall_judgment=RoB2Judgment.HIGH,
-                    overall_rationale=f"ASSESSMENT FAILED: {str(e)} - High risk assumed conservatively.",
+                    overall_rationale=f"ASSESSMENT FAILED: {e!s} - High risk assumed conservatively.",
                 )
                 rob2_results.append(failed_result)
 
@@ -222,7 +222,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                 robins_i_results.append(result)
                 print(f"[ROBINS-I] Assessed {card.record_id}: {result.overall_judgment.value}")
             except Exception as e:
-                error_msg = f"ROBINS-I assessment failed for {card.record_id}: {str(e)}"
+                error_msg = f"ROBINS-I assessment failed for {card.record_id}: {e!s}"
                 print(f"[ROBINS-I] ERROR: {error_msg}")
                 assessment_errors.append(error_msg)
                 span.set_attribute(f"robinsi_error_{card.record_id}", str(e))
@@ -232,7 +232,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                     ROBINSIDomainResult(
                         domain=domain,
                         judgment=ROBINSIJudgment.CRITICAL,
-                        rationale=f"ASSESSMENT FAILED: {str(e)}",
+                        rationale=f"ASSESSMENT FAILED: {e!s}",
                         supporting_snippet_ids=[],
                     )
                     for domain in ROBINSIDomain
@@ -241,7 +241,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                     record_id=card.record_id,
                     domains=failed_domains,
                     overall_judgment=ROBINSIJudgment.CRITICAL,
-                    overall_rationale=f"ASSESSMENT FAILED: {str(e)} - Critical risk assumed conservatively.",
+                    overall_rationale=f"ASSESSMENT FAILED: {e!s} - Critical risk assumed conservatively.",
                 )
                 robins_i_results.append(failed_result)
 

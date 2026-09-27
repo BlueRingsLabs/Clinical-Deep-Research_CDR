@@ -6,21 +6,21 @@ Tests for evidence synthesis, GRADE assessment, and meta-analysis components.
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from cdr.core.enums import GRADECertainty, OutcomeMeasureType, RoB2Domain, RoB2Judgment, StudyType
 from cdr.core.schemas import (
+    PICO,
     EvidenceClaim,
     OutcomeMeasure,
-    PICO,
     RoB2DomainResult,
     RoB2Result,
     Snippet,
     SourceRef,
     StudyCard,
 )
-
 
 # =============================================================================
 # SYNTHESIS RESULT TESTS
@@ -366,8 +366,8 @@ class TestSkepticAgent:
 
     def test_critique_filtering_by_severity(self, mock_llm):
         """Test that critiques are filtered by severity threshold."""
-        from cdr.skeptic.skeptic_agent import SkepticAgent
         from cdr.core.enums import CritiqueSeverity
+        from cdr.skeptic.skeptic_agent import SkepticAgent
 
         # Agent with HIGH threshold (filters out MEDIUM, LOW, INFO)
         agent = SkepticAgent(
@@ -380,9 +380,9 @@ class TestSkepticAgent:
 
     def test_aggregate_critiques(self):
         """Test critique aggregation by claim."""
-        from cdr.skeptic.skeptic_agent import aggregate_critiques
-        from cdr.core.schemas import CritiqueResult
         from cdr.core.enums import CritiqueDimension, CritiqueSeverity
+        from cdr.core.schemas import CritiqueResult
+        from cdr.skeptic.skeptic_agent import aggregate_critiques
 
         findings = [
             CritiqueResult(
@@ -415,9 +415,9 @@ class TestSkepticAgent:
 
     def test_calculate_critique_score(self):
         """Test critique severity score calculation."""
-        from cdr.skeptic.skeptic_agent import calculate_critique_score
-        from cdr.core.schemas import CritiqueResult
         from cdr.core.enums import CritiqueDimension, CritiqueSeverity
+        from cdr.core.schemas import CritiqueResult
+        from cdr.skeptic.skeptic_agent import calculate_critique_score
 
         # All CRITICAL
         critical_findings = [
@@ -448,9 +448,9 @@ class TestSkepticAgent:
 
     def test_should_revise_claim(self):
         """Test claim revision decision logic."""
-        from cdr.skeptic.skeptic_agent import should_revise_claim
-        from cdr.core.schemas import CritiqueResult
         from cdr.core.enums import CritiqueDimension, CritiqueSeverity
+        from cdr.core.schemas import CritiqueResult
+        from cdr.skeptic.skeptic_agent import should_revise_claim
 
         # One CRITICAL should trigger revision
         findings_with_critical = [
@@ -591,8 +591,8 @@ class TestDoDLevelEarlyGates:
 
         Refs: ADR-005, PRISMA 2020 (reproducibility)
         """
-        from cdr.core.schemas import SynthesisResult, EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim, SynthesisResult
 
         # Simulate the gate logic from synthesize_node
         dod_level = 2
@@ -630,8 +630,8 @@ class TestDoDLevelEarlyGates:
 
         Refs: ADR-005, GRADE handbook section 5.2
         """
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         dod_level = 3
 
@@ -664,8 +664,8 @@ class TestDoDLevelEarlyGates:
 
     def test_dod_level_2_allows_missing_grade_rationale(self):
         """Test DoD Level 2 does NOT block for missing grade_rationale."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         dod_level = 2
 
@@ -687,8 +687,8 @@ class TestDoDLevelEarlyGates:
 
     def test_dod_level_3_passes_with_complete_rationale(self):
         """Test DoD Level 3 passes when all claims have grade_rationale."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         dod_level = 3
 
@@ -793,8 +793,8 @@ class TestDoDLevelEarlyGates:
         Refs: ADR-005, CDR_Post_ADR005_Full_Audit (ALTO)
         GRADE domains: risk_of_bias, inconsistency, indirectness, imprecision, publication_bias
         """
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         GRADE_REQUIRED_DOMAINS = frozenset(
             [
@@ -829,8 +829,8 @@ class TestDoDLevelEarlyGates:
 
     def test_level3_grade_rationale_complete_passes(self):
         """Test Level 3 passes with all 5 GRADE domains populated."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         GRADE_REQUIRED_DOMAINS = frozenset(
             [
@@ -863,8 +863,8 @@ class TestDoDLevelEarlyGates:
 
     def test_level3_grade_rationale_empty_value_blocked(self):
         """Test Level 3 blocks when domain is present but value is empty."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         GRADE_REQUIRED_DOMAINS = frozenset(
             [

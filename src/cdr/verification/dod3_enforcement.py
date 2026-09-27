@@ -24,7 +24,6 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cdr.core.schemas import PICO, EvidenceClaim, Record, Snippet
-    from cdr.composition.schemas import ComposedHypothesis
 
 logger = logging.getLogger(__name__)
 
@@ -215,10 +214,10 @@ class DoD3Enforcer:
     def enforce(
         self,
         run_id: str,
-        pico: "PICO",
-        records: list["Record"],
-        snippets: list["Snippet"],
-        claims: list["EvidenceClaim"],
+        pico: PICO,
+        records: list[Record],
+        snippets: list[Snippet],
+        claims: list[EvidenceClaim],
         hypotheses: list[Any] | None = None,
         gate_violations: list[dict] | None = None,
         is_unpublishable: bool = False,
@@ -247,7 +246,6 @@ class DoD3Enforcer:
         # Build lookups
         records_by_id = {r.record_id: r for r in records}
         snippets_by_id = {s.snippet_id: s for s in snippets}
-        snippet_to_record = {s.snippet_id: s.source_ref.record_id for s in snippets}
 
         # 1. IDENTIFY EXCLUDED RECORDS
         excluded_record_ids = set()
@@ -415,9 +413,9 @@ class DoD3Enforcer:
 
     def apply_to_claims(
         self,
-        claims: list["EvidenceClaim"],
+        claims: list[EvidenceClaim],
         enforcement_result: EnforcementResult,
-    ) -> list["EvidenceClaim"]:
+    ) -> list[EvidenceClaim]:
         """
         Apply enforcement result to claims - filter out orphans, update snippet IDs.
 
@@ -529,9 +527,9 @@ class SubPICODecomposer:
 
     def decompose(
         self,
-        pico: "PICO",
-        snippets: list["Snippet"],
-        records: list["Record"] | None = None,
+        pico: PICO,
+        snippets: list[Snippet],
+        records: list[Record] | None = None,
     ) -> list[SubPICO]:
         """
         Analyze evidence and decompose into sub-PICOs.
@@ -582,7 +580,7 @@ class SubPICODecomposer:
         sub_picos = []
         sorted_comparisons = sorted(comparisons.items(), key=lambda x: -x[1])
 
-        for i, ((drug1, drug2), count) in enumerate(sorted_comparisons[:5]):  # Max 5 sub-PICOs
+        for i, ((drug1, drug2), _count) in enumerate(sorted_comparisons[:5]):  # Max 5 sub-PICOs
             label = f"PICO-{chr(65 + i)} ({drug1.upper()} vs {drug2.upper()})"
 
             sub_pico = SubPICO(
@@ -613,8 +611,8 @@ class SubPICODecomposer:
     def generate_sectioned_conclusion(
         self,
         sub_picos: list[SubPICO],
-        original_pico: "PICO",
-        claims: list["EvidenceClaim"],
+        original_pico: PICO,
+        claims: list[EvidenceClaim],
     ) -> dict:
         """
         Generate a sectioned conclusion based on sub-PICOs.
@@ -695,7 +693,6 @@ class HypothesisGate:
         Returns:
             (should_pass, reason)
         """
-        hyp_id = getattr(hypothesis, "hypothesis_id", None) or hypothesis.get("hypothesis_id", "")
         source_claims = getattr(hypothesis, "source_claim_ids", None) or hypothesis.get(
             "source_claim_ids", []
         )

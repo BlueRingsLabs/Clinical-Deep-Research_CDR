@@ -7,12 +7,13 @@ Structured tracing for CDR operations using OpenTelemetry-compatible format.
 import json
 import time
 import uuid
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 from cdr.config import get_settings
 
@@ -273,7 +274,7 @@ class Tracer:
             return
 
         self._export_path.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
         filename = f"trace_{self._trace_id}_{timestamp}.jsonl"
 
         with open(self._export_path / filename, "a") as f:

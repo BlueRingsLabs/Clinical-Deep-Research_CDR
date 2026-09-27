@@ -6,11 +6,10 @@ Shared fixtures and test utilities.
 
 import os
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import pytest
-
 
 # Set test environment before any imports
 os.environ.setdefault("CDR_DEBUG", "true")

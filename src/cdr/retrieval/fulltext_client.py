@@ -27,7 +27,6 @@ import httpx
 from cdr.config import get_settings
 from cdr.observability import get_tracer
 
-
 tracer = get_tracer(__name__)
 
 # NCBI PMC API endpoints

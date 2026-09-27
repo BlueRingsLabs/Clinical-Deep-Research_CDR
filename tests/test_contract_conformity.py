@@ -15,6 +15,7 @@ Source of Truth:
 """
 
 import pytest
+
 from cdr.core.enums import (
     CritiqueDimension,
     CritiqueSeverity,
@@ -33,7 +34,6 @@ from cdr.core.schemas import (
     SourceRef,
     VerificationResult,
 )
-
 
 # =============================================================================
 # HELPER FUNCTIONS (module-level to avoid duplication)
@@ -136,7 +136,6 @@ class TestEvidenceClaimContract:
 
     def test_evidence_claim_has_no_statement_field(self):
         """EvidenceClaim must NOT have statement field."""
-        import inspect
 
         fields = set(EvidenceClaim.model_fields.keys())
         assert "statement" not in fields, "EvidenceClaim should not have 'statement' field"
@@ -288,7 +287,7 @@ This is the third paragraph that also has more than fifty characters for extract
 
         assert len(snippets) >= 1, "Should extract at least one snippet"
 
-        for i, snip in enumerate(snippets):
+        for _i, snip in enumerate(snippets):
             # Verify snippet_id field is used (not 'id')
             assert hasattr(snip, "snippet_id"), "Snippet must have snippet_id attribute"
             assert snip.snippet_id.startswith("test_001_snip_"), (
@@ -318,6 +317,7 @@ class TestAuditFixes:
     def test_study_card_extractor_no_placeholder(self):
         """StudyCardExtractor must NOT use 'placeholder' in supporting_snippet_ids."""
         import inspect
+
         from cdr.extraction.extractor import StudyCardExtractor
 
         # Inspect the _parse_response method source code
@@ -332,6 +332,7 @@ class TestAuditFixes:
     def test_rule_based_screener_uses_record_id_not_id(self):
         """RuleBasedScreener must use record.record_id, not record.id."""
         import inspect
+
         from cdr.screening.screener import RuleBasedScreener
 
         # Inspect the _apply_rules method source code
@@ -371,6 +372,7 @@ class TestSnippetGateFormal:
     def test_synthesize_node_has_snippet_validation_gate(self):
         """synthesize_node must validate claims against state.snippets."""
         import inspect
+
         from cdr.orchestration.graph import synthesize_node
 
         source = inspect.getsource(synthesize_node)
@@ -388,6 +390,7 @@ class TestSnippetGateFormal:
     def test_publish_node_checks_insufficient_evidence_for_no_snippets(self):
         """publish_node must set INSUFFICIENT_EVIDENCE when no snippets exist."""
         import inspect
+
         from cdr.orchestration.graph import publish_node
 
         source = inspect.getsource(publish_node)
@@ -405,6 +408,7 @@ class TestSnippetGateFormal:
     def test_publish_node_checks_unpublishable_for_invalid_claims(self):
         """publish_node must set UNPUBLISHABLE when claims lack valid snippets."""
         import inspect
+
         from cdr.orchestration.graph import publish_node
 
         source = inspect.getsource(publish_node)
@@ -448,6 +452,7 @@ class TestCritical1EarlyExitStatus:
     def test_retrieve_early_exit_routes_to_publish(self):
         """should_continue_after_retrieve returns 'publish' not 'end'."""
         import inspect
+
         from cdr.orchestration.graph import should_continue_after_retrieve
 
         # Check return type annotation
@@ -465,6 +470,7 @@ class TestCritical1EarlyExitStatus:
     def test_screen_early_exit_routes_to_publish(self):
         """should_continue_after_screen returns 'publish' not 'end'."""
         import inspect
+
         from cdr.orchestration.graph import should_continue_after_screen
 
         sig = inspect.signature(should_continue_after_screen)
@@ -480,6 +486,7 @@ class TestCritical1EarlyExitStatus:
     def test_publish_node_handles_no_records(self):
         """publish_node must handle no_records_retrieved case."""
         import inspect
+
         from cdr.orchestration.graph import publish_node
 
         source = inspect.getsource(publish_node)
@@ -501,6 +508,7 @@ class TestCritical2ScreeningProviderMismatch:
     def test_screener_accepts_provider_instance(self):
         """Screener.__init__ must accept BaseLLMProvider instances."""
         import inspect
+
         from cdr.screening.screener import Screener
 
         sig = inspect.signature(Screener.__init__)
@@ -517,6 +525,7 @@ class TestCritical2ScreeningProviderMismatch:
     def test_screener_init_has_isinstance_check(self):
         """Screener.__init__ must have isinstance check for BaseLLMProvider."""
         import inspect
+
         from cdr.screening.screener import Screener
 
         source = inspect.getsource(Screener.__init__)
@@ -544,6 +553,7 @@ class TestCritical3APIContract:
     def test_api_uses_running_not_in_progress(self):
         """API routes must use RunStatus.RUNNING not IN_PROGRESS."""
         import inspect
+
         from cdr.api import routes
 
         source = inspect.getsource(routes)
@@ -604,6 +614,7 @@ class TestCriticoAVerificationContract:
     def test_api_claims_endpoint_uses_verification_list(self):
         """API claims endpoint must use result.verification (list), not result.verification_results."""
         import inspect
+
         from cdr.api import routes
 
         source = inspect.getsource(routes.get_run_claims)
@@ -624,6 +635,7 @@ class TestCriticoBNegativeOutcomes:
     def test_api_claims_allows_insufficient_evidence(self):
         """API claims endpoint must allow INSUFFICIENT_EVIDENCE status."""
         import inspect
+
         from cdr.api import routes
 
         source = inspect.getsource(routes.get_run_claims)
@@ -636,6 +648,7 @@ class TestCriticoBNegativeOutcomes:
     def test_api_claims_allows_unpublishable(self):
         """API claims endpoint must allow UNPUBLISHABLE status."""
         import inspect
+
         from cdr.api import routes
 
         source = inspect.getsource(routes.get_run_claims)
@@ -652,6 +665,7 @@ class TestAltoCRunIdAlignment:
     def test_cdr_runner_accepts_run_id_parameter(self):
         """CDRRunner.run must accept optional run_id parameter."""
         import inspect
+
         from cdr.orchestration.graph import CDRRunner
 
         sig = inspect.signature(CDRRunner.run)
@@ -667,6 +681,7 @@ class TestAltoCRunIdAlignment:
     def test_api_passes_run_id_to_runner(self):
         """API _execute_run must pass run_id to runner."""
         import inspect
+
         from cdr.api import routes
 
         source = inspect.getsource(routes._execute_run)
@@ -685,6 +700,7 @@ class TestAltoDReasonCodePropagation:
     def test_publish_node_checks_screening_blocked_no_llm(self):
         """publish_node must check screening_blocked_no_llm flag."""
         import inspect
+
         from cdr.orchestration.graph import publish_node
 
         source = inspect.getsource(publish_node)
@@ -696,6 +712,7 @@ class TestAltoDReasonCodePropagation:
     def test_publish_node_has_llm_required_reason(self):
         """publish_node must use llm_required_for_level_2 reason code."""
         import inspect
+
         from cdr.orchestration.graph import publish_node
 
         source = inspect.getsource(publish_node)
@@ -714,6 +731,7 @@ class TestMedioEPrismaCountsInit:
     def test_retrieve_node_returns_prisma_counts_on_no_plan(self):
         """retrieve_node must return PRISMACounts when no search_plan."""
         import inspect
+
         from cdr.orchestration.graph import retrieve_node
 
         source = inspect.getsource(retrieve_node)
@@ -740,8 +758,8 @@ class TestFunctionalPublishGates:
 
     def test_empty_records_produces_insufficient_evidence(self):
         """State with no records must produce INSUFFICIENT_EVIDENCE."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState
 
         # Create minimal state with no records
         state = CDRState(
@@ -757,8 +775,8 @@ class TestFunctionalPublishGates:
 
     def test_screening_blocked_flag_set(self):
         """State with screening_blocked_no_llm flag must be detectable."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState
 
         state = CDRState(
             run_id="test_002",
@@ -771,9 +789,10 @@ class TestFunctionalPublishGates:
 
     def test_verification_list_mappable_by_claim_id(self):
         """verification list can be mapped by claim_id."""
-        from cdr.core.schemas import VerificationResult, VerificationCheck, SourceRef
-        from cdr.core.enums import VerificationStatus
         from datetime import datetime
+
+        from cdr.core.enums import VerificationStatus
+        from cdr.core.schemas import SourceRef, VerificationCheck
 
         # Create verification results as list
         # VerificationCheck uses claim_id, source_ref, status, confidence
@@ -870,8 +889,9 @@ class TestRuntimePublishNode:
     def _make_record(self, record_id: str, title: str, abstract: str):
         """Create a valid Record with content_hash."""
         import hashlib
-        from cdr.core.schemas import Record
+
         from cdr.core.enums import RecordSource
+        from cdr.core.schemas import Record
 
         content = f"{title}{abstract}"
         content_hash = hashlib.sha256(content.encode()).hexdigest()
@@ -896,8 +916,8 @@ class TestRuntimePublishNode:
 
     def _make_study_card(self, record_id: str, snippet_ids: list):
         """Create a valid StudyCard."""
-        from cdr.core.schemas import StudyCard, OutcomeMeasure
-        from cdr.core.enums import StudyType, OutcomeMeasureType
+        from cdr.core.enums import OutcomeMeasureType, StudyType
+        from cdr.core.schemas import OutcomeMeasure, StudyCard
 
         return StudyCard(
             record_id=record_id,
@@ -918,8 +938,8 @@ class TestRuntimePublishNode:
 
     def _make_rob2_result(self, record_id: str):
         """Create a valid RoB2Result with all 5 domains."""
-        from cdr.core.schemas import RoB2Result, RoB2DomainResult
         from cdr.core.enums import RoB2Domain, RoB2Judgment
+        from cdr.core.schemas import RoB2DomainResult, RoB2Result
 
         domains = [
             RoB2DomainResult(
@@ -938,8 +958,8 @@ class TestRuntimePublishNode:
 
     def test_publish_node_no_records_returns_insufficient_evidence(self, tmp_path):
         """publish_node with no records must return INSUFFICIENT_EVIDENCE."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import publish_node
 
         # State with no retrieved records
@@ -960,8 +980,8 @@ class TestRuntimePublishNode:
 
     def test_publish_node_llm_blocked_returns_llm_required(self, tmp_path):
         """publish_node with screening_blocked_no_llm must return llm_required_for_level_2."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import publish_node
 
         # State with records but LLM screening blocked
@@ -983,8 +1003,8 @@ class TestRuntimePublishNode:
 
     def test_publish_node_no_included_records_returns_no_included(self, tmp_path):
         """publish_node with all records excluded must return no_records_included."""
+        from cdr.core.enums import ExclusionReason, RunStatus
         from cdr.core.schemas import CDRState, ScreeningDecision
-        from cdr.core.enums import RunStatus, ExclusionReason
         from cdr.orchestration.graph import publish_node
 
         # State with records but all excluded
@@ -1011,8 +1031,8 @@ class TestRuntimePublishNode:
 
     def test_publish_node_no_snippets_returns_no_snippets(self, tmp_path):
         """publish_node with included records but no snippets."""
-        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.orchestration.graph import publish_node
 
         # State with included records but no snippets
@@ -1042,8 +1062,8 @@ class TestRuntimePublishNode:
         MEDIO-F2 fix: Test for no_studies_included gate.
         Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
         """
-        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.orchestration.graph import publish_node
 
         # State with included records and snippets but no study_cards
@@ -1076,8 +1096,8 @@ class TestRuntimePublishNode:
         MEDIO-F2 fix: Test for no_claims_generated gate.
         Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
         """
-        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.orchestration.graph import publish_node
 
         # State with study_cards but no claims
@@ -1111,14 +1131,13 @@ class TestRuntimePublishNode:
         MEDIO-F2 fix: Test for verification_coverage_insufficient gate.
         Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
         """
+        from cdr.core.enums import GRADECertainty, RunStatus, VerificationStatus
         from cdr.core.schemas import (
             CDRState,
-            ScreeningDecision,
             EvidenceClaim,
-            VerificationResult,
+            ScreeningDecision,
             SynthesisResult,
         )
-        from cdr.core.enums import RunStatus, GRADECertainty, VerificationStatus
         from cdr.orchestration.graph import publish_node
 
         # Create 3 claims
@@ -1183,16 +1202,15 @@ class TestRuntimePublishNode:
         HIGH-4 fix: report_data must include reproducible search strategy.
         Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md HIGH-4
         """
+        from cdr.core.enums import GRADECertainty, RunStatus, VerificationStatus
         from cdr.core.schemas import (
-            CDRState,
-            ScreeningDecision,
-            EvidenceClaim,
-            VerificationResult,
-            SynthesisResult,
-            SearchPlan,
             PICO,
+            CDRState,
+            EvidenceClaim,
+            ScreeningDecision,
+            SearchPlan,
+            SynthesisResult,
         )
-        from cdr.core.enums import RunStatus, GRADECertainty, VerificationStatus
         from cdr.orchestration.graph import publish_node
 
         # Create a complete state with search_plan
@@ -1269,14 +1287,13 @@ class TestRuntimePublishNode:
         SOTA requirement: EvaluationReport per run for DoD compliance.
         Refs: CDR SOTA requirements, evaluation integration
         """
+        from cdr.core.enums import GRADECertainty, RunStatus, VerificationStatus
         from cdr.core.schemas import (
             CDRState,
-            ScreeningDecision,
             EvidenceClaim,
-            VerificationResult,
+            ScreeningDecision,
             SynthesisResult,
         )
-        from cdr.core.enums import RunStatus, GRADECertainty, VerificationStatus
         from cdr.orchestration.graph import publish_node
 
         claims = [
@@ -1349,8 +1366,8 @@ class TestRuntimeRetrieveNode:
 
     def test_retrieve_node_no_search_plan_returns_prisma_counts(self):
         """retrieve_node without search_plan must return empty PRISMACounts."""
-        from cdr.core.schemas import CDRState, PRISMACounts
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState, PRISMACounts
         from cdr.orchestration.graph import retrieve_node
 
         # State without search_plan
@@ -1382,8 +1399,9 @@ class TestRuntimeParseDocsNode:
     def _make_record(self, record_id: str, pmid: str | None, abstract: str):
         """Create a valid Record with optional PMID."""
         import hashlib
-        from cdr.core.schemas import Record
+
         from cdr.core.enums import RecordSource
+        from cdr.core.schemas import Record
 
         content = f"{record_id}{abstract}"
         content_hash = hashlib.sha256(content.encode()).hexdigest()
@@ -1399,8 +1417,8 @@ class TestRuntimeParseDocsNode:
 
     def test_parse_docs_with_fulltext_disabled_uses_abstracts(self, tmp_path):
         """parse_documents_node with fulltext disabled uses abstracts only."""
-        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.core.enums import RunStatus, Section
+        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.orchestration.graph import parse_documents_node
 
         # State with included record that has abstract
@@ -1426,8 +1444,8 @@ class TestRuntimeParseDocsNode:
 
     def test_parse_docs_no_abstract_counts_as_not_retrieved(self, tmp_path):
         """parse_documents_node without abstract marks as reports_not_retrieved."""
-        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState, ScreeningDecision
         from cdr.orchestration.graph import parse_documents_node
 
         # State with record that has no/short abstract
@@ -1457,8 +1475,8 @@ class TestRiskOfBiasRouting:
 
     def _make_study_card(self, record_id: str, study_type):
         """Create a minimal StudyCard for testing."""
-        from cdr.core.schemas import StudyCard, OutcomeMeasure
         from cdr.core.enums import OutcomeMeasureType
+        from cdr.core.schemas import OutcomeMeasure, StudyCard
 
         return StudyCard(
             record_id=record_id,
@@ -1479,8 +1497,8 @@ class TestRiskOfBiasRouting:
 
     def _mock_rob2_result(self, record_id: str):
         """Create a mock RoB2Result with all required domains."""
-        from cdr.core.schemas import RoB2Result, RoB2DomainResult
         from cdr.core.enums import RoB2Domain, RoB2Judgment
+        from cdr.core.schemas import RoB2DomainResult, RoB2Result
 
         # All 5 RoB2 domains are required
         domains = [
@@ -1502,8 +1520,8 @@ class TestRiskOfBiasRouting:
 
     def _mock_robins_i_result(self, record_id: str):
         """Create a mock ROBINSIResult with all required domains."""
-        from cdr.core.schemas import ROBINSIResult, ROBINSIDomainResult
         from cdr.core.enums import ROBINSIDomain, ROBINSIJudgment
+        from cdr.core.schemas import ROBINSIDomainResult, ROBINSIResult
 
         # All 7 ROBINS-I domains are required
         domains = [
@@ -1525,10 +1543,11 @@ class TestRiskOfBiasRouting:
 
     def test_rct_uses_rob2(self):
         """RCT studies should be assessed with RoB2."""
-        from cdr.core.schemas import CDRState
+        from unittest.mock import MagicMock, patch
+
         from cdr.core.enums import RunStatus, StudyType
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import assess_rob2_node
-        from unittest.mock import patch, MagicMock
 
         rct_card = self._make_study_card("rec_rct", StudyType.RCT)
 
@@ -1565,10 +1584,11 @@ class TestRiskOfBiasRouting:
 
     def test_cohort_uses_robins_i(self):
         """Cohort studies should be assessed with ROBINS-I."""
-        from cdr.core.schemas import CDRState
+        from unittest.mock import MagicMock, patch
+
         from cdr.core.enums import RunStatus, StudyType
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import assess_rob2_node
-        from unittest.mock import patch, MagicMock
 
         cohort_card = self._make_study_card("rec_cohort", StudyType.COHORT)
 
@@ -1605,10 +1625,11 @@ class TestRiskOfBiasRouting:
 
     def test_mixed_study_types_routes_correctly(self):
         """Mixed study types should be routed to appropriate tools."""
-        from cdr.core.schemas import CDRState
+        from unittest.mock import MagicMock, patch
+
         from cdr.core.enums import RunStatus, StudyType
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import assess_rob2_node
-        from unittest.mock import patch, MagicMock
 
         rct_card = self._make_study_card("rec_rct", StudyType.RCT)
         cohort_card = self._make_study_card("rec_cohort", StudyType.COHORT)
@@ -1661,8 +1682,8 @@ class TestCompositionalInference:
 
     def _make_claim(self, claim_id: str, text: str):
         """Create a minimal EvidenceClaim for testing."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         return EvidenceClaim(
             claim_id=claim_id,
@@ -1673,7 +1694,6 @@ class TestCompositionalInference:
 
     def _make_verification(self, claim_id: str, status):
         """Create a minimal VerificationResult."""
-        from cdr.core.schemas import VerificationResult
 
         return VerificationResult(
             claim_id=claim_id,
@@ -1684,8 +1704,8 @@ class TestCompositionalInference:
 
     def test_compose_node_skipped_for_dod_level_1(self):
         """Composition should be skipped for DoD Level 1."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus, VerificationStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import compose_node
 
         claim1 = self._make_claim("c1", "Drug A inhibits enzyme X")
@@ -1710,8 +1730,8 @@ class TestCompositionalInference:
 
     def test_compose_node_skipped_for_dod_level_2(self):
         """Composition should be skipped for DoD Level 2."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus, VerificationStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import compose_node
 
         claim1 = self._make_claim("c1", "Drug A inhibits enzyme X")
@@ -1736,8 +1756,8 @@ class TestCompositionalInference:
 
     def test_compose_node_skipped_without_llm(self):
         """Composition should be skipped without LLM provider."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus, VerificationStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import compose_node
 
         claim1 = self._make_claim("c1", "Drug A inhibits enzyme X")
@@ -1762,8 +1782,8 @@ class TestCompositionalInference:
 
     def test_compose_node_skipped_insufficient_verified_claims(self):
         """Composition requires at least 2 verified claims."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus, VerificationStatus
+        from cdr.core.schemas import CDRState
         from cdr.orchestration.graph import compose_node
 
         claim1 = self._make_claim("c1", "Drug A inhibits enzyme X")
@@ -1796,8 +1816,8 @@ class TestCompositionalInference:
 
     def test_cdr_state_has_composed_hypotheses_field(self):
         """CDRState should have composed_hypotheses field."""
-        from cdr.core.schemas import CDRState
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import CDRState
 
         state = CDRState(
             run_id="test_schema",
@@ -1811,11 +1831,11 @@ class TestCompositionalInference:
     def test_composition_schemas_exist(self):
         """Composition module should export required schemas."""
         from cdr.composition import (
-            CompositionEngine,
             ComposedHypothesis,
+            CompositionEngine,
+            HypothesisStrength,
             MechanisticRelation,
             RelationType,
-            HypothesisStrength,
         )
 
         # Verify enums have expected values
@@ -1833,8 +1853,9 @@ class TestCompositionalInference:
     def test_compose_node_runs_with_llm_provider_dod3(self):
         """Test compose_node executes composition with LLM provider at DoD 3."""
         from unittest.mock import MagicMock
-        from cdr.core.schemas import CDRState, PICO
+
         from cdr.core.enums import RunStatus, VerificationStatus
+        from cdr.core.schemas import PICO, CDRState
         from cdr.orchestration.graph import compose_node
 
         # Create claims with composable mechanistic chain
@@ -1936,8 +1957,8 @@ class TestCompositionEngineWithStub:
 
     def _make_claim(self, claim_id: str, text: str):
         """Create a minimal EvidenceClaim for testing."""
-        from cdr.core.schemas import EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim
 
         return EvidenceClaim(
             claim_id=claim_id,
@@ -1960,6 +1981,7 @@ class TestCompositionEngineWithStub:
     def _make_stub_provider(self, responses: list[str]):
         """Create a stub LLM provider that returns predefined responses."""
         from unittest.mock import MagicMock
+
         from cdr.llm.base import LLMResponse
 
         call_count = [0]
@@ -2077,7 +2099,7 @@ class TestCompositionEngineWithStub:
 
         assert len(pairs) >= 1
         # Should find (c1, c2) because c1's target (Enzyme X) is c2's source
-        claim_a, claim_b, shared = pairs[0]
+        _claim_a, _claim_b, shared = pairs[0]
         assert "enzyme x" in shared
 
     def test_compose_hypothesis_generates_valid_structure(self):
@@ -2137,8 +2159,8 @@ class TestCompositionEngineWithStub:
     def test_propose_test_design_generates_valid_structure(self):
         """Test test design proposal creates valid structure."""
         from cdr.composition import (
-            CompositionEngine,
             ComposedHypothesis,
+            CompositionEngine,
             HypothesisStrength,
             ThreatAnalysis,
         )

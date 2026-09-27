@@ -6,16 +6,15 @@ Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5
 """
 
 import pytest
-from unittest.mock import MagicMock
 
-from cdr.core.enums import RoB2Domain, RoB2Judgment, GRADECertainty
+from cdr.core.enums import GRADECertainty, RoB2Domain, RoB2Judgment
 from cdr.core.schemas import (
+    PICO,
     CDRState,
+    EvidenceClaim,
     PRISMACounts,
     RoB2DomainResult,
     RoB2Result,
-    EvidenceClaim,
-    PICO,
 )
 from cdr.publisher.publisher import Publisher
 
@@ -211,8 +210,8 @@ class TestPublisherFormatting:
 
     def test_format_search_strategy(self):
         """Test search strategy formatting."""
-        from cdr.core.schemas import SearchPlan
         from cdr.core.enums import RunStatus
+        from cdr.core.schemas import SearchPlan
 
         pico = PICO(
             population="Adults with heart disease",

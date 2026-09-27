@@ -161,7 +161,7 @@ class Histogram:
         self.description = description
         self._buckets = buckets or self.DEFAULT_BUCKETS
         self._bucket_counts: dict[str, dict[float, int]] = defaultdict(
-            lambda: {b: 0 for b in self._buckets}
+            lambda: dict.fromkeys(self._buckets, 0)
         )
         self._sums: dict[str, float] = defaultdict(float)
         self._counts: dict[str, int] = defaultdict(int)

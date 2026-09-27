@@ -10,22 +10,19 @@ Tests the hard exclusion logic that ensures:
 Refs: DoD3 Contract, CDR_DOD3_b3142335 audit
 """
 
-import pytest
 from unittest.mock import MagicMock
-from datetime import datetime
 
 from cdr.verification.dod3_enforcement import (
+    DegradedClaim,
     DoD3Enforcer,
     EnforcementResult,
     ExcludedEvidence,
     ExclusionReason,
-    DegradedClaim,
-    SuppressedHypothesis,
-    SubPICODecomposer,
-    HypothesisGate,
     GateReportRenderer,
+    HypothesisGate,
+    SubPICODecomposer,
+    SuppressedHypothesis,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -43,7 +40,7 @@ def make_mock_pico():
     return pico
 
 
-def make_mock_record(record_id: str, pmid: str = None, title: str = "Test Record"):
+def make_mock_record(record_id: str, pmid: str | None = None, title: str = "Test Record"):
     """Create a mock Record."""
     record = MagicMock()
     record.record_id = record_id
@@ -53,7 +50,7 @@ def make_mock_record(record_id: str, pmid: str = None, title: str = "Test Record
 
 
 def make_mock_snippet(
-    snippet_id: str, record_id: str, pmid: str = None, text: str = "Test snippet"
+    snippet_id: str, record_id: str, pmid: str | None = None, text: str = "Test snippet"
 ):
     """Create a mock Snippet."""
     snippet = MagicMock()

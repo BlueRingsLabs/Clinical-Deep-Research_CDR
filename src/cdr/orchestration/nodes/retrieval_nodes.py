@@ -7,12 +7,14 @@ Extracted from graph.py monolith.
 
 from __future__ import annotations
 
+from datetime import UTC
+
 from langchain_core.runnables import RunnableConfig
 
 from cdr.core.enums import RecordSource
 from cdr.core.schemas import CDRState, PRISMACounts
-from cdr.observability.tracer import tracer
 from cdr.observability.metrics import metrics
+from cdr.observability.tracer import tracer
 
 
 async def parse_question_node(state: CDRState, config: RunnableConfig) -> dict:
@@ -78,8 +80,9 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
     """
     with tracer.start_span("node.retrieve") as span:
         # Import schemas needed for this node
-        from cdr.core.schemas import PRISMACounts, ExecutedSearch
-        from datetime import datetime, timezone
+        from datetime import datetime
+
+        from cdr.core.schemas import ExecutedSearch, PRISMACounts
 
         if not state.search_plan:
             # MEDIO-E fix: Initialize empty PRISMA counts for early failures
@@ -93,8 +96,8 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
 
         configurable = config.get("configurable", {})
         max_results = configurable.get("max_results", 100)
-        from cdr.retrieval.pubmed_client import PubMedClient
         from cdr.retrieval.ct_client import ClinicalTrialsClient
+        from cdr.retrieval.pubmed_client import PubMedClient
 
         pubmed = PubMedClient()
         ct_client = ClinicalTrialsClient()
@@ -146,7 +149,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
                     database="PubMed",
                     query_planned=state.search_plan.pubmed_query,
                     query_executed=state.search_plan.pubmed_query,  # No modification for PubMed
-                    executed_at=datetime.now(timezone.utc),
+                    executed_at=datetime.now(UTC),
                     results_count=pubmed_total_count,
                     results_fetched=pubmed_fetched_count,
                     notes=pubmed_error_note,
@@ -220,7 +223,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
                     database="ClinicalTrials.gov",
                     query_planned=state.search_plan.ct_gov_query,
                     query_executed=ct_query_executed or state.search_plan.ct_gov_query,
-                    executed_at=datetime.now(timezone.utc),
+                    executed_at=datetime.now(UTC),
                     results_count=ct_total_count,
                     results_fetched=ct_fetched_count,
                     notes="; ".join(notes_parts) if notes_parts else None,
@@ -302,7 +305,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
                             key=lambda r: r.retrieval_scores.get("rerank", 0),
                             reverse=True,
                         )
-                        print(f"[Retrieve] Cross-encoder reranking applied")
+                        print("[Retrieve] Cross-encoder reranking applied")
                         span.set_attribute("reranked", True)
                     except Exception as rerank_err:
                         print(f"[Retrieve] Reranking skipped: {rerank_err}")

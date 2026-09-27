@@ -26,21 +26,20 @@ Metrics implemented:
         - citation_accuracy: Reference validity
 """
 
+from cdr.evaluation.golden_set import (
+    GOLDEN_SET,
+    ExpectedEvidenceLevel,
+    GoldenSetQuestion,
+    get_golden_set,
+    get_question_by_id,
+    validate_against_golden_set,
+)
 from cdr.evaluation.metrics import (
     CDRMetricsEvaluator,
     EvaluationReport,
     MetricResult,
     MetricStatus,
     evaluate_cdr_output,
-)
-
-from cdr.evaluation.golden_set import (
-    GOLDEN_SET,
-    GoldenSetQuestion,
-    ExpectedEvidenceLevel,
-    get_golden_set,
-    get_question_by_id,
-    validate_against_golden_set,
 )
 
 __all__ = [

@@ -26,8 +26,10 @@ import sys
 import time
 from pathlib import Path
 
+
 class _QueryTimeoutError(Exception):
     """Raised by SIGALRM when a canary query exceeds its wall-clock budget."""
+
     pass
 
 
@@ -122,13 +124,16 @@ async def _health_check(provider, name: str, timeout: float = 30.0) -> bool:
             timeout=timeout,
         )
         return True
-    except asyncio.TimeoutError:
+    except TimeoutError:
         print(f"  ⚠️  {name}: health-check timed out ({timeout}s)")
         return False
     except Exception as exc:
         exc_str = str(exc).lower()
         # Detect payment / quota / auth errors
-        if any(k in exc_str for k in ("402", "credit", "payment", "quota", "401", "403", "unauthorized")):
+        if any(
+            k in exc_str
+            for k in ("402", "credit", "payment", "quota", "401", "403", "unauthorized")
+        ):
             print(f"  ⚠️  {name}: health-check failed ({exc_str[:120]})")
             return False
         # Transient errors (429, 500, etc.) — provider might still work
@@ -244,8 +249,8 @@ async def run_single_query(
         if not export_files:
             # Try publisher export manually
             try:
-                from cdr.publisher import Publisher
                 from cdr.core.schemas import SynthesisResult
+                from cdr.publisher import Publisher
 
                 publisher = Publisher(
                     output_dir=query_dir,
@@ -258,7 +263,7 @@ async def run_single_query(
                         claims=final_state.claims,
                         overall_narrative=final_state.answer or "No narrative.",
                     )
-                pub_result = publisher.publish(
+                publisher.publish(
                     state=final_state,
                     synthesis_result=synthesis_result,
                     critique_result=None,
@@ -329,7 +334,9 @@ async def run_single_query(
 async def main():
     parser = argparse.ArgumentParser(description="CDR Online Canary")
     parser.add_argument("--output", default="canary_output", help="Output directory")
-    parser.add_argument("--provider", default="auto", help="LLM provider (auto|openrouter|groq|cerebras|gemini)")
+    parser.add_argument(
+        "--provider", default="auto", help="LLM provider (auto|openrouter|groq|cerebras|gemini)"
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output)
@@ -359,6 +366,7 @@ async def main():
         # Use SIGALRM for hard wall-clock timeout — works even when
         # synchronous time.sleep() calls in LLM providers block the event loop.
         import signal
+
         old_handler = signal.signal(signal.SIGALRM, _sigalrm_handler)
         signal.alarm(QUERY_TIMEOUT_SECONDS)
         try:
@@ -381,10 +389,12 @@ async def main():
 
         status_icon = "✅" if result["status"] == "PASS" else "❌"
         metrics = result.get("metrics", {})
-        print(f"   {status_icon} {result['status']}"
-              f"  latency={metrics.get('latency_seconds', '?')}s"
-              f"  claims={metrics.get('claim_count', '?')}"
-              f"  studies={metrics.get('study_count', '?')}")
+        print(
+            f"   {status_icon} {result['status']}"
+            f"  latency={metrics.get('latency_seconds', '?')}s"
+            f"  claims={metrics.get('claim_count', '?')}"
+            f"  studies={metrics.get('study_count', '?')}"
+        )
         if result.get("error"):
             print(f"   ❌ Error: {result['error']}")
         for w in result.get("warnings", []):
@@ -431,10 +441,12 @@ async def main():
     for r in query_results:
         icon = "✅" if r["status"] == "PASS" else "❌"
         m = r.get("metrics", {})
-        print(f"  {icon} {r['query_id']}: {r['status']}"
-              f"  ({m.get('latency_seconds', '?')}s, "
-              f"{m.get('claim_count', '?')} claims, "
-              f"{m.get('study_count', '?')} studies)")
+        print(
+            f"  {icon} {r['query_id']}: {r['status']}"
+            f"  ({m.get('latency_seconds', '?')}s, "
+            f"{m.get('claim_count', '?')} claims, "
+            f"{m.get('study_count', '?')} studies)"
+        )
 
     print()
     if failed > 0:
@@ -448,7 +460,7 @@ async def main():
         if p.is_file():
             sz = p.stat().st_size
             rel = p.relative_to(output_dir)
-            print(f"   {str(rel):<50} {sz:>8,} bytes")
+            print(f"   {rel!s:<50} {sz:>8,} bytes")
     print(f"{'=' * 60}")
 
 

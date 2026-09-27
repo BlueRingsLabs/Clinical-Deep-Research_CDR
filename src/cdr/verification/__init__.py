@@ -5,11 +5,11 @@ Citation verification and entailment checking.
 """
 
 from cdr.verification.verifier import (
-    Verifier,
+    BatchVerificationResult,
     CitationChecker,
     CitationCheckResult,
+    Verifier,
     batch_verify,
-    BatchVerificationResult,
 )
 
 __all__ = [

@@ -8,10 +8,11 @@ Per MEDIUM-4 audit issue: dict messages in question_parser, search_planner, synt
 should work with any provider.
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
-from cdr.llm.base import BaseLLMProvider, Message, LLMResponse
+import pytest
+
+from cdr.llm.base import BaseLLMProvider, LLMResponse, Message
 
 
 class ConcreteProvider(BaseLLMProvider):
@@ -28,7 +29,7 @@ class ConcreteProvider(BaseLLMProvider):
         max_tokens: int | None = None,
         **kwargs,
     ) -> LLMResponse:
-        normalized = self._normalize_messages(messages)
+        self._normalize_messages(messages)
         return LLMResponse(
             content="test",
             model="test-model",
@@ -43,7 +44,7 @@ class ConcreteProvider(BaseLLMProvider):
         max_tokens: int | None = None,
         **kwargs,
     ) -> LLMResponse:
-        normalized = self._normalize_messages(messages)
+        self._normalize_messages(messages)
         return LLMResponse(
             content="test",
             model="test-model",
@@ -207,6 +208,7 @@ class TestOpenAIProviderNormalization:
     def test_acomplete_accepts_dict_messages(self, mock_async, mock_sync, mock_openai_env):
         """OpenAI acomplete() accepts dict messages."""
         import asyncio
+
         from cdr.llm.openai_provider import OpenAIProvider
 
         # Set up mock async response
@@ -273,6 +275,7 @@ class TestAnthropicProviderNormalization:
     def test_acomplete_accepts_dict_messages(self, mock_async, mock_sync, mock_anthropic_env):
         """Anthropic acomplete() accepts dict messages."""
         import asyncio
+
         from cdr.llm.anthropic_provider import AnthropicProvider
 
         # Set up mock async response

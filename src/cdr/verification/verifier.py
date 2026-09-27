@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 ENTAILMENT_SYSTEM_PROMPT = """You are a textual entailment expert.
 
-Given a CLAIM and a SOURCE TEXT, determine if the source text entails 
+Given a CLAIM and a SOURCE TEXT, determine if the source text entails
 (logically supports) the claim.
 
 Entailment levels:
@@ -40,7 +40,7 @@ Entailment levels:
 - NEUTRAL: The source neither supports nor contradicts
 - CONTRADICTS: The source contradicts the claim
 
-IMPORTANT: For medical/scientific abstracts, if the abstract discusses the topic 
+IMPORTANT: For medical/scientific abstracts, if the abstract discusses the topic
 and provides evidence about the intervention's effects, consider it ENTAILS or PARTIAL
 unless it explicitly contradicts the claim.
 
@@ -391,7 +391,7 @@ Does the source text entail (support) the claim?"""
             )
 
         # Count statuses
-        status_counts = {status: 0 for status in VerificationStatus}
+        status_counts = dict.fromkeys(VerificationStatus, 0)
         for check in checks:
             status_counts[check.status] += 1
 
@@ -534,7 +534,7 @@ Verify that the citation accurately represents the source."""
                     severity="major",
                 )
 
-    def _parse_citation_result(self, content: str) -> "CitationCheckResult":
+    def _parse_citation_result(self, content: str) -> CitationCheckResult:
         """Parse citation check response."""
         content = content.strip()
         if content.startswith("```"):

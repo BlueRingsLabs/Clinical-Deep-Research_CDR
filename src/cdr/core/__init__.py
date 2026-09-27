@@ -42,9 +42,9 @@ from cdr.core.exceptions import (
     ScopeViolationError,
     StorageError,
     ValidationError,
+    VectorStoreError,
     VerificationError,
     VerificationGateError,
-    VectorStoreError,
 )
 from cdr.core.schemas import (
     PICO,
@@ -52,6 +52,7 @@ from cdr.core.schemas import (
     Critique,
     CritiqueResult,
     EvidenceClaim,
+    ExecutedSearch,
     OutcomeMeasure,
     PRISMACounts,
     Record,
@@ -59,7 +60,6 @@ from cdr.core.schemas import (
     RoB2Result,
     ScreeningDecision,
     SearchPlan,
-    ExecutedSearch,
     Snippet,
     SourceRef,
     StudyCard,

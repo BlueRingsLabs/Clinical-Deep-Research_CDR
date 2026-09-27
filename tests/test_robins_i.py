@@ -12,7 +12,6 @@ import pytest
 from cdr.core.enums import ROBINSIDomain, ROBINSIJudgment
 from cdr.core.schemas import ROBINSIResult
 
-
 # --- Unit Tests for ROBINSIAssessor ---
 
 

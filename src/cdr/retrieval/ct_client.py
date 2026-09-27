@@ -25,7 +25,6 @@ from cdr.core.exceptions import ClinicalTrialsError
 from cdr.core.schemas import Record
 from cdr.observability import get_tracer
 
-
 CT_API_BASE = "https://clinicaltrials.gov/api/v2"
 
 
@@ -267,7 +266,7 @@ class ClinicalTrialsClient:
                     params["filter.studyType"] = study_type
 
             # Log applied filters
-            filter_keys = [k for k in params.keys() if k.startswith("filter.")]
+            filter_keys = [k for k in params if k.startswith("filter.")]
             if filter_keys:
                 print(f"[CT.gov] Filters applied: {filter_keys}")
 
@@ -371,15 +370,15 @@ class ClinicalTrialsClient:
 
             # Status
             status_module = protocol.get("statusModule", {})
-            overall_status = status_module.get("overallStatus")
+            overall_status = status_module.get("overallStatus")  # noqa: F841 — loose end: parsed but not used yet
 
             # Study design
             design_module = protocol.get("designModule", {})
-            study_type_raw = design_module.get("studyType", "")
-            phases = design_module.get("phases", [])
+            study_type_raw = design_module.get("studyType", "")  # noqa: F841 — loose end: parsed but not used yet
+            phases = design_module.get("phases", [])  # noqa: F841 — loose end: parsed but not used yet
 
             # Conditions and interventions
-            conditions = protocol.get("conditionsModule", {}).get("conditions", [])
+            conditions = protocol.get("conditionsModule", {}).get("conditions", [])  # noqa: F841 — loose end: parsed but not used yet
 
             interventions = []
             for intervention in protocol.get("armsInterventionsModule", {}).get(
@@ -398,10 +397,10 @@ class ClinicalTrialsClient:
                 sponsors.append(lead["name"])
 
             # Enrollment
-            enrollment = design_module.get("enrollmentInfo", {}).get("count")
+            enrollment = design_module.get("enrollmentInfo", {}).get("count")  # noqa: F841 — loose end: parsed but not used yet
 
             # Dates
-            start_date = status_module.get("startDateStruct", {}).get("date")
+            start_date = status_module.get("startDateStruct", {}).get("date")  # noqa: F841 — loose end: parsed but not used yet
 
             # Compute content hash for deduplication
             content_hash = Record.compute_hash(title, abstract, None)

@@ -25,14 +25,13 @@ from cdr.composition.schemas import (
     ComposedHypothesis,
     HypothesisStrength,
     MechanisticRelation,
-    RelationType,
     ProposedStudyDesign,
+    RelationType,
     ThreatAnalysis,
 )
-from cdr.core.schemas import EvidenceClaim, PICO
+from cdr.core.schemas import PICO, EvidenceClaim
 from cdr.llm.base import BaseLLMProvider
 from cdr.observability import get_tracer
-
 
 tracer = get_tracer(__name__)
 

@@ -5,8 +5,8 @@ Adversarial verification agent.
 """
 
 from cdr.skeptic.skeptic_agent import (
-    SkepticAgent,
     CounterArgument,
+    SkepticAgent,
     aggregate_critiques,
     calculate_critique_score,
     should_revise_claim,

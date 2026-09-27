@@ -8,7 +8,6 @@ import math
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any
 
 from cdr.observability import get_tracer
 
