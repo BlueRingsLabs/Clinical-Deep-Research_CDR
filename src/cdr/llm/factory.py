@@ -169,13 +169,24 @@ def create_provider(
     elif provider == "openai":
         from cdr.llm.openai_provider import OpenAIProvider
 
+        base_url = kwargs.pop("base_url", None) or settings.llm.openai_base_url
         api_key = kwargs.pop("api_key", None) or settings.llm.openai_api_key
+        if not api_key and base_url:
+            # Local OpenAI-compatible servers (Ollama, vLLM, LM Studio) ignore the key,
+            # but the client refuses to start without one.
+            api_key = "not-needed"
         if not api_key:
             raise ConfigurationError(
-                "OpenAI API key not configured. Set OPENAI_API_KEY environment variable."
+                "OpenAI API key not configured. Set OPENAI_API_KEY, or set OPENAI_BASE_URL "
+                "to use a local OpenAI-compatible server (Ollama, vLLM, LM Studio)."
             )
 
-        return OpenAIProvider(model=model or settings.llm.openai_model, api_key=api_key, **kwargs)
+        return OpenAIProvider(
+            model=model or settings.llm.openai_model,
+            api_key=api_key,
+            base_url=base_url,
+            **kwargs,
+        )
 
     elif provider == "anthropic":
         from cdr.llm.anthropic_provider import AnthropicProvider
