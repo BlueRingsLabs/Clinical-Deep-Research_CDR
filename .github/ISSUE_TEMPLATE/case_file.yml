@@ -1,0 +1,38 @@
+name: Case File proposal
+description: Propose a clinical question with a known answer that CDR should reproduce.
+title: "[case] "
+labels: ["case-file", "evaluation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Case Files are CDR's test bench. See [docs/case-files.md](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/blob/main/docs/case-files.md)
+        for what makes a good one. You can also open a PR that adds the case directly.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Case type
+      options:
+        - Settled question (strong existing consensus, e.g. a Cochrane review)
+        - Honest uncertainty (evidence genuinely mixed or weak)
+        - Retrodiction (a hypothesis that was later confirmed; tests discovery)
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Clinical question (and PICO if you have it)
+    validations:
+      required: true
+  - type: textarea
+    id: answer
+    attributes:
+      label: The known answer and its source
+      description: What should CDR conclude, and what's the reference (Cochrane review, guideline, landmark trial; PMID or DOI)? For retrodiction, give the discovery year and the key papers on each side.
+    validations:
+      required: true
+  - type: textarea
+    id: pitfalls
+    attributes:
+      label: Traps (optional)
+      description: What would a naive system get wrong here?

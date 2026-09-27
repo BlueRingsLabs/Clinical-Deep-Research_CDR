@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/discussions
+    about: Not sure it's a bug? Want to float an idea first? Start a discussion.
+  - name: Security vulnerability
+    url: https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/security/advisories/new
+    about: Report privately. Please don't open a public issue.

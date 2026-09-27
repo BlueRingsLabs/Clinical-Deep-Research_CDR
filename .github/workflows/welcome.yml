@@ -1,0 +1,28 @@
+# Says hello on someone's first issue or PR. No checkout, no code from the PR runs.
+name: Welcome
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            Thanks for opening your first issue here. A maintainer will take a look within a few days.
+
+            If it's about something CDR claimed, the more exact the better: the claim, the snippet or PMID it cited, and what the source actually says.
+          pr-message: |
+            Thanks for your first PR to CDR!
+
+            A few things that help it land fast: `make check` passing locally, a test for any behavior change, and a note if anything touches an evidence gate. If CI goes red and you're not sure why, just ask here. That's what review is for.

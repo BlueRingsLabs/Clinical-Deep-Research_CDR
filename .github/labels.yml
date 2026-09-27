@@ -1,0 +1,83 @@
+# Source of truth for repository labels. Synced by .github/workflows/labels.yml.
+# `aliases` renames existing labels in place, so issues keep them.
+
+# --- Getting started -------------------------------------------------------
+- name: good first issue
+  color: "7057ff"
+  description: Scoped and explained. A good first contribution.
+  aliases: [good-first-issue]
+- name: help wanted
+  color: "008672"
+  description: Bigger piece of work where an owner would be very welcome
+
+# --- Kind --------------------------------------------------------------------
+- name: bug
+  color: "d73a4a"
+  description: Something is broken
+- name: evidence
+  color: "b60205"
+  description: CDR output not supported by (or missing) evidence
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or improvement
+- name: documentation
+  color: "0075ca"
+  description: Docs are wrong, missing or unclear
+  aliases: [docs]
+- name: loose end
+  color: "fbca04"
+  description: Code parses or computes something and never uses it
+  aliases: [code-quality]
+
+# --- Area --------------------------------------------------------------------
+- name: methodology
+  color: "c5def5"
+  description: PRISMA, RoB 2, GRADE, screening rules. Needs clinical-methods eyes
+- name: discovery
+  color: "1d76db"
+  description: Hypothesis generation track (composition, retrodiction)
+- name: evaluation
+  color: "f9d0c4"
+  description: Metrics, golden set, benchmarks
+  aliases: [eval]
+- name: case-file
+  color: "5319e7"
+  description: Known-answer clinical question for the test bench
+- name: retrieval
+  color: "bfdadc"
+  description: PubMed, ClinicalTrials.gov, full text, ranking
+- name: llm
+  color: "d4c5f9"
+  description: Providers, prompts, structured output
+- name: api
+  color: "c2e0c6"
+  description: FastAPI endpoints
+- name: frontend
+  color: "fef2c0"
+  description: React UI
+- name: observability
+  color: "e6e6e6"
+  description: Logging, tracing, metrics
+- name: dx
+  color: "e4e669"
+  description: Developer experience, setup, tooling
+- name: infrastructure
+  color: "bfd4f2"
+  description: CI, Docker, release plumbing
+- name: dependencies
+  color: "0366d6"
+  description: Dependency updates
+
+# --- Process -----------------------------------------------------------------
+- name: triage
+  color: "ededed"
+  description: Needs a maintainer to look at it
+- name: needs discussion
+  color: "cc317c"
+  description: Direction not settled yet. Talk before coding
+- name: blocked
+  color: "000000"
+  description: Waiting on something outside this issue
+- name: visualization
+  color: "ffffff"
+  description: Diagrams and figures

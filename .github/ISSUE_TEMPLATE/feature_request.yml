@@ -1,0 +1,32 @@
+name: Feature or improvement
+description: Propose something new or better.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: For open-ended ideas, a [discussion](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/discussions) is often a better first step.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What's missing or painful, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd do about it
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Trade-offs and alternatives
+      description: What could this break? Does it relax any evidence gate? What else did you consider?
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to work on this myself

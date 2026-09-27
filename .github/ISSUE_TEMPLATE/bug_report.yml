@@ -1,0 +1,39 @@
+name: Bug report
+description: Something crashes, errors, or behaves differently from the docs.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      placeholder: |
+        1. make setup
+        2. make dev
+        3. POST /api/v1/runs with {...}
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traceback
+      description: Remove API keys before pasting.
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "macOS 15 / Python 3.12.7 / commit abc1234 / provider: gemini"
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Pipeline / backend, API, UI, Docker / setup, Evaluation, Not sure]

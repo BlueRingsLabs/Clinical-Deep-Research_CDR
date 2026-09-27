@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use CDR in your research, please cite it as below."
+title: "Clinical Deep Research (CDR)"
+abstract: >-
+  An open-source evidence engine that retrieves, screens and synthesizes clinical
+  literature with snippet-level traceability for every claim, built toward
+  verifiable clinical hypothesis generation.
+type: software
+authors:
+  - family-names: Romero
+    given-names: Gonzalo
+repository-code: "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR"
+license: Apache-2.0
+version: 0.1.0
+date-released: "2026-02-16"
+keywords:
+  - evidence-based medicine
+  - systematic review
+  - literature-based discovery
+  - large language models
+  - hypothesis generation
