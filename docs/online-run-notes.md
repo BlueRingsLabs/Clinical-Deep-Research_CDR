@@ -140,4 +140,4 @@ for i in range(1, 6):
 
 ---
 
-*See [EVAL.md](evaluation.md) for evaluation methodology and [docs/report_anatomy.md](report-anatomy.md) for how to read CDR reports.*
+*See [evaluation.md](evaluation.md) for evaluation methodology and [report-anatomy.md](report-anatomy.md) for how to read CDR reports.*
