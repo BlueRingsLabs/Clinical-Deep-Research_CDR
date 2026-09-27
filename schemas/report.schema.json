@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/blob/main/schemas/report.schema.json",
+  "$id": "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/blob/main/schemas/report.schema.json",
   "title": "CDR Report",
   "description": "JSON Schema for Clinical Deep Research report output (v0.1)",
   "type": "object",
