@@ -9,21 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`--format` flag for evaluation runner**: `eval_runner.py` now accepts `--format json|markdown|all` to control output file generation. Default is `all` (backward-compatible). Closes [#3](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/issues/3). ([#24](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/24))
-- **Dependabot configuration**: Automated dependency update monitoring for pip, npm, and GitHub Actions on a weekly Monday schedule. Closes [#5](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/issues/5).
+- **`--format` flag for evaluation runner**: `eval_runner.py` now accepts `--format json|markdown|all` to control output file generation. Default is `all` (backward-compatible). Closes [#3](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/3). ([#24](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/24))
+- **Dependabot configuration**: Automated dependency update monitoring for pip, npm, and GitHub Actions on a weekly Monday schedule. Closes [#5](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/5).
 - **Pull Request template**: Standardized PR template (`.github/PULL_REQUEST_TEMPLATE.md`) with checklist for description, tests, docs, and breaking changes.
 - **Code of Conduct**: Contributor Covenant v2.1 (`CODE_OF_CONDUCT.md`).
 - **Branch protection on `main`**: Require 1 PR review, CDR CI status check, dismiss stale reviews, no force pushes or deletions.
 
 ### Changed
 
-- **Comprehensive type annotations in `eval_runner.py`**: Added 7 type aliases (`EvalMode`, `OutputFormat`, `QuestionDict`, `MetricsDict`, `EvalResult`, `EvalSummary`, `ComparisonResult`), explicit variable annotations, and full `typing` imports. Passes `mypy --strict` with 0 errors. Closes [#1](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/issues/1). ([#25](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/25))
+- **Comprehensive type annotations in `eval_runner.py`**: Added 7 type aliases (`EvalMode`, `OutputFormat`, `QuestionDict`, `MetricsDict`, `EvalResult`, `EvalSummary`, `ComparisonResult`), explicit variable annotations, and full `typing` imports. Passes `mypy --strict` with 0 errors. Closes [#1](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/1). ([#25](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/25))
 
 ### Fixed
 
-- **Canary provider fallback**: `pick_provider()` in `online_canary.py` now sends a health-check completion before committing to a provider. Detects 402 (payment), 401/403 (auth), and quota errors at selection time, automatically falling back to the next provider. Prevents a single provider's credit exhaustion from failing the entire canary run. Refs: Canary #7 (2026-03-02, OpenRouter 402). ([#33](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/33))
-- **Canary provider order**: `PROVIDER_ORDER` reordered to `groq → cerebras → gemini → openrouter` (free-tier providers first). ([#33](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/33))
-- **Canary timeouts and CI observability**: Added `PYTHONUNBUFFERED=1`, `python -u`, per-query timeout (8 min via `asyncio.wait_for`), and health-check timeout (30s). Ensures real-time log output in CI and prevents indefinite hangs. ([#34](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/34))
+- **Canary provider fallback**: `pick_provider()` in `online_canary.py` now sends a health-check completion before committing to a provider. Detects 402 (payment), 401/403 (auth), and quota errors at selection time, automatically falling back to the next provider. Prevents a single provider's credit exhaustion from failing the entire canary run. Refs: Canary #7 (2026-03-02, OpenRouter 402). ([#33](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/33))
+- **Canary provider order**: `PROVIDER_ORDER` reordered to `groq → cerebras → gemini → openrouter` (free-tier providers first). ([#33](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/33))
+- **Canary timeouts and CI observability**: Added `PYTHONUNBUFFERED=1`, `python -u`, per-query timeout (8 min via `asyncio.wait_for`), and health-check timeout (30s). Ensures real-time log output in CI and prevents indefinite hangs. ([#34](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/34))
 
 ### Suspended
 
@@ -32,28 +32,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Dependencies
 
 - **GitHub Actions** (CI):
-  - `actions/checkout` 4 → 6 ([#13](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/13))
-  - `actions/upload-artifact` 4 → 6 → 7 ([#14](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/14), [#27](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/27))
-  - `actions/setup-python` 5 → 6 ([#15](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/15))
-  - `actions/cache` 4 → 5 ([#16](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/16))
-  - `actions/setup-node` 4 → 6 ([#17](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/17))
+  - `actions/checkout` 4 → 6 ([#13](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/13))
+  - `actions/upload-artifact` 4 → 6 → 7 ([#14](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/14), [#27](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/27))
+  - `actions/setup-python` 5 → 6 ([#15](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/15))
+  - `actions/cache` 4 → 5 ([#16](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/16))
+  - `actions/setup-node` 4 → 6 ([#17](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/17))
 - **npm** (`/ui`):
-  - Minor-and-patch group: 7 updates including vite, vitest, eslint plugins ([#18](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/18))
-  - `jsdom` 25.0.1 → 28.1.0 ([#23](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/23))
-  - `autoprefixer` 10.4.24 → 10.4.27 ([#28](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/28))
-  - `eslint-plugin-react-hooks` 5.2.0 → 7.0.1 ([#31](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/31))
-  - `@vitejs/plugin-react` 4.7.0 → 5.1.4 ([#32](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/32))
-  - `react-router-dom` 6.30.3 → 7.13.1 ([#30](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/30))
+  - Minor-and-patch group: 7 updates including vite, vitest, eslint plugins ([#18](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/18))
+  - `jsdom` 25.0.1 → 28.1.0 ([#23](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/23))
+  - `autoprefixer` 10.4.24 → 10.4.27 ([#28](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/28))
+  - `eslint-plugin-react-hooks` 5.2.0 → 7.0.1 ([#31](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/31))
+  - `@vitejs/plugin-react` 4.7.0 → 5.1.4 ([#32](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/32))
+  - `react-router-dom` 6.30.3 → 7.13.1 ([#30](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/30))
 
 ### Removed
 
-- Closed Dependabot PRs for incompatible major bumps: tailwindcss 3→4 ([#19](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/19)), eslint 9→10 ([#20](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/20)), react-dom ([#22](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/22)), react 18→19 ([#29](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/pull/29)). These require migration work and may be addressed in v0.2.0.
+- Closed Dependabot PRs for incompatible major bumps: tailwindcss 3→4 ([#19](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/19)), eslint 9→10 ([#20](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/20)), react-dom ([#22](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/22)), react 18→19 ([#29](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/29)). These require migration work and may be addressed in v0.2.0.
 
 ### Community
 
 - Community Profile score raised to 8/8.
 - Welcome Discussion created for new contributors.
-- Detailed code review posted on [#2](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/issues/2) for Tianlin0725's environment validation implementation.
+- Detailed code review posted on [#2](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/2) for Tianlin0725's environment validation implementation.
 
 ## [0.1.0] - 2026-02-16
 
@@ -99,5 +99,5 @@ First public release of Clinical Deep Research (CDR).
 - Fulltext available only for PMC Open Access subset
 - RoB2 quality depends on fulltext availability
 
-[Unreleased]: https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/releases/tag/v0.1.0
+[Unreleased]: https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/releases/tag/v0.1.0

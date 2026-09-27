@@ -1,12 +1,15 @@
 [project]
 name = "cdr"
 version = "0.1.0"
-description = "Clinical Deep Research - Evidence-based medical research assistant with full traceability"
+description = "Clinical Deep Research: an open evidence engine that traces every claim to its source, built toward clinical hypothesis generation"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-authors = [{ name = "DeepRatAI Team" }]
-keywords = ["clinical", "research", "evidence-based", "rag", "medical", "pubmed"]
+authors = [{ name = "Gonzalo Romero" }]
+keywords = [
+    "clinical-research", "evidence-based-medicine", "systematic-review", "llm",
+    "langgraph", "pubmed", "prisma", "risk-of-bias", "hypothesis-generation",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Healthcare Industry",
@@ -65,6 +68,12 @@ dependencies = [
     # PDF Export
     "weasyprint>=62.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR"
+Documentation = "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/tree/main/docs"
+Issues = "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues"
+Changelog = "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
