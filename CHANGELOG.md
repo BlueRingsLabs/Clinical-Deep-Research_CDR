@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Local models**: set `OPENAI_BASE_URL` to run CDR on any OpenAI-compatible server (Ollama, vLLM, LM Studio) with no API key.
+- **Case Files**: known-answer clinical questions in `eval/cases/` (settled, uncertain, retrodiction), with a JSON schema, CI validation and `make eval-cases`. Seeded with four cases, including Swanson's fish oil → Raynaud's and magnesium → migraine.
+- **Docs**: `docs/vision.md`, `docs/glossary.md`, `docs/providers.md`, `docs/case-files.md`, `docs/history/hardening-log.md`; rewritten README, CONTRIBUTING and ROADMAP; `GOVERNANCE.md`, `CITATION.cff`.
+- **Community tooling**: issue forms (including "Evidence problem" for clinicians and "Case File proposal"), label definitions synced from `.github/labels.yml`, welcome workflow, CODEOWNERS, devcontainer, pre-commit config.
 - **`--format` flag for evaluation runner**: `eval_runner.py` now accepts `--format json|markdown|all` to control output file generation. Default is `all` (backward-compatible). Closes [#3](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/3). ([#24](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/24))
 - **Dependabot configuration**: Automated dependency update monitoring for pip, npm, and GitHub Actions on a weekly Monday schedule. Closes [#5](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/5).
 - **Pull Request template**: Standardized PR template (`.github/PULL_REQUEST_TEMPLATE.md`) with checklist for description, tests, docs, and breaking changes.
@@ -17,9 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Deep docs moved into `docs/`; internal release checklists and the Spanish audit ADRs retired (condensed into the English hardening log).
+- `.env.example` covers all eight providers and no longer claims Hugging Face is required.
+- CI: new lint job, mypy explicitly advisory, OpenAPI spec drift check, duplicate integration job removed.
+- Dependabot uses the `uv` ecosystem and groups updates.
+- Code comments no longer reference internal audit documents that were never published.
 - **Comprehensive type annotations in `eval_runner.py`**: Added 7 type aliases (`EvalMode`, `OutputFormat`, `QuestionDict`, `MetricsDict`, `EvalResult`, `EvalSummary`, `ComparisonResult`), explicit variable annotations, and full `typing` imports. Passes `mypy --strict` with 0 errors. Closes [#1](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/1). ([#25](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/25))
 
 ### Fixed
+
+- **Docker**: the API container crashed on start (`router` served as a factory) and compose waited forever on a healthcheck at the wrong path. The UI image couldn't reach the API. All three fixed; UI now served by nginx with an `/api` proxy.
+- **`make setup`** installed neither pytest nor ruff (`.[dev]` is a dependency group, not an extra). Setup now uses `uv sync`.
+- **Lint was never enforced**: `make lint` reported 657 ruff errors and ESLint had no config. Both now pass and CI enforces them.
+- **`examples/run_query.py`** imported functions that no longer exist.
+- **README** `curl` example used the wrong request field (`question` instead of `research_question`).
 
 - **Canary provider fallback**: `pick_provider()` in `online_canary.py` now sends a health-check completion before committing to a provider. Detects 402 (payment), 401/403 (auth), and quota errors at selection time, automatically falling back to the next provider. Prevents a single provider's credit exhaustion from failing the entire canary run. Refs: Canary #7 (2026-03-02, OpenRouter 402). ([#33](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/33))
 - **Canary provider order**: `PROVIDER_ORDER` reordered to `groq → cerebras → gemini → openrouter` (free-tier providers first). ([#33](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/33))
