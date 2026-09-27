@@ -20,22 +20,24 @@ This is a React/TypeScript frontend that provides an evidence-first interface fo
 - **Vite** for fast development and builds
 - **Tailwind CSS** for styling
 - **TanStack Query** for data fetching and caching
-- **React Router v6** for navigation
+- **React Router 7** for navigation
 - **Lucide React** for icons
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or pnpm
+- Node.js 20+
+- npm
 
 ### Installation
 
 ```bash
 cd ui
-npm install
+npm ci
 ```
+
+Or run `make setup` from the repo root.
 
 ### Development
 
@@ -57,10 +59,12 @@ npm run build
 npm run typecheck
 ```
 
-### Lint
+### Lint and test
 
 ```bash
 npm run lint
+npm test -- --run      # vitest
+npm run test:e2e       # Playwright (needs a build: npm run build)
 ```
 
 ## Project Structure
@@ -89,10 +93,13 @@ The frontend communicates with the CDR backend API. In development, the Vite dev
 
 ### Required API Endpoints
 
-- `GET /api/runs` - List all runs
-- `GET /api/runs/{runId}` - Get run detail
-- `POST /api/runs` - Create new run
-- `GET /api/runs/{runId}/report` - Get report metadata
+- `GET /api/v1/runs` - List all runs
+- `GET /api/v1/runs/{runId}/detail` - Get run detail
+- `POST /api/v1/runs` - Create new run
+- `GET /api/v1/runs/{runId}/report` - Get report metadata
+
+The full API is documented at http://localhost:8000/docs when the backend is running, and in
+[`docs/openapi.json`](../docs/openapi.json).
 
 ## Design Principles
 
@@ -103,4 +110,4 @@ The frontend communicates with the CDR backend API. In development, the Vite dev
 
 ## License
 
-See main repository LICENSE file.
+Apache 2.0. See the [LICENSE](../LICENSE) at the repo root.

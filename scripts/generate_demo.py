@@ -46,6 +46,9 @@ def render_markdown(report: dict) -> str:
     lines = [
         "# CDR Report — Sample Output",
         "",
+        "> ⚠️ **Illustrative sample.** Hand-written to show the report format; the PMIDs are",
+        "> placeholders, not real papers. For real runs see `examples/output/online/`.",
+        "",
         f"> **Question**: {report.get('question', 'N/A')}",
         ">",
         f"> **Status**: `{report.get('status', 'unknown')}`  ",
