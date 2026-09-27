@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import List, Tuple
-
 
 # =============================================================================
 # STRONG LANGUAGE PATTERNS (that affirm effects)
@@ -50,7 +48,7 @@ class DegradedConclusion:
     original: str
     degraded: str
     was_degraded: bool
-    reasons: List[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
     gate_summary: str | None = None
 
 
@@ -165,7 +163,7 @@ def degrade_conclusion_for_unpublishable(
 def check_conclusion_obeys_status(
     conclusion: str,
     status: str,
-) -> Tuple[bool, List[str]]:
+) -> tuple[bool, list[str]]:
     """
     Check if a conclusion appropriately obeys its run status.
 

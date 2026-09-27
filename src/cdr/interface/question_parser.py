@@ -28,7 +28,7 @@ Parse the research question into PICO components and return ONLY valid JSON, not
 PICO Components:
 - P (Population): Who are the patients/participants?
 - I (Intervention): What is the treatment/intervention?
-- C (Comparator): What is the comparison? 
+- C (Comparator): What is the comparison?
 - O (Outcome): What is the primary outcome?
 
 CRITICAL RULES FOR COMPARATOR:
@@ -71,7 +71,7 @@ class QuestionParser:
 
     def __init__(
         self,
-        llm_provider: "BaseLLMProvider",
+        llm_provider: BaseLLMProvider,
         model: str = "gpt-4o",
     ) -> None:
         """Initialize parser.
@@ -171,7 +171,7 @@ class QuestionParser:
 
         # If all strategies failed, fallback
         if data is None:
-            print(f"[QuestionParser] All JSON extraction strategies failed")
+            print("[QuestionParser] All JSON extraction strategies failed")
             print(f"[QuestionParser] Raw response (first 300 chars): {original_content[:300]}")
             return PICO(
                 population="Not parsed",

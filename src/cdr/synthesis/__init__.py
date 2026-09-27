@@ -7,8 +7,8 @@ Evidence synthesis and GRADE assessment.
 from cdr.synthesis.synthesizer import (
     EvidenceSynthesizer,
     SynthesisResult,
-    calculate_pooled_estimate,
     assess_publication_bias,
+    calculate_pooled_estimate,
 )
 
 __all__ = [

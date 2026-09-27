@@ -238,7 +238,7 @@ class PopulationMatchGate:
         text_lower = text.lower()
         return any(term in text_lower for term in population_terms)
 
-    def check_record(self, record: "Record", pico: "PICO") -> GateCheckResult:
+    def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Check if a record is relevant to PICO population."""
         population_terms = self._get_population_terms(pico.population)
 
@@ -304,7 +304,7 @@ class PopulationMatchGate:
             metadata={"population_terms": population_terms[:5]},
         )
 
-    def check_snippet(self, snippet: "Snippet", pico: "PICO") -> GateCheckResult:
+    def check_snippet(self, snippet: Snippet, pico: PICO) -> GateCheckResult:
         """Check if a snippet is relevant to PICO population."""
         population_terms = self._get_population_terms(pico.population)
 
@@ -319,7 +319,7 @@ class PopulationMatchGate:
                 snippet_id=snippet.snippet_id,
                 record_id=snippet.source_ref.record_id,
                 pmid=snippet.source_ref.pmid,
-                message=f"Snippet mentions exclusion of PICO population",
+                message="Snippet mentions exclusion of PICO population",
                 evidence_text=exclusion_text,
             )
             return GateCheckResult(
@@ -412,7 +412,7 @@ class ComparatorAlignmentGate:
     def check_evidence_comparator(
         self,
         text: str,
-        pico: "PICO",
+        pico: PICO,
         record_id: str | None = None,
         pmid: str | None = None,
     ) -> GateCheckResult:
@@ -478,7 +478,7 @@ class ComparatorAlignmentGate:
             metadata={"comparator_pairs": comparator_pairs[:3]},
         )
 
-    def check_record(self, record: "Record", pico: "PICO") -> GateCheckResult:
+    def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Check record for comparator alignment."""
         text = (record.abstract or "") + " " + record.title
         return self.check_evidence_comparator(text, pico, record.record_id, record.pmid)
@@ -548,7 +548,7 @@ class StudyTypeConsistencyGate:
         self.strict = strict
         self.study_type_strict = study_type_strict
 
-    def _detect_study_type(self, record: "Record") -> tuple[str | None, str | None]:
+    def _detect_study_type(self, record: Record) -> tuple[str | None, str | None]:
         """
         Detect study type from record metadata.
         Returns: (category, specific_type) e.g. ('observational', 'cohort')
@@ -599,7 +599,7 @@ class StudyTypeConsistencyGate:
 
         return None, None
 
-    def check_record(self, record: "Record", pico: "PICO") -> GateCheckResult:
+    def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Check if record study type matches PICO requirements."""
         from cdr.core.enums import StudyType
 
@@ -648,7 +648,7 @@ class StudyTypeConsistencyGate:
 
         # Check if detected type matches any required type
         pico_requires_experimental = any(st in [StudyType.RCT] for st in pico.study_types)
-        pico_allows_observational = any(
+        pico_allows_observational = any(  # noqa: F841 — loose end: computed but never enforced
             st in [StudyType.COHORT, StudyType.CASE_CONTROL] for st in pico.study_types
         )
 
@@ -703,7 +703,7 @@ class DeduplicationGate:
 
     NAME = "deduplication"
 
-    def check_claim(self, claim: "EvidenceClaim", snippets: list["Snippet"]) -> GateCheckResult:
+    def check_claim(self, claim: EvidenceClaim, snippets: list[Snippet]) -> GateCheckResult:
         """Check for duplicate evidence in a claim."""
         # Get PMIDs from supporting snippets
         pmid_to_snippets: dict[str, list[str]] = {}
@@ -947,7 +947,7 @@ class EvidenceValidator:
         # Track gate results for conclusion degradation
         self._all_gate_results: list[GateCheckResult] = []
 
-    def validate_record(self, record: "Record", pico: "PICO") -> EvidenceValidationResult:
+    def validate_record(self, record: Record, pico: PICO) -> EvidenceValidationResult:
         """Run all gates on a record."""
         gate_results = []
 
@@ -979,7 +979,7 @@ class EvidenceValidator:
 
         return result
 
-    def validate_snippet(self, snippet: "Snippet", pico: "PICO") -> EvidenceValidationResult:
+    def validate_snippet(self, snippet: Snippet, pico: PICO) -> EvidenceValidationResult:
         """Run gates on a snippet."""
         gate_results = []
 
@@ -1007,9 +1007,9 @@ class EvidenceValidator:
 
     def validate_claim(
         self,
-        claim: "EvidenceClaim",
-        snippets: list["Snippet"],
-        pico: "PICO",
+        claim: EvidenceClaim,
+        snippets: list[Snippet],
+        pico: PICO,
     ) -> EvidenceValidationResult:
         """Validate a claim's supporting evidence."""
         gate_results = []

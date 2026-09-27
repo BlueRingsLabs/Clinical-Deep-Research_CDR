@@ -24,10 +24,9 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -194,7 +193,7 @@ async def run_single_question(
             "All findings require independent verification by qualified professionals. "
             "See DISCLAIMER.md for full terms."
         ),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "pico": state_dict.get("pico", {}),
         "prisma_counts": state_dict.get(
             "prisma_counts",
@@ -216,7 +215,7 @@ async def run_single_question(
             "mode": "online",
             "dod_level": 1,
             "latency_seconds": round(t_elapsed, 2),
-            "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "date": datetime.now(UTC).strftime("%Y-%m-%d"),
         },
     }
 
@@ -278,7 +277,7 @@ async def main() -> int:
             results.append({"run_id": run_id, "status": report.get("status", "?")})
         else:
             # Try fallback provider
-            print(f"    🔄 Trying fallback provider...")
+            print("    🔄 Trying fallback provider...")
             fb_provider, fb_name = try_next_provider(provider_name)
             if fb_provider:
                 print(f"    ✅ Fallback to: {fb_name}")

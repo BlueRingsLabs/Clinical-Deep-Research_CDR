@@ -16,7 +16,8 @@ import asyncio
 import os
 import random
 import time
-from typing import Any, AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Iterator
+from typing import Any
 
 from cdr.core.exceptions import LLMError, LLMProviderError, LLMRateLimitError
 from cdr.llm.base import BaseLLMProvider, LLMResponse, Message, StreamChunk
@@ -170,7 +171,7 @@ class GroqProvider(BaseLLMProvider):
                         time.sleep((wait_minutes + 1) * 60)
                     else:
                         # No wait time specified, wait longer (2 minutes)
-                        print(f"[Groq] Daily limit (TPD) hit. Waiting 2 minutes...")
+                        print("[Groq] Daily limit (TPD) hit. Waiting 2 minutes...")
                         time.sleep(120)
                 else:
                     # Per-minute limit - use exponential backoff
@@ -242,7 +243,7 @@ class GroqProvider(BaseLLMProvider):
                         await asyncio.sleep((wait_minutes + 1) * 60)
                     else:
                         # No wait time specified, wait longer (2 minutes)
-                        print(f"[Groq] Daily limit (TPD) hit. Waiting 2 minutes...")
+                        print("[Groq] Daily limit (TPD) hit. Waiting 2 minutes...")
                         await asyncio.sleep(120)
                 else:
                     delay = min(BASE_DELAY * (2**attempt) + random.uniform(0, 1), MAX_DELAY)

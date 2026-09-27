@@ -10,35 +10,33 @@ Tests for the complete DoD3 gate system including:
 """
 
 import pytest
-from datetime import datetime
 
+from cdr.core.enums import (
+    ComparatorSource,
+    GRADECertainty,
+    RecordSource,
+    Section,
+    StudyType,
+)
+from cdr.core.schemas import (
+    PICO,
+    EvidenceClaim,
+    Record,
+    Snippet,
+    SourceRef,
+)
 from cdr.verification.dod3_gates import (
-    PICOMatchGate,
-    StudyTypeEnforcementGate,
-    ContextPurityGate,
     AssertionCoverageGate,
+    ContextPurityGate,
     DoD3Validator,
     GateReportGenerator,
     GateResult,
     MismatchType,
+    PICOMatchGate,
     PopulationContext,
+    StudyTypeEnforcementGate,
     TherapyMode,
 )
-from cdr.core.schemas import (
-    PICO,
-    Record,
-    Snippet,
-    SourceRef,
-    EvidenceClaim,
-)
-from cdr.core.enums import (
-    StudyType,
-    RecordSource,
-    GRADECertainty,
-    Section,
-    ComparatorSource,
-)
-
 
 # =============================================================================
 # FIXTURES
@@ -524,8 +522,8 @@ class TestDoD3Validator:
 
         P0-02: This tests that violations become BLOCKERS when claims USE the bad evidence.
         """
-        from cdr.core.schemas import Snippet, SourceRef, EvidenceClaim
         from cdr.core.enums import GRADECertainty
+        from cdr.core.schemas import EvidenceClaim, Snippet, SourceRef
 
         validator = DoD3Validator(strict=True)
 
@@ -639,9 +637,9 @@ class TestDoD3Harness:
 
     def test_harness_detects_regressions(self):
         """Harness should fail when expected results don't match."""
-        from cdr.verification.dod3_harness import TestCase, run_harness
-        from cdr.core.schemas import PICO
         from cdr.core.enums import StudyType
+        from cdr.core.schemas import PICO
+        from cdr.verification.dod3_harness import TestCase, run_harness
 
         # Create a case that will mismatch expectations
         bad_case = TestCase(

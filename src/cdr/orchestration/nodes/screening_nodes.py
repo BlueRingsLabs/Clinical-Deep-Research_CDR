@@ -10,9 +10,9 @@ from __future__ import annotations
 from langchain_core.runnables import RunnableConfig
 
 from cdr.core.schemas import CDRState, PRISMACounts
-from cdr.observability.tracer import tracer
 from cdr.observability.metrics import metrics
-from cdr.orchestration.nodes._helpers import _extract_pico_terms, _calculate_pico_match_score
+from cdr.observability.tracer import tracer
+from cdr.orchestration.nodes._helpers import _calculate_pico_match_score, _extract_pico_terms
 
 
 async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
@@ -88,7 +88,7 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
             # CRITICAL: Block heuristic screening for Research-grade (Level 2+)
             if dod_level >= 2:
                 print(f"[Screen] ❌ ERROR: No LLM available for Research-grade (Level {dod_level})")
-                print(f"[Screen] Heuristic screening is insufficient for Level 2+ per PRISMA 2020")
+                print("[Screen] Heuristic screening is insufficient for Level 2+ per PRISMA 2020")
                 span.set_attribute("screening_blocked", True)
                 span.set_attribute("screening_error", f"LLM_REQUIRED_FOR_LEVEL_{dod_level}")
 
@@ -104,11 +104,9 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
                 }
 
             # Level 1 (exploratory) - allow heuristic fallback with warning
+            print("[Screen] ⚠️ WARNING: No LLM available - using heuristic screening (Level 1 only)")
             print(
-                f"[Screen] ⚠️ WARNING: No LLM available - using heuristic screening (Level 1 only)"
-            )
-            print(
-                f"[Screen] For Research-grade reviews, configure LLM provider or use manual screening"
+                "[Screen] For Research-grade reviews, configure LLM provider or use manual screening"
             )
             span.set_attribute("screening_warning", "heuristic_fallback_level1_only")
 
@@ -326,8 +324,8 @@ async def parse_documents_node(state: CDRState, config: RunnableConfig) -> dict:
     enable_fulltext = configurable.get("enable_fulltext_retrieval", True)
 
     with tracer.start_span("node.parse_documents") as span:
-        from cdr.core.schemas import Snippet, SourceRef, PRISMACounts
         from cdr.core.enums import Section
+        from cdr.core.schemas import PRISMACounts, Snippet, SourceRef
 
         parsed = {}
         snippets = []
@@ -507,7 +505,7 @@ async def parse_documents_node(state: CDRState, config: RunnableConfig) -> dict:
         enable_snippet_gates = configurable.get("enable_evidence_gates", True)
 
         if enable_snippet_gates and state.pico:
-            from cdr.verification.evidence_gates import PopulationMatchGate, GateResult
+            from cdr.verification.evidence_gates import PopulationMatchGate
 
             pop_gate = PopulationMatchGate(strict=False)
             validated_snippets = []

@@ -5,7 +5,6 @@ Vector storage and retrieval using Qdrant.
 """
 
 from typing import Any
-from uuid import uuid4
 
 import numpy as np
 
@@ -17,11 +16,11 @@ try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
         Distance,
+        FieldCondition,
+        Filter,
+        MatchValue,
         PointStruct,
         VectorParams,
-        Filter,
-        FieldCondition,
-        MatchValue,
     )
 
     QDRANT_AVAILABLE = True
@@ -65,7 +64,7 @@ class QdrantStore:
         self._tracer = get_tracer("cdr.retrieval.qdrant")
 
         # Initialize client
-        with self._tracer.span("init_client", attributes={"url": self._url}) as span:
+        with self._tracer.span("init_client", attributes={"url": self._url}):
             try:
                 self._client = QdrantClient(
                     url=self._url,
@@ -157,9 +156,7 @@ class QdrantStore:
         if len(ids) != len(embeddings) or len(ids) != len(payloads):
             raise ValueError("ids, embeddings, and payloads must have same length")
 
-        with self._tracer.span(
-            "upsert", attributes={"collection": collection, "count": len(ids)}
-        ) as span:
+        with self._tracer.span("upsert", attributes={"collection": collection, "count": len(ids)}):
             try:
                 points = [
                     PointStruct(
@@ -241,9 +238,7 @@ class QdrantStore:
         """Delete vectors by ID."""
         collection = collection_name or self._default_collection
 
-        with self._tracer.span(
-            "delete", attributes={"collection": collection, "count": len(ids)}
-        ) as span:
+        with self._tracer.span("delete", attributes={"collection": collection, "count": len(ids)}):
             try:
                 self._client.delete(
                     collection_name=collection,

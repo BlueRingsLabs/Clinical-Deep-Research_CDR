@@ -5,31 +5,29 @@ Tests metrics, golden set, and evaluation reports.
 """
 
 import pytest
-from datetime import datetime
 
-from cdr.evaluation import (
-    CDRMetricsEvaluator,
-    EvaluationReport,
-    MetricResult,
-    MetricStatus,
-    evaluate_cdr_output,
-    GOLDEN_SET,
-    get_golden_set,
-    get_question_by_id,
-    validate_against_golden_set,
-    GoldenSetQuestion,
-    ExpectedEvidenceLevel,
-)
+from cdr.composition.schemas import ComposedHypothesis, ThreatAnalysis
+from cdr.core.enums import VerificationStatus
 from cdr.core.schemas import (
     EvidenceClaim,
     Snippet,
     SourceRef,
-    VerificationResult,
     VerificationCheck,
+    VerificationResult,
 )
-from cdr.core.enums import VerificationStatus
-from cdr.composition.schemas import ComposedHypothesis, ThreatAnalysis
-
+from cdr.evaluation import (
+    GOLDEN_SET,
+    CDRMetricsEvaluator,
+    EvaluationReport,
+    ExpectedEvidenceLevel,
+    GoldenSetQuestion,
+    MetricResult,
+    MetricStatus,
+    evaluate_cdr_output,
+    get_golden_set,
+    get_question_by_id,
+    validate_against_golden_set,
+)
 
 # =============================================================================
 # Fixtures - Using correct schema architecture

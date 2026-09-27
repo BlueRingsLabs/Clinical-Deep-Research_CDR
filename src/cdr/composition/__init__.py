@@ -23,8 +23,8 @@ from cdr.composition.schemas import (
     ComposedHypothesis,
     HypothesisStrength,
     MechanisticRelation,
-    RelationType,
     ProposedStudyDesign,
+    RelationType,
     ThreatAnalysis,
 )
 

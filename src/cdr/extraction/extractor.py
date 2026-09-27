@@ -5,15 +5,16 @@ Structured extraction of study metadata using DSPy.
 """
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from cdr.config import get_settings
 from cdr.core.enums import OutcomeMeasureType, StudyType
-from cdr.core.schemas import OutcomeMeasure, Snippet, SourceRef, StudyCard
 from cdr.core.exceptions import ExtractionError
-from cdr.llm import Message, create_provider, build_messages
-from cdr.observability import get_tracer, get_cdr_metrics
+from cdr.core.schemas import OutcomeMeasure, Snippet, SourceRef, StudyCard
+from cdr.llm import build_messages, create_provider
+from cdr.observability import get_cdr_metrics, get_tracer
 
+if TYPE_CHECKING:
+    from cdr.llm.base import BaseLLMProvider
 
 EXTRACTION_SYSTEM_PROMPT = """You are a clinical research data extraction specialist. Extract structured study information from the provided text.
 
@@ -202,7 +203,7 @@ Extract the structured study information from the above text."""
         # Parse supporting snippets
         supporting_snippets: list[str] = []
         snippet_refs = data.get("supporting_snippets", [])
-        for i, snip in enumerate(snippet_refs):
+        for i, _snip in enumerate(snippet_refs):
             snippet_id = f"{record_id}_snip_{i}"
             supporting_snippets.append(snippet_id)
 

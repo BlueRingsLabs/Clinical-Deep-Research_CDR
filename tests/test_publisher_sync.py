@@ -8,18 +8,18 @@ Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5, PRISMA 2020, PRISMA-S (BMJ 2021
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 import pytest
 
-from cdr.core.enums import ExclusionReason, GRADECertainty, RoB2Judgment, RoB2Domain, StudyType
+from cdr.core.enums import GRADECertainty, RoB2Domain, RoB2Judgment, StudyType
 from cdr.core.schemas import (
+    PICO,
     CDRState,
     EvidenceClaim,
     ExecutedSearch,
     OutcomeMeasure,
-    PICO,
     PRISMACounts,
     RoB2DomainResult,
     RoB2Result,
@@ -153,7 +153,7 @@ class TestExecutedSearchesSync:
                     database="PubMed",
                     query_planned="hypertension treatment",
                     query_executed="hypertension treatment",
-                    executed_at=datetime(2026, 1, 20, 10, 30, tzinfo=timezone.utc),
+                    executed_at=datetime(2026, 1, 20, 10, 30, tzinfo=UTC),
                     results_count=150,
                     results_fetched=100,
                     notes=None,
@@ -162,7 +162,7 @@ class TestExecutedSearchesSync:
                     database="ClinicalTrials.gov",
                     query_planned="hypertension treatment drugs",
                     query_executed="hypertension treatment",
-                    executed_at=datetime(2026, 1, 20, 10, 31, tzinfo=timezone.utc),
+                    executed_at=datetime(2026, 1, 20, 10, 31, tzinfo=UTC),
                     results_count=25,
                     results_fetched=25,
                     notes="Query truncated to 6 words",
@@ -189,7 +189,7 @@ class TestExecutedSearchesSync:
                     database="PubMed",
                     query_planned="diabetes treatment",
                     query_executed="diabetes treatment",
-                    executed_at=datetime(2026, 1, 20, 12, 0, tzinfo=timezone.utc),
+                    executed_at=datetime(2026, 1, 20, 12, 0, tzinfo=UTC),
                     results_count=200,
                     results_fetched=100,
                     notes=None,

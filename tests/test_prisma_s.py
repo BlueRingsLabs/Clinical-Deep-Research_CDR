@@ -13,12 +13,12 @@ PRISMA-S requires:
 """
 
 import asyncio
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cdr.core.schemas import ExecutedSearch, CDRState, SearchPlan, PICO
+from cdr.core.schemas import PICO, CDRState, ExecutedSearch, SearchPlan
 
 
 class TestExecutedSearchSchema:
@@ -30,7 +30,7 @@ class TestExecutedSearchSchema:
             database="PubMed",
             query_planned="diabetes AND metformin AND RCT",
             query_executed="diabetes AND metformin AND RCT",
-            executed_at=datetime.now(timezone.utc),
+            executed_at=datetime.now(UTC),
             results_count=150,
             results_fetched=100,
             notes=None,
@@ -45,7 +45,7 @@ class TestExecutedSearchSchema:
             database="ClinicalTrials.gov",
             query_planned="diabetes mellitus type 2 AND metformin hydrochloride AND randomized controlled trial",
             query_executed="diabetes mellitus type 2",
-            executed_at=datetime.now(timezone.utc),
+            executed_at=datetime.now(UTC),
             results_count=50,
             results_fetched=50,
             notes="Query truncated to 6 words for CT.gov compatibility",
@@ -151,8 +151,9 @@ class TestRetrieveNodePRISMAS:
 
     def test_retrieve_node_returns_executed_searches(self, mock_state):
         """retrieve_node should return executed_searches in output."""
-        from cdr.orchestration.graph import retrieve_node
         from unittest.mock import MagicMock
+
+        from cdr.orchestration.graph import retrieve_node
 
         # Mock PubMed client
         mock_pubmed_result = MagicMock()
@@ -378,8 +379,8 @@ class TestPRISMAExclusionReasons:
 
     def test_screening_decision_has_reason_code(self):
         """ScreeningDecision should have reason_code for exclusions."""
-        from cdr.core.schemas import ScreeningDecision
         from cdr.core.enums import ExclusionReason
+        from cdr.core.schemas import ScreeningDecision
 
         # Exclusion decision with reason
         decision = ScreeningDecision(

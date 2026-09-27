@@ -7,10 +7,11 @@ Provides ACID guarantees for workflow state management.
 
 import json
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 from cdr.config import get_settings
 from cdr.core.enums import RunStatus
@@ -77,7 +78,7 @@ class RunStore:
                     error_message TEXT,
                     metadata_json TEXT
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL,
@@ -97,7 +98,7 @@ class RunStore:
                     FOREIGN KEY (run_id) REFERENCES runs(run_id) ON DELETE CASCADE,
                     UNIQUE (run_id, record_id)
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS screening_decisions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL,
@@ -110,7 +111,7 @@ class RunStore:
                     FOREIGN KEY (run_id) REFERENCES runs(run_id) ON DELETE CASCADE,
                     UNIQUE (run_id, record_id)
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS checkpoints (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL,
@@ -119,7 +120,7 @@ class RunStore:
                     created_at TEXT NOT NULL,
                     FOREIGN KEY (run_id) REFERENCES runs(run_id) ON DELETE CASCADE
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS evaluations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id TEXT NOT NULL,
@@ -130,7 +131,7 @@ class RunStore:
                     FOREIGN KEY (run_id) REFERENCES runs(run_id) ON DELETE CASCADE,
                     UNIQUE (run_id)
                 );
-                
+
                 CREATE INDEX IF NOT EXISTS idx_records_run_id ON records(run_id);
                 CREATE INDEX IF NOT EXISTS idx_screening_run_id ON screening_decisions(run_id);
                 CREATE INDEX IF NOT EXISTS idx_checkpoints_run_id ON checkpoints(run_id);
@@ -150,7 +151,7 @@ class RunStore:
             pico: PICO question as dict.
             metadata: Optional additional metadata.
         """
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self._connection() as conn:
             conn.execute(
                 """
@@ -185,14 +186,14 @@ class RunStore:
         error_message: str | None = None,
     ) -> None:
         """Update run status."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         completed_at = now if status in (RunStatus.COMPLETED, RunStatus.FAILED) else None
 
         with self._connection() as conn:
             conn.execute(
                 """
-                UPDATE runs 
-                SET status = ?, current_node = ?, updated_at = ?, 
+                UPDATE runs
+                SET status = ?, current_node = ?, updated_at = ?,
                     completed_at = COALESCE(?, completed_at),
                     error_message = COALESCE(?, error_message)
                 WHERE run_id = ?
@@ -205,7 +206,7 @@ class RunStore:
         with self._connection() as conn:
             conn.execute(
                 "UPDATE runs SET iteration = iteration + 1, updated_at = ? WHERE run_id = ?",
-                (datetime.now(timezone.utc).isoformat(), run_id),
+                (datetime.now(UTC).isoformat(), run_id),
             )
             row = conn.execute("SELECT iteration FROM runs WHERE run_id = ?", (run_id,)).fetchone()
             return row["iteration"] if row else 0
@@ -237,7 +238,7 @@ class RunStore:
 
         Supports both 'id' (legacy) and 'record_id' (current schema) field names.
         """
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         # Support both 'id' (legacy) and 'record_id' (current schema)
         record_id = record.get("record_id") or record.get("id")
         if not record_id:
@@ -251,8 +252,8 @@ class RunStore:
         with self._connection() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO records 
-                (run_id, record_id, source, external_id, title, abstract, 
+                INSERT OR REPLACE INTO records
+                (run_id, record_id, source, external_id, title, abstract,
                  authors_json, year, journal, doi, pmid, study_type, metadata_json, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -317,7 +318,7 @@ class RunStore:
         confidence: float | None = None,
     ) -> None:
         """Add a screening decision."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self._connection() as conn:
             conn.execute(
                 """
@@ -376,7 +377,7 @@ class RunStore:
 
     def save_checkpoint(self, run_id: str, node: str, state: dict[str, Any]) -> None:
         """Save a workflow checkpoint."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self._connection() as conn:
             conn.execute(
                 """
@@ -391,9 +392,9 @@ class RunStore:
         with self._connection() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM checkpoints 
-                WHERE run_id = ? 
-                ORDER BY created_at DESC 
+                SELECT * FROM checkpoints
+                WHERE run_id = ?
+                ORDER BY created_at DESC
                 LIMIT 1
                 """,
                 (run_id,),
@@ -478,11 +479,11 @@ class RunStore:
             overall_score: Optional overall score (0-1).
             grade: Optional letter grade (A-F).
         """
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self._connection() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO evaluations 
+                INSERT OR REPLACE INTO evaluations
                 (run_id, report_json, overall_score, grade, created_at)
                 VALUES (?, ?, ?, ?, ?)
                 """,

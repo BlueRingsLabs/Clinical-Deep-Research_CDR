@@ -7,8 +7,6 @@ Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-3
 - retrieval_scores per Record
 """
 
-import pytest
-
 from cdr.core.schemas import Record, RecordSource
 
 
@@ -133,8 +131,9 @@ class TestHybridRetrievalIntegration:
 
     def test_bm25_index_efficiency(self):
         """BM25 indexing should handle large document sets efficiently."""
-        from cdr.retrieval.bm25 import BM25Retriever
         import time
+
+        from cdr.retrieval.bm25 import BM25Retriever
 
         retriever = BM25Retriever()
 

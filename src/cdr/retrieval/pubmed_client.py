@@ -15,8 +15,6 @@ E-utilities reference: https://www.ncbi.nlm.nih.gov/books/NBK25500/
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import Any
-from urllib.parse import urlencode
 
 import httpx
 
@@ -25,7 +23,6 @@ from cdr.core.enums import RecordSource, StudyType
 from cdr.core.exceptions import PubMedError
 from cdr.core.schemas import Record
 from cdr.observability import get_tracer
-
 
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
@@ -364,7 +361,7 @@ class PubMedClient:
                     break
 
             # Study type inference from publication types
-            study_type = self._infer_study_type(article)
+            study_type = self._infer_study_type(article)  # noqa: F841 — loose end: parsed but not used yet
 
             # Compute content hash for deduplication
             content_hash = Record.compute_hash(title, abstract, doi)

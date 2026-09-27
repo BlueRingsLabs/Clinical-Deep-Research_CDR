@@ -23,10 +23,10 @@ from typing import Any
 import httpx
 from tenacity import (
     AsyncRetrying,
+    before_sleep_log,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential_jitter,
-    before_sleep_log,
 )
 
 from cdr.llm.base import BaseLLMProvider, LLMResponse, Message
@@ -362,7 +362,7 @@ class HuggingFaceProvider(BaseLLMProvider):
                 str(e),
                 request=httpx.Request("POST", self._endpoint_url),
                 response=httpx.Response(e.status_code),
-            )
+            ) from e
         except httpx.HTTPStatusError as e:
             # If 400 error and we used response_format or tools, retry without them
             if e.response.status_code == 400 and (response_format or tools):
@@ -380,7 +380,7 @@ class HuggingFaceProvider(BaseLLMProvider):
                         str(retry_e),
                         request=httpx.Request("POST", self._endpoint_url),
                         response=httpx.Response(retry_e.status_code),
-                    )
+                    ) from retry_e
             else:
                 # Log and re-raise for non-recoverable errors
                 logger.error(f"[HF] Non-recoverable error: {e}")

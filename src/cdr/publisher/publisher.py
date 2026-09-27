@@ -12,11 +12,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cdr.core.enums import GRADECertainty, Section, VerificationStatus
+from cdr.core.enums import VerificationStatus
 from cdr.core.schemas import (
     CDRState,
     EvidenceClaim,
-    ExecutedSearch,
     PRISMACounts,
     RoB2Result,
     StudyCard,
@@ -25,8 +24,8 @@ from cdr.core.schemas import (
 from cdr.observability.tracer import tracer
 
 if TYPE_CHECKING:
-    from cdr.synthesis.synthesizer import SynthesisResult
     from cdr.skeptic.skeptic_agent import CritiqueResult
+    from cdr.synthesis.synthesizer import SynthesisResult
 
 
 # =============================================================================
@@ -276,8 +275,8 @@ class Publisher:
     def publish(
         self,
         state: CDRState,
-        synthesis_result: "SynthesisResult",
-        critique_result: "CritiqueResult | None" = None,
+        synthesis_result: SynthesisResult,
+        critique_result: CritiqueResult | None = None,
         verification_results: dict[str, VerificationResult] | None = None,
         formats: list[str] | None = None,
     ) -> PublishResult:
@@ -334,8 +333,8 @@ class Publisher:
     def _generate_markdown(
         self,
         state: CDRState,
-        synthesis_result: "SynthesisResult",
-        critique_result: "CritiqueResult | None",
+        synthesis_result: SynthesisResult,
+        critique_result: CritiqueResult | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate Markdown report."""
@@ -394,8 +393,8 @@ class Publisher:
     def _generate_json(
         self,
         state: CDRState,
-        synthesis_result: "SynthesisResult",
-        critique_result: "CritiqueResult | None",
+        synthesis_result: SynthesisResult,
+        critique_result: CritiqueResult | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate JSON report.
@@ -496,8 +495,8 @@ class Publisher:
     def _generate_html(
         self,
         state: CDRState,
-        synthesis_result: "SynthesisResult",
-        critique_result: "CritiqueResult | None",
+        synthesis_result: SynthesisResult,
+        critique_result: CritiqueResult | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate HTML report."""
@@ -586,8 +585,8 @@ class Publisher:
 
     def _build_executive_summary(
         self,
-        synthesis_result: "SynthesisResult",
-        critique_result: "CritiqueResult | None",
+        synthesis_result: SynthesisResult,
+        critique_result: CritiqueResult | None,
     ) -> str:
         """Build executive summary section."""
         lines = []
@@ -773,7 +772,7 @@ Identification → Screening → Eligibility → Included
             lines.append(f"- **{claim.certainty.value.upper()}**: {claim.claim_text}")
         return "\n".join(lines) or "*No key findings*"
 
-    def _build_limitations(self, critique_result: "CritiqueResult | None") -> str:
+    def _build_limitations(self, critique_result: CritiqueResult | None) -> str:
         """Build limitations section."""
         if not critique_result:
             return "- Limitations not formally assessed"
@@ -784,7 +783,7 @@ Identification → Screening → Eligibility → Included
 
         return "\n".join(lines) or "- No major limitations identified"
 
-    def _build_implications(self, synthesis_result: "SynthesisResult") -> str:
+    def _build_implications(self, synthesis_result: SynthesisResult) -> str:
         """Build implications section."""
         lines = []
 

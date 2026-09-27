@@ -6,8 +6,6 @@ Reranking using cross-encoder models for improved precision.
 
 from typing import Any
 
-import numpy as np
-
 from cdr.config import get_settings
 from cdr.core.exceptions import RetrievalError
 from cdr.observability import get_tracer
@@ -50,7 +48,7 @@ class Reranker:
         self._model_name = model_name or settings.retrieval.reranker_model
         self._tracer = get_tracer("cdr.retrieval.reranker")
 
-        with self._tracer.span("load_model", attributes={"model": self._model_name}) as span:
+        with self._tracer.span("load_model", attributes={"model": self._model_name}):
             try:
                 self._model = CrossEncoder(self._model_name, device=device)
             except Exception as e:
@@ -122,7 +120,7 @@ class Reranker:
         ) as span:
             # Extract texts
             texts = []
-            for doc_id, data in candidates:
+            for _doc_id, data in candidates:
                 if isinstance(data, str):
                     texts.append(data)
                 elif isinstance(data, dict) and "text" in data:

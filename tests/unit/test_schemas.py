@@ -7,37 +7,31 @@ Tests validation rules and invariants defined in schemas.py.
 import pytest
 from pydantic import ValidationError
 
+from cdr.core.enums import (
+    CritiqueDimension,
+    CritiqueSeverity,
+    ExclusionReason,
+    OutcomeMeasureType,
+    RecordSource,
+    RoB2Judgment,
+    RunStatus,
+    VerificationStatus,
+)
 from cdr.core.schemas import (
     PICO,
     CDRState,
-    Critique,
     CritiqueResult,
     EvidenceClaim,
     OutcomeMeasure,
     PRISMACounts,
     Record,
-    RoB2DomainResult,
     RoB2Result,
     ScreeningDecision,
-    SearchPlan,
     Snippet,
     SourceRef,
     StudyCard,
     VerificationCheck,
     VerificationResult,
-)
-from cdr.core.enums import (
-    CritiqueDimension,
-    CritiqueSeverity,
-    ExclusionReason,
-    GRADECertainty,
-    OutcomeMeasureType,
-    RecordSource,
-    RoB2Domain,
-    RoB2Judgment,
-    RunStatus,
-    StudyType,
-    VerificationStatus,
 )
 
 

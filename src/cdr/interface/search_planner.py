@@ -48,7 +48,7 @@ class SearchPlanner:
 
     def __init__(
         self,
-        llm_provider: "BaseLLMProvider",
+        llm_provider: BaseLLMProvider,
         model: str = "gpt-4o",
     ) -> None:
         """Initialize planner.
@@ -109,9 +109,7 @@ class SearchPlanner:
 
     def _parse_response(self, content: str, pico: PICO) -> SearchPlan:
         """Parse LLM response into SearchPlan."""
-        import re
 
-        original_content = content
         content = content.strip()
 
         # Try to extract JSON from various formats
@@ -153,7 +151,7 @@ class SearchPlanner:
                     pass
 
         if data is None:
-            print(f"[SearchPlanner] JSON extraction failed, using fallback")
+            print("[SearchPlanner] JSON extraction failed, using fallback")
             return self._generate_fallback_plan(pico)
 
         # Parse date range

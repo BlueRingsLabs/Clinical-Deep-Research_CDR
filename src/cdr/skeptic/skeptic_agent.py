@@ -7,15 +7,14 @@ Adversarial verification agent that challenges claims and identifies weaknesses.
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from cdr.core.enums import CritiqueDimension, CritiqueSeverity, GRADECertainty
+from cdr.core.enums import CritiqueDimension, CritiqueSeverity
 from cdr.core.schemas import (
     Critique,
     CritiqueResult,
     EvidenceClaim,
-    Snippet,
-    SourceRef,
 )
 from cdr.observability.tracer import tracer
 
@@ -291,7 +290,7 @@ class SkepticAgent:
             Critique object containing CritiqueResult findings
         """
         import re
-        
+
         # Clean JSON - handle markdown code blocks
         content = content.strip()
         if content.startswith("```"):
@@ -307,7 +306,9 @@ class SkepticAgent:
             data = json.loads(content)
         except json.JSONDecodeError:
             # Try to extract JSON from text
-            json_match = re.search(r'\{[^{}]*("critiques"|"findings")[^{}]*\[.*?\]\s*\}', content, re.DOTALL)
+            json_match = re.search(
+                r'\{[^{}]*("critiques"|"findings")[^{}]*\[.*?\]\s*\}', content, re.DOTALL
+            )
             if json_match:
                 try:
                     data = json.loads(json_match.group())
@@ -316,7 +317,9 @@ class SkepticAgent:
                     return Critique(
                         findings=[],
                         blockers=[],  # Don't block on parsing failure
-                        recommendations=["LLM response was not valid JSON - manual review may be needed"],
+                        recommendations=[
+                            "LLM response was not valid JSON - manual review may be needed"
+                        ],
                         overall_assessment=content[:500] if content else "No assessment available",
                     )
             else:
@@ -405,7 +408,7 @@ class SkepticAgent:
     def generate_counter_arguments(
         self,
         claim: EvidenceClaim,
-    ) -> list["CounterArgument"]:
+    ) -> list[CounterArgument]:
         """Generate counter-arguments for a specific claim.
 
         Args:
@@ -442,7 +445,7 @@ Generate strong counter-arguments to this claim."""
 
             return self._parse_counter_arguments(response.content)
 
-    def _parse_counter_arguments(self, content: str) -> list["CounterArgument"]:
+    def _parse_counter_arguments(self, content: str) -> list[CounterArgument]:
         """Parse counter-arguments from LLM response."""
         content = content.strip()
         if content.startswith("```"):
@@ -459,7 +462,6 @@ Generate strong counter-arguments to this claim."""
 
         result = []
         for arg in args:
-            strength_map = {"strong": 3, "moderate": 2, "weak": 1}
             result.append(
                 CounterArgument(
                     argument=arg.get("argument", ""),
@@ -483,7 +485,7 @@ Generate strong counter-arguments to this claim."""
         Returns:
             Devil's advocate argument text
         """
-        with tracer.start_span("skeptic.devils_advocate") as span:
+        with tracer.start_span("skeptic.devils_advocate"):
             # Use claim_text per EvidenceClaim schema
             context = f"""
 CLAIM TO OPPOSE: {claim.claim_text}
@@ -510,8 +512,6 @@ Take the opposite position and argue convincingly against this claim.
 # =============================================================================
 # DATA CLASSES
 # =============================================================================
-
-from dataclasses import dataclass
 
 
 @dataclass

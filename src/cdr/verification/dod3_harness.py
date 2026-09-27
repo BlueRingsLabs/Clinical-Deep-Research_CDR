@@ -23,32 +23,23 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
-from typing import Any
 
-# Import gates
-from cdr.verification.dod3_gates import (
-    PICOMatchGate,
-    StudyTypeEnforcementGate,
-    ContextPurityGate,
-    AssertionCoverageGate,
-    DoD3Validator,
-    GateResult,
-    PopulationContext,
-    TherapyMode,
+from cdr.core.enums import (
+    ComparatorSource,
+    GRADECertainty,
+    RecordSource,
+    Section,
+    StudyType,
 )
 
 # Import schemas
-from cdr.core.schemas import PICO, Record, Snippet, SourceRef, EvidenceClaim
-from cdr.core.enums import (
-    StudyType,
-    RecordSource,
-    GRADECertainty,
-    Section,
-    ComparatorSource,
-)
+from cdr.core.schemas import PICO, EvidenceClaim, Record, Snippet, SourceRef
 
+# Import gates
+from cdr.verification.dod3_gates import (
+    DoD3Validator,
+)
 
 # =============================================================================
 # TEST CASE DEFINITIONS
@@ -674,7 +665,7 @@ def run_harness(cases: list[TestCase] | None = None, verbose: bool = True) -> Ha
                 expected_result=case.expected_result,
                 violations_found=[],
                 expected_violations=case.expected_violations,
-                message=f"Exception: {str(e)}",
+                message=f"Exception: {e!s}",
             )
             if verbose:
                 print(f"Result: ❌ ERROR - {e}")

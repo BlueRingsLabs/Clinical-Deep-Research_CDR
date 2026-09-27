@@ -19,8 +19,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from cdr.core.enums import ComparatorSource, TherapeuticContext, GRADECertainty
-from cdr.core.schemas import EvidenceClaim, PICO, Snippet
+from cdr.core.enums import ComparatorSource, TherapeuticContext
+from cdr.core.schemas import PICO, EvidenceClaim, Snippet
 
 if TYPE_CHECKING:
     pass

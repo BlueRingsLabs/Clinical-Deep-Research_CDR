@@ -79,7 +79,7 @@ def generate_latency_chart() -> Path:
     x = range(len(labels))
     width = 0.35
 
-    bars_p50 = ax.bar(
+    ax.bar(
         [i - width / 2 for i in x],
         [v / 1000 for v in p50],
         width,
@@ -88,7 +88,7 @@ def generate_latency_chart() -> Path:
         alpha=0.85,
         edgecolor="none",
     )
-    bars_p95 = ax.bar(
+    ax.bar(
         [i + width / 2 for i in x],
         [v / 1000 for v in p95],
         width,
@@ -117,7 +117,7 @@ def generate_latency_chart() -> Path:
     ax.set_axisbelow(True)
 
     # Legend
-    legend = ax.legend(
+    ax.legend(
         loc="upper left",
         facecolor="#1e293b",
         edgecolor="#334155",
@@ -135,7 +135,7 @@ def generate_latency_chart() -> Path:
         f"{p95[max_idx] / 1000:.1f}s",
         xy=(max_idx + width / 2, p95[max_idx] / 1000),
         xytext=(max_idx + 1.5, p95[max_idx] / 1000 + 0.5),
-        arrowprops=dict(arrowstyle="->", color="#ef4444", lw=1.2),
+        arrowprops={"arrowstyle": "->", "color": "#ef4444", "lw": 1.2},
         fontsize=9,
         color="#ef4444",
         fontweight="bold",

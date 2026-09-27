@@ -6,13 +6,12 @@ Uses LLM for intelligent inclusion/exclusion decisions.
 """
 
 import json
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from cdr.config import get_settings
 from cdr.core.enums import ExclusionReason, StudyType
 from cdr.core.schemas import PICO, Record, ScreeningDecision
-from cdr.llm import Message, create_provider, build_messages
-from cdr.observability import get_tracer, get_cdr_metrics
+from cdr.llm import build_messages, create_provider
+from cdr.observability import get_cdr_metrics, get_tracer
 
 if TYPE_CHECKING:
     from cdr.llm.base import BaseLLMProvider
@@ -181,7 +180,7 @@ class Screener:
         with self._tracer.span("screen_records", attributes={"count": len(records)}) as span:
             decisions: list[ScreeningDecision] = []
 
-            for i, record in enumerate(records):
+            for _i, record in enumerate(records):
                 decision = self.screen_record(pico, record)
                 decisions.append(decision)
 

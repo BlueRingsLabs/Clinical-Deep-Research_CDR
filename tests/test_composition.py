@@ -20,12 +20,12 @@ from cdr.composition.schemas import (
     ComposedHypothesis,
     HypothesisStrength,
     MechanisticRelation,
-    RelationType,
     ProposedStudyDesign,
+    RelationType,
     ThreatAnalysis,
 )
 from cdr.core.enums import GRADECertainty
-
+from cdr.core.schemas import EvidenceClaim
 
 # ============================================================================
 # SCHEMA TESTS
@@ -275,9 +275,8 @@ class TestCompositionEngineInit:
         assert engine.model == "gpt-4o-mini"
 
 
-def make_claim(claim_id: str, claim_text: str, snippet_ids: list[str]) -> "EvidenceClaim":
+def make_claim(claim_id: str, claim_text: str, snippet_ids: list[str]) -> EvidenceClaim:
     """Factory to create valid EvidenceClaim for testing."""
-    from cdr.core.schemas import EvidenceClaim
 
     return EvidenceClaim(
         claim_id=claim_id,
@@ -316,10 +315,10 @@ class TestCompositionEngineMethods:
 
     def test_extract_relations_returns_list(self, mock_claims, mock_provider):
         """extract_relations returns list of MechanisticRelation."""
-        from cdr.composition import CompositionEngine
-
         # Mock LLM response - use MagicMock without spec to allow any attribute
         from unittest.mock import MagicMock
+
+        from cdr.composition import CompositionEngine
         from cdr.llm.base import LLMResponse
 
         mock_provider = MagicMock()

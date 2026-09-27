@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cdr.core.schemas import EvidenceClaim, Snippet, VerificationResult
 from cdr.composition.schemas import ComposedHypothesis
+from cdr.core.schemas import EvidenceClaim, Snippet, VerificationResult
 
 
 class MetricStatus(str, Enum):

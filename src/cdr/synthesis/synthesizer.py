@@ -7,7 +7,7 @@ Evidence synthesis with GRADE assessment and meta-narrative generation.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from cdr.core.enums import GRADECertainty, OutcomeMeasureType, Section, TherapeuticContext
 from cdr.core.schemas import (
@@ -65,7 +65,7 @@ Available contexts:
 - "monotherapy_vs_active": Drug A vs Drug B (head-to-head)
 - "add_on": Drug added to existing therapy
 - "aspirin_monotherapy": Aspirin alone context
-- "aspirin_plus_anticoagulant": Aspirin + anticoagulant context  
+- "aspirin_plus_anticoagulant": Aspirin + anticoagulant context
 - "doac_vs_aspirin": DOAC compared to aspirin (head-to-head)
 - "doac_vs_warfarin": DOAC compared to warfarin
 - "head_to_head": Active comparator (superiority/non-inferiority)
@@ -137,7 +137,7 @@ For binary outcomes: risk ratio or odds ratio with 95% CI
 
 Assess heterogeneity:
 - I² < 25%: low
-- I² 25-75%: moderate  
+- I² 25-75%: moderate
 - I² > 75%: high
 
 If heterogeneity is high, recommend subgroup analysis or narrative synthesis only.
@@ -218,7 +218,7 @@ class EvidenceSynthesizer:
                 rob2_dict = rob2_results
 
             # Group studies by outcome type
-            outcomes_by_type = self._group_by_outcome_type(study_cards)
+            outcomes_by_type = self._group_by_outcome_type(study_cards)  # noqa: F841 — loose end: parsed but not used yet
 
             # Build context for LLM
             context = self._build_synthesis_context(study_cards, rob2_dict, research_question)
@@ -306,7 +306,7 @@ class EvidenceSynthesizer:
                     lines.append(
                         f"Risk of Bias: {rob2.overall_judgment.value} (ASSESSMENT ERROR - CONSERVATIVE DEFAULT)"
                     )
-                    lines.append(f"  ⚠️ RoB2 evaluation failed: certainty should be downgraded")
+                    lines.append("  ⚠️ RoB2 evaluation failed: certainty should be downgraded")
                 else:
                     lines.append(f"Risk of Bias: {rob2.overall_judgment.value}")
 
@@ -338,7 +338,7 @@ class EvidenceSynthesizer:
         content: str,
         study_cards: list[StudyCard],
         valid_snippet_ids: set[str] | None = None,
-    ) -> "SynthesisResult":
+    ) -> SynthesisResult:
         """Parse LLM response into SynthesisResult.
 
         Maps LLM output to EvidenceClaim schema correctly:
@@ -554,7 +554,7 @@ class EvidenceSynthesizer:
 
     def generate_narrative(
         self,
-        synthesis_result: "SynthesisResult",
+        synthesis_result: SynthesisResult,
         section: Section = Section.RESULTS,
     ) -> str:
         """Generate publication-ready narrative from synthesis.
@@ -588,7 +588,7 @@ class EvidenceSynthesizer:
 
     def _build_narrative_context(
         self,
-        synthesis_result: "SynthesisResult",
+        synthesis_result: SynthesisResult,
         section: Section,
     ) -> str:
         """Build context for narrative generation."""

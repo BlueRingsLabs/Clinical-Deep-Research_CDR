@@ -17,15 +17,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from cdr.api.routes import router, _runs
+from cdr.api.routes import _runs, router
 from cdr.core.enums import RunStatus
-
 
 # =============================================================================
 # TEST FIXTURES

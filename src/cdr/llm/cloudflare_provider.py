@@ -18,7 +18,8 @@ import asyncio
 import os
 import random
 import time
-from typing import Any, AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Iterator
+from typing import Any
 
 from cdr.core.exceptions import LLMError, LLMProviderError, LLMRateLimitError
 from cdr.llm.base import BaseLLMProvider, LLMResponse, Message, StreamChunk

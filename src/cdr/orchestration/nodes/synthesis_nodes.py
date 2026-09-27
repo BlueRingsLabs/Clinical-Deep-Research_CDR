@@ -10,8 +10,8 @@ from __future__ import annotations
 from langchain_core.runnables import RunnableConfig
 
 from cdr.core.schemas import CDRState
-from cdr.observability.tracer import tracer
 from cdr.observability.metrics import metrics
+from cdr.observability.tracer import tracer
 
 
 async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
@@ -227,8 +227,8 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
                         break  # One caveat is enough
                     elif v.violation_type.value == "comparator_mismatch":
                         caveats.append(
-                            f"⚠️ CAVEAT: PICO comparator may not match the evidence comparator. "
-                            f"Review evidence context."
+                            "⚠️ CAVEAT: PICO comparator may not match the evidence comparator. "
+                            "Review evidence context."
                         )
                         break
 
@@ -514,7 +514,7 @@ async def verify_node(state: CDRState, config: RunnableConfig) -> dict:
         # DEBUG: Log source_texts availability
         print(f"[Verify] source_texts available for {len(source_texts)} records")
         if source_texts:
-            sample_id = list(source_texts.keys())[0]
+            sample_id = next(iter(source_texts))
             sample_len = len(source_texts[sample_id])
             print(f"[Verify] Sample source_text: {sample_id} ({sample_len} chars)")
 

@@ -14,32 +14,30 @@ Node functions are organized in the `nodes/` package:
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
-from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from cdr.core.enums import GraphNode, RunStatus
 from cdr.core.schemas import CDRState
 from cdr.observability.tracer import tracer
-from cdr.observability.metrics import metrics
 
 # Import all node functions from the nodes package
 from cdr.orchestration.nodes import (
+    assess_rob2_node,
+    compose_node,
+    critique_node,
+    deduplicate_node,
+    extract_data_node,
+    parse_documents_node,
     parse_question_node,
     plan_search_node,
-    retrieve_node,
-    deduplicate_node,
-    screen_node,
-    parse_documents_node,
-    extract_data_node,
-    assess_rob2_node,
-    synthesize_node,
-    critique_node,
-    verify_node,
-    compose_node,
     publish_node,
+    retrieve_node,
+    screen_node,
+    synthesize_node,
+    verify_node,
 )
 
 if TYPE_CHECKING:
@@ -195,11 +193,11 @@ class CDRRunner:
 
     def __init__(
         self,
-        llm_provider: "BaseLLMProvider",
+        llm_provider: BaseLLMProvider,
         model: str = "gpt-4o",
         output_dir: str = "reports",
         dod_level: int = 1,
-        run_store: "RunStore | None" = None,
+        run_store: RunStore | None = None,
     ) -> None:
         """Initialize runner.
 
@@ -291,11 +289,11 @@ class CDRRunner:
             print(f"[CDRRunner] Starting run {run_id} with DoD Level {effective_dod_level}")
             if effective_dod_level >= 2:
                 print(
-                    f"[CDRRunner] Research-grade: LLM screening required, structured outputs enforced"
+                    "[CDRRunner] Research-grade: LLM screening required, structured outputs enforced"
                 )
             if effective_dod_level >= 3:
                 print(
-                    f"[CDRRunner] SOTA-grade: Full compositional inference, verification gates active"
+                    "[CDRRunner] SOTA-grade: Full compositional inference, verification gates active"
                 )
 
             # Run graph
@@ -510,5 +508,5 @@ class CDRRunner:
                 except Exception:
                     pass
 
-        print(f"[CDRRunner] Partial run complete")
+        print("[CDRRunner] Partial run complete")
         return current_state

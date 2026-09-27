@@ -4,14 +4,12 @@ Embedder
 Text embedding using sentence-transformers.
 """
 
-from typing import Any
-
 import numpy as np
 
 from cdr.config import get_settings
 from cdr.core.exceptions import EmbeddingError
 from cdr.observability import get_tracer
-from cdr.storage.cache import cached, get_embedding_cache
+from cdr.storage.cache import get_embedding_cache
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -93,7 +91,7 @@ class Embedder:
             if cached_result is not None:
                 return np.array(cached_result)
 
-        with self._tracer.span("embed") as span:
+        with self._tracer.span("embed"):
             try:
                 embedding = self._model.encode(
                     text,

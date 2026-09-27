@@ -42,15 +42,14 @@ import json
 import statistics
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from cdr.evaluation.golden_set import get_golden_set, get_question_by_id, GoldenSetQuestion
-from cdr.evaluation.metrics import CDRMetricsEvaluator, EvaluationReport
+from cdr.evaluation.golden_set import GoldenSetQuestion, get_question_by_id
 
 # ============================================================================
 # Type aliases
@@ -123,7 +122,7 @@ def load_dataset(dataset_path: str) -> tuple[list[QuestionDict], str]:
     # Verify against declared checksum if present
     declared = data.get("sha256_questions") if isinstance(data, dict) else None
     if declared and declared != checksum:
-        print(f"⚠️   Checksum mismatch!")
+        print("⚠️   Checksum mismatch!")
         print(f"     Declared: {declared}")
         print(f"     Computed: {checksum}")
 
@@ -178,7 +177,7 @@ def evaluate_question_offline(question: QuestionDict) -> EvalResult:
     result: EvalResult = {
         "question_id": qid,
         "question": question.get("question", ""),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "mode": "offline",
         "structural_checks": checks,
         "structural_pass": all_pass,
@@ -227,7 +226,7 @@ def evaluate_question_online(question: QuestionDict) -> EvalResult:
     golden: GoldenSetQuestion | None = get_question_by_id(qid)
     question_text: str = question.get("question", "")
 
-    stage_latencies: dict[str, float] = {}
+    stage_latencies: dict[str, float] = {}  # noqa: F841 — loose end: per-stage timing not wired yet
     t_start = time.perf_counter()
 
     try:
@@ -244,7 +243,7 @@ def evaluate_question_online(question: QuestionDict) -> EvalResult:
             return {
                 "question_id": qid,
                 "question": question_text,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "mode": "online",
                 "status": "error",
                 "error": str(e),
@@ -255,7 +254,7 @@ def evaluate_question_online(question: QuestionDict) -> EvalResult:
         return {
             "question_id": qid,
             "question": question_text,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "mode": "online",
             "status": "error",
             "error": str(e),
@@ -279,15 +278,15 @@ def evaluate_question_online(question: QuestionDict) -> EvalResult:
     result: EvalResult = {
         "question_id": qid,
         "question": question_text,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "mode": "online",
         "status": report.get("status", "unknown"),
         "metrics": {
             "studies_found": report.get("study_count", 0),
             "claims_generated": report.get("claim_count", 0),
             "snippet_count": report.get("snippet_count", 0),
-            "snippet_coverage": run_kpis.get("snippet_coverage", None),
-            "verification_coverage": run_kpis.get("verification_coverage", None),
+            "snippet_coverage": run_kpis.get("snippet_coverage"),
+            "verification_coverage": run_kpis.get("verification_coverage"),
             "composition_emitted": bool(report.get("composed_hypotheses")),
             "pipeline_status": report.get("status", "unknown"),
             "records_identified": prisma.get("records_identified", 0),
@@ -591,7 +590,7 @@ def run_evaluation(
             print(f"❌  Question {question_id} not found in dataset")
             sys.exit(1)
 
-    print(f"📊  CDR Evaluation Runner")
+    print("📊  CDR Evaluation Runner")
     print(f"    Mode:     {mode}")
     print(f"    Dataset:  {dataset_path}")
     print(f"    Checksum: sha256:{checksum[:16]}...")
@@ -628,12 +627,12 @@ def run_evaluation(
             if regressions:
                 print(f"⚠️   {regressions} regression(s) detected vs baseline!")
             else:
-                print(f"✅  No regressions vs baseline")
+                print("✅  No regressions vs baseline")
 
     # Build summary
     summary: EvalSummary = {
         "eval_version": "0.1.0",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "mode": mode,
         "dataset": str(dataset_path),
         "dataset_checksum": checksum,
@@ -651,7 +650,7 @@ def run_evaluation(
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     print()
-    print(f"✅  Evaluation complete")
+    print("✅  Evaluation complete")
 
     if output_format in ("json", "all"):
         results_file = output_path / f"{ts}_results.json"

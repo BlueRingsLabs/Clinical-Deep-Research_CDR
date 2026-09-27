@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import datetime
-from typing import Annotated, Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -39,7 +39,6 @@ from cdr.core.enums import (
     TherapeuticContext,
     VerificationStatus,
 )
-
 
 # =============================================================================
 # PICO - Clinical Question Structure
@@ -280,7 +279,7 @@ class ScreeningDecision(BaseModel):
     screened_at: datetime = Field(default_factory=datetime.utcnow)
 
     @model_validator(mode="after")
-    def validate_exclusion_has_reason(self) -> "ScreeningDecision":
+    def validate_exclusion_has_reason(self) -> ScreeningDecision:
         """Ensure excluded records have documented reasons."""
         if not self.included:
             if self.reason_code is None:
@@ -326,7 +325,7 @@ class SourceRef(BaseModel):
     offset_end: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
-    def validate_offsets(self) -> "SourceRef":
+    def validate_offsets(self) -> SourceRef:
         """Ensure offset_start <= offset_end if both present."""
         if self.offset_start is not None and self.offset_end is not None:
             if self.offset_start > self.offset_end:
@@ -381,7 +380,7 @@ class Snippet(BaseModel):
     extracted_at: datetime = Field(default_factory=datetime.utcnow)
 
     @model_validator(mode="after")
-    def compute_char_count(self) -> "Snippet":
+    def compute_char_count(self) -> Snippet:
         """Auto-compute char_count from text."""
         object.__setattr__(self, "char_count", len(self.text))
         return self
@@ -420,7 +419,7 @@ class OutcomeMeasure(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_ci_bounds(self) -> "OutcomeMeasure":
+    def validate_ci_bounds(self) -> OutcomeMeasure:
         """Ensure CI bounds are coherent."""
         if self.ci_lower is not None and self.ci_upper is not None:
             if self.ci_lower > self.ci_upper:
@@ -428,7 +427,7 @@ class OutcomeMeasure(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_value_has_support(self) -> "OutcomeMeasure":
+    def validate_value_has_support(self) -> OutcomeMeasure:
         """Warn if value present without supporting snippet."""
         # Note: We use warning instead of error to allow partial extraction
         # The verification layer will catch unsupported values

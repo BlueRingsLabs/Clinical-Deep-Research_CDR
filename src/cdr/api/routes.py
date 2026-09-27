@@ -6,17 +6,16 @@ FastAPI routes for the Clinical Deep Research system.
 
 from __future__ import annotations
 
-import asyncio
-from typing import Any, Optional
+from datetime import datetime
+from typing import Any
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from pydantic import BaseModel, Field
 
 from cdr.core.enums import RunStatus
-from cdr.core.schemas import CDRState, PICO
-from cdr.observability.tracer import tracer
 from cdr.observability.metrics import metrics
+from cdr.observability.tracer import tracer
 from cdr.storage.run_store import RunStore
 
 # =============================================================================
@@ -238,7 +237,6 @@ class RunDetailResponse(BaseModel):
 # IN-MEMORY STATE (for demo; use Redis/DB in production)
 # =============================================================================
 
-from datetime import datetime
 
 _runs: dict[str, dict] = {}
 
@@ -248,10 +246,10 @@ _runs: dict[str, dict] = {}
 # =============================================================================
 
 # Global run store instance (set via configure_run_store)
-_run_store: Optional[RunStore] = None
+_run_store: RunStore | None = None
 
 
-def configure_run_store(store: Optional[RunStore]) -> None:
+def configure_run_store(store: RunStore | None) -> None:
     """Configure the global RunStore for persistence.
 
     Call this at application startup to enable SQLite persistence.
@@ -264,7 +262,7 @@ def configure_run_store(store: Optional[RunStore]) -> None:
     _run_store = store
 
 
-def get_run_store() -> Optional[RunStore]:
+def get_run_store() -> RunStore | None:
     """Dependency to get the current RunStore.
 
     Returns:
@@ -273,7 +271,7 @@ def get_run_store() -> Optional[RunStore]:
     return _run_store
 
 
-def _get_run(run_id: str) -> Optional[dict]:
+def _get_run(run_id: str) -> dict | None:
     """Get run from store or in-memory cache.
 
     Tries RunStore first if configured, falls back to _runs.
@@ -1056,8 +1054,9 @@ async def export_run(run_id: str, format: str):
     Returns:
         Exported content as file download
     """
-    from fastapi.responses import Response
     import json
+
+    from fastapi.responses import Response
 
     run = _get_run(run_id)
     if run is None:
@@ -1353,8 +1352,9 @@ async def export_run(run_id: str, format: str):
 
     elif format == "pdf":
         # Build comprehensive PDF from HTML representation
-        from weasyprint import HTML, CSS
         import html as html_escape_module
+
+        from weasyprint import HTML
 
         def escape_html(text: str) -> str:
             """Escape HTML special characters."""
@@ -1569,7 +1569,7 @@ async def export_run(run_id: str, format: str):
         html_parts.extend(
             [
                 "<h1>CDR Clinical Evidence Report</h1>",
-                f"<div class='meta'>",
+                "<div class='meta'>",
                 f"<strong>Run ID:</strong> {run_id} &nbsp;|&nbsp; ",
                 f"<strong>Status:</strong> {run.get('status', 'N/A')} &nbsp;|&nbsp; ",
                 f"<strong>Date:</strong> {created_date}",
@@ -1893,11 +1893,11 @@ async def export_run(run_id: str, format: str):
 
                 html_parts.extend(
                     [
-                        f"<div style='background: #fef3c7; border: 2px solid #d69e2e; padding: 16px; margin: 16px 0; border-radius: 8px;'>",
-                        f"<div style='display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;'>",
+                        "<div style='background: #fef3c7; border: 2px solid #d69e2e; padding: 16px; margin: 16px 0; border-radius: 8px;'>",
+                        "<div style='display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;'>",
                         f"<div><strong>Status:</strong> <span style='color: {status_color}; font-weight: bold;'>{overall_status}</span></div>",
                         f"<div><strong>Generated:</strong> {str(gate_report.get('generated_at', 'N/A'))[:19]}</div>",
-                        f"</div>",
+                        "</div>",
                     ]
                 )
 
@@ -1905,16 +1905,16 @@ async def export_run(run_id: str, format: str):
                 summary = gate_report.get("summary", {})
                 html_parts.extend(
                     [
-                        f"<div style='display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0;'>",
-                        f"<div style='padding: 8px 16px; background: #fff; border-radius: 6px;'>",
+                        "<div style='display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0;'>",
+                        "<div style='padding: 8px 16px; background: #fff; border-radius: 6px;'>",
                         f"<strong>Total Checks:</strong> {summary.get('total_checks', 0)}</div>",
-                        f"<div style='padding: 8px 16px; background: #c6f6d5; border-radius: 6px;'>",
+                        "<div style='padding: 8px 16px; background: #c6f6d5; border-radius: 6px;'>",
                         f"<strong>Passed:</strong> {summary.get('passed', 0)}</div>",
-                        f"<div style='padding: 8px 16px; background: #fefcbf; border-radius: 6px;'>",
+                        "<div style='padding: 8px 16px; background: #fefcbf; border-radius: 6px;'>",
                         f"<strong>Warned:</strong> {summary.get('warned', 0)}</div>",
-                        f"<div style='padding: 8px 16px; background: #fed7d7; border-radius: 6px;'>",
+                        "<div style='padding: 8px 16px; background: #fed7d7; border-radius: 6px;'>",
                         f"<strong>Failed:</strong> {summary.get('failed', 0)}</div>",
-                        f"</div>",
+                        "</div>",
                     ]
                 )
 
@@ -1948,11 +1948,11 @@ async def export_run(run_id: str, format: str):
 
                         html_parts.extend(
                             [
-                                f"<tr>",
+                                "<tr>",
                                 f"<td style='padding: 6px; border-bottom: 1px solid #e2e8f0;'>{escape_html(gate_name.replace('_', ' ').title())}</td>",
                                 f"<td style='padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: center; color: {result_color};'>{result_icon} {gate_result.upper()}</td>",
                                 f"<td style='padding: 6px; border-bottom: 1px solid #e2e8f0; font-size: 8pt; color: #718096;'>{escape_html(details)}</td>",
-                                f"</tr>",
+                                "</tr>",
                             ]
                         )
 
@@ -1979,11 +1979,11 @@ async def export_run(run_id: str, format: str):
 
                         html_parts.extend(
                             [
-                                f"<div style='background: #fff5f5; border-left: 3px solid #c53030; padding: 8px; margin: 4px 0; font-size: 9pt;'>",
+                                "<div style='background: #fff5f5; border-left: 3px solid #c53030; padding: 8px; margin: 4px 0; font-size: 9pt;'>",
                                 f"<strong>{i}. [{escape_html(str(gate_v))}]</strong> {escape_html(str(mismatch))}<br>",
                                 f"<span style='color: #718096;'>Record: {escape_html(str(record_id))} | PMID: {escape_html(str(pmid))}</span><br>",
                                 f"<span>{escape_html(message)}</span>",
-                                f"</div>",
+                                "</div>",
                             ]
                         )
 
@@ -2004,16 +2004,16 @@ async def export_run(run_id: str, format: str):
 
                     html_parts.extend(
                         [
-                            f"<div style='margin-top: 16px; padding-top: 12px; border-top: 1px dashed #d69e2e;'>",
-                            f"<strong>Enforcement Applied:</strong>",
-                            f"<ul style='margin: 8px 0; padding-left: 20px; font-size: 9pt;'>",
+                            "<div style='margin-top: 16px; padding-top: 12px; border-top: 1px dashed #d69e2e;'>",
+                            "<strong>Enforcement Applied:</strong>",
+                            "<ul style='margin: 8px 0; padding-left: 20px; font-size: 9pt;'>",
                             f"<li>Records Excluded: {exc_records}</li>",
                             f"<li>Snippets Excluded: {exc_snippets}</li>",
                             f"<li>Claims Degraded: {deg_claims}</li>",
                             f"<li>Claims Orphaned: {orphan_claims}</li>",
                             f"<li>Hypotheses Suppressed: {sup_hyp}</li>",
-                            f"</ul>",
-                            f"</div>",
+                            "</ul>",
+                            "</div>",
                         ]
                     )
 
@@ -2023,13 +2023,13 @@ async def export_run(run_id: str, format: str):
                 # Generate a minimal gate report explaining the gap
                 html_parts.extend(
                     [
-                        f"<div style='background: #fed7d7; border: 2px solid #c53030; padding: 16px; margin: 16px 0; border-radius: 8px;'>",
-                        f"<p><strong>⚠️ AUDIT GAP</strong></p>",
+                        "<div style='background: #fed7d7; border: 2px solid #c53030; padding: 16px; margin: 16px 0; border-radius: 8px;'>",
+                        "<p><strong>⚠️ AUDIT GAP</strong></p>",
                         f"<p>Run status: <strong>{run_status}</strong></p>",
-                        f"<p>Gate Report not available. This indicates a gap in the DoD3 audit trail.</p>",
-                        f"<p>For unpublishable runs, a complete Gate Report is required per DoD3 Contract.</p>",
+                        "<p>Gate Report not available. This indicates a gap in the DoD3 audit trail.</p>",
+                        "<p>For unpublishable runs, a complete Gate Report is required per DoD3 Contract.</p>",
                         f"<p><strong>Status Reason:</strong> {result.report.get('status_reason', 'Unknown') if hasattr(result, 'report') and result.report else 'Status reason not captured'}</p>",
-                        f"</div>",
+                        "</div>",
                     ]
                 )
 
@@ -2250,7 +2250,7 @@ async def _execute_run(
     except Exception as e:
         import traceback
 
-        error_detail = f"{e.__class__.__name__}: {str(e)}"
+        error_detail = f"{e.__class__.__name__}: {e!s}"
         print(f"[API] Run {run_id} FAILED: {error_detail}")
         print(f"[API] Traceback: {traceback.format_exc()}")
         run["status"] = RunStatus.FAILED.value

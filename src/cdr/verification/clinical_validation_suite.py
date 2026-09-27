@@ -26,20 +26,17 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
-from typing import Any
 
-from cdr.core.schemas import PICO, Record, Snippet, SourceRef, EvidenceClaim
 from cdr.core.enums import (
-    StudyType,
-    RecordSource,
-    GRADECertainty,
-    Section,
     ComparatorSource,
+    GRADECertainty,
+    RecordSource,
+    Section,
+    StudyType,
 )
+from cdr.core.schemas import PICO, EvidenceClaim, Record, Snippet, SourceRef
 from cdr.verification.dod3_gates import DoD3Validator
-
 
 # =============================================================================
 # TEST CASE DEFINITION
@@ -978,7 +975,7 @@ def run_validation_suite(
                 actual_blockers=0,
                 expected_blockers=case.expected_blockers,
                 violations=[],
-                message=f"Exception: {str(e)}",
+                message=f"Exception: {e!s}",
             )
             if verbose:
                 print(f"Result: ❌ ERROR - {e}")

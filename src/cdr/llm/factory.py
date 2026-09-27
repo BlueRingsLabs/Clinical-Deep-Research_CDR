@@ -20,7 +20,7 @@ import os
 from typing import Literal
 
 from cdr.config import get_settings
-from cdr.core.exceptions import ConfigurationError, LLMProviderError
+from cdr.core.exceptions import ConfigurationError
 from cdr.llm.base import BaseLLMProvider
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ def create_provider(
         provider = getattr(settings.llm, "default_provider", "gemini")
 
     if provider == "gemini":
-        from cdr.llm.gemini_provider import GeminiProvider, GEMINI_FREE_MODELS
+        from cdr.llm.gemini_provider import GEMINI_FREE_MODELS, GeminiProvider
 
         # Use settings first, then fallback to os.getenv
         api_key = (
@@ -76,7 +76,7 @@ def create_provider(
         return GeminiProvider(model=model or default_model, api_key=api_key, **kwargs)
 
     elif provider == "cerebras":
-        from cdr.llm.cerebras_provider import CerebrasProvider, CEREBRAS_FREE_MODELS
+        from cdr.llm.cerebras_provider import CEREBRAS_FREE_MODELS, CerebrasProvider
 
         api_key = (
             kwargs.pop("api_key", None)
@@ -92,7 +92,7 @@ def create_provider(
         return CerebrasProvider(model=model or default_model, api_key=api_key, **kwargs)
 
     elif provider == "cloudflare":
-        from cdr.llm.cloudflare_provider import CloudflareProvider, CLOUDFLARE_MODELS
+        from cdr.llm.cloudflare_provider import CLOUDFLARE_MODELS, CloudflareProvider
 
         api_key = (
             kwargs.pop("api_key", None)
@@ -119,7 +119,7 @@ def create_provider(
         )
 
     elif provider == "openrouter":
-        from cdr.llm.openrouter_provider import OpenRouterProvider, OPENROUTER_MODELS
+        from cdr.llm.openrouter_provider import OPENROUTER_MODELS, OpenRouterProvider
 
         api_key = (
             kwargs.pop("api_key", None)
@@ -135,7 +135,7 @@ def create_provider(
         return OpenRouterProvider(model=model or default_model, api_key=api_key, **kwargs)
 
     elif provider == "huggingface":
-        from cdr.llm.huggingface_provider import HuggingFaceProvider, RECOMMENDED_MODELS
+        from cdr.llm.huggingface_provider import RECOMMENDED_MODELS, HuggingFaceProvider
 
         api_key = kwargs.pop("api_key", None) or settings.llm.hf_token
         if not api_key:
@@ -151,7 +151,7 @@ def create_provider(
         return HuggingFaceProvider(model=model or default_model, api_key=api_key, **kwargs)
 
     elif provider == "groq":
-        from cdr.llm.groq_provider import GroqProvider, GROQ_FREE_MODELS
+        from cdr.llm.groq_provider import GROQ_FREE_MODELS, GroqProvider
 
         api_key = kwargs.pop("api_key", None) or getattr(settings.llm, "groq_api_key", None)
         if not api_key:
