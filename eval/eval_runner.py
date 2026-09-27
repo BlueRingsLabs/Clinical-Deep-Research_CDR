@@ -100,7 +100,8 @@ def load_dataset(dataset_path: str) -> tuple[list[QuestionDict], str]:
     """Load evaluation dataset and compute its checksum.
 
     Args:
-        dataset_path: Path to evaluation dataset JSON file.
+        dataset_path: Path to an evaluation dataset JSON file, or to a directory of
+            Case Files (one question per ``*.json`` file).
 
     Returns:
         Tuple of (questions list, sha256 hex digest of the file).
@@ -110,8 +111,15 @@ def load_dataset(dataset_path: str) -> tuple[list[QuestionDict], str]:
         print(f"❌  Dataset not found: {dataset_path}")
         sys.exit(1)
 
-    raw_bytes = path.read_bytes()
-    data = json.loads(raw_bytes)
+    if path.is_dir():
+        # A directory of Case Files: one question per JSON file (see docs/case-files.md).
+        data: Any = {
+            "questions": [
+                json.loads(case.read_text(encoding="utf-8")) for case in sorted(path.glob("*.json"))
+            ]
+        }
+    else:
+        data = json.loads(path.read_bytes())
     questions = data.get("questions", data) if isinstance(data, dict) else data
 
     # Hash the questions array only (not the full file) to avoid
@@ -691,12 +699,15 @@ Examples:
 
   # Output only Markdown summary:
   python -m eval.eval_runner --format markdown
+
+  # Run on the Case Files instead of the golden set:
+  python -m eval.eval_runner --dataset eval/cases/
         """,
     )
     parser.add_argument(
         "--dataset",
         default="eval/datasets/golden_set_toy.json",
-        help="Path to evaluation dataset JSON (default: golden set)",
+        help="Dataset JSON file, or a directory of Case Files (default: golden set)",
     )
     parser.add_argument(
         "--output",

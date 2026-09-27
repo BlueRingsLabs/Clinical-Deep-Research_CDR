@@ -42,6 +42,12 @@ data = json.load(open('eval/datasets/golden_set_toy.json'))
 print(hashlib.sha256(json.dumps(data['questions'], sort_keys=True, ensure_ascii=False).encode()).hexdigest())
 "
 
+### Case Files
+
+Beyond the golden set, [Case Files](case-files.md) are known-answer questions (settled,
+uncertain, and retrodiction) contributed one file at a time in `eval/cases/`. Run them with
+`make eval-cases`, or pass `--dataset eval/cases/` to the runner.
+
 ### Custom Datasets
 
 You can create custom evaluation datasets following the schema in `eval/datasets/golden_set_toy.json`. Each entry requires:

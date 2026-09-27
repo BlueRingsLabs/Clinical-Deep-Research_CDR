@@ -130,3 +130,4 @@ docker-compose.override.yml
 # ── Eval timestamped results (keep only baseline) ──
 eval/results/20*_results.json
 eval/results/20*_summary.md
+eval/results/cases/

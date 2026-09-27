@@ -1,0 +1,26 @@
+{
+  "id": "CF-0004",
+  "title": "Swanson's magnesium and migraine",
+  "case_type": "retrodiction",
+  "question": "Which nutritional factors might plausibly be involved in migraine and serve as a preventive target?",
+  "population": "Adults with migraine",
+  "intervention": "Nutritional factors (open-ended)",
+  "comparator": null,
+  "outcome": "Migraine frequency",
+  "expected_evidence_level": "very_low",
+  "expected_min_studies": 2,
+  "expected_claim_patterns": ["magnesium", "vasospasm", "spreading depression", "calcium channel"],
+  "composition_expected": true,
+  "known_answer": "In 1988 Swanson listed eleven indirect connections between magnesium and migraine drawn from literatures that didn't cite each other, among them vascular tone, spreading cortical depression and calcium-channel effects. He proposed magnesium deficiency as a factor in migraine. Placebo-controlled trials of oral magnesium for prophylaxis followed in the 1990s.",
+  "expected_hypothesis": "Magnesium deficiency may contribute to migraine, and magnesium supplementation may reduce migraine frequency.",
+  "literature_cutoff_year": 1987,
+  "references": [
+    "Swanson DR. Migraine and magnesium: eleven neglected connections. Perspect Biol Med. 1988;31(4):526-557.",
+    "Peikert A, Wilimzig C, Köhne-Volland R. Prophylaxis of migraine with oral magnesium: results from a prospective, multi-center, placebo-controlled and double-blind randomized study. Cephalalgia. 1996;16(4):257-263."
+  ],
+  "traps": [
+    "Finding only one of the eleven links and overstating it",
+    "Using post-1987 literature"
+  ],
+  "contributed_by": "glromero"
+}

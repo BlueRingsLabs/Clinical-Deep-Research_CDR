@@ -2,7 +2,7 @@
 # Run `make` with no arguments to see what's here.
 
 .PHONY: help setup check-env check test test-ui test-all lint format typecheck \
-        eval demo demo-online figures dev run server docker-up docker-down clean
+        eval eval-cases demo demo-online figures dev run server docker-up docker-down clean
 
 SHELL := /bin/bash
 UV    ?= uv
@@ -36,6 +36,7 @@ help:
 	@echo ""
 	@echo "  Evaluation"
 	@echo "    make eval         Offline structural evaluation on the golden set"
+	@echo "    make eval-cases   Same, on the Case Files (eval/cases/)"
 	@echo "    make figures      Regenerate evaluation charts"
 	@echo ""
 
@@ -123,6 +124,9 @@ eval:
 	$(RUN) python -m eval.eval_runner \
 		--dataset eval/datasets/golden_set_toy.json \
 		--output eval/results/
+
+eval-cases:
+	$(RUN) python -m eval.eval_runner --dataset eval/cases/ --output eval/results/
 
 figures:
 	$(RUN) python scripts/generate_figures.py

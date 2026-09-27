@@ -1,0 +1,24 @@
+{
+  "id": "CF-0002",
+  "title": "Vitamin D to prevent respiratory infections",
+  "case_type": "uncertain",
+  "question": "Does vitamin D supplementation prevent acute respiratory tract infections?",
+  "population": "General population, children and adults",
+  "intervention": "Vitamin D supplementation",
+  "comparator": "Placebo",
+  "outcome": "Incidence of acute respiratory tract infection",
+  "expected_evidence_level": "moderate",
+  "expected_min_studies": 10,
+  "expected_claim_patterns": ["vitamin D", "respiratory", "infection", "dosing", "heterogeneity"],
+  "composition_expected": false,
+  "known_answer": "Pooled trials show a small protective effect at best, with substantial heterogeneity. The benefit appears in regimens with daily dosing rather than large intermittent boluses. A good answer is hedged. Neither 'works' nor 'doesn't work' is correct.",
+  "references": [
+    "Martineau AR, et al. Vitamin D supplementation to prevent acute respiratory tract infections: systematic review and meta-analysis of individual participant data. BMJ. 2017;356:i6583.",
+    "Jolliffe DA, et al. Vitamin D supplementation to prevent acute respiratory infections: a systematic review and meta-analysis of stratified aggregate data. Lancet Diabetes Endocrinol. 2021;9(5):276-292."
+  ],
+  "traps": [
+    "Collapsing mixed evidence into a confident yes or no",
+    "Ignoring that dosing regimen changes the result"
+  ],
+  "contributed_by": "glromero"
+}
