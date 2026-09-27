@@ -1,25 +1,14 @@
-# CDR UI Dockerfile
-FROM node:20-slim
+# CDR UI image: build with Node, serve with nginx.
+# nginx also proxies /api to the backend, so the SPA can keep using relative URLs.
 
+FROM node:20-slim AS build
 WORKDIR /app
-
-# Install serve globally
-RUN npm install -g serve
-
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
-
-# Copy source
 COPY . .
+RUN npm run build
 
-# Build for production
-RUN npm run build || npx vite build --mode development
-
-# Expose port
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 5173
-
-# Serve the built files with SPA fallback
-CMD ["serve", "-s", "dist", "--single", "-l", "5173"]
