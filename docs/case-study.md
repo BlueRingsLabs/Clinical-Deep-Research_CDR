@@ -53,7 +53,7 @@ critique → verify → compose → publish
 **Tradeoff**: Less "autonomous" — CDR follows a fixed pipeline, not an agent loop.
 
 ### 2. Pydantic contracts over free-form dicts
-**Decision**: 20 Pydantic models with strict validation at every node boundary.
+**Decision**: Pydantic models with strict validation at every node boundary.
 **Why**: A dict-based pipeline would be faster to prototype but impossible to maintain. When Node A's output changes, Pydantic immediately tells you what breaks downstream.
 **Tradeoff**: More boilerplate, slower iteration early on, but saved dozens of integration bugs.
 
@@ -116,7 +116,7 @@ critique → verify → compose → publish
 
 ## Evidence
 
-See [EVAL.md](EVAL.md) for full evaluation methodology and results.
+See [EVAL.md](evaluation.md) for full evaluation methodology and results.
 
 **Baseline summary (v0.1, 5-query golden set):**
 
@@ -127,7 +127,7 @@ See [EVAL.md](EVAL.md) for full evaluation methodology and results.
 | Verification pass rate | ≥80% | Measured per-run |
 | RoB2 domain coverage | 5/5 domains | Enforced by schema |
 | Pipeline completion | ≥60% publishable | ~45% (honest) |
-| Test suite | 0 failures | 635 backend + 81 frontend |
+| Test suite | 0 failures | All green, fully offline |
 
 **Key takeaway**: CDR produces traceable, structured outputs. Evidence quality is limited by retrieval depth (PubMed + PMC OA only) and LLM extraction accuracy. This is documented, not hidden.
 

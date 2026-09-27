@@ -75,8 +75,8 @@
 
 | Mode | Frequency | Impact | Documented |
 |------|-----------|--------|------------|
-| Citation laundering | ~5% of claims | Incorrect PMID attribution | [INC-001](INCIDENTS.md#inc-001-citation-laundering) |
-| Uniform RoB2 | ~30% of assessments | Uninformative bias rating | [INC-002](INCIDENTS.md#inc-002-uniform-rob2-some-concerns) |
+| Citation laundering | ~5% of claims | Incorrect PMID attribution | [INC-001](../../docs/incidents.md#inc-001-citation-laundering) |
+| Uniform RoB2 | ~30% of assessments | Uninformative bias rating | [INC-002](../../docs/incidents.md#inc-002-uniform-rob2-some-concerns) |
 | CT.gov empty results | ~10% of runs | Missing trial data | Fixed (500-char limit) |
 | Unpublishable output | ~40% of runs | Report marked unpublishable | By design (honest reporting) |
 

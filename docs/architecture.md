@@ -7,7 +7,7 @@
 CDR is a **13-node LangGraph StateGraph** pipeline that automates clinical evidence retrieval, screening, extraction, bias assessment, synthesis, and verification.
 
 <div align="center">
-<img src="docs/assets/architecture.svg" alt="CDR Pipeline Architecture" width="800" />
+<img src="assets/architecture.svg" alt="CDR Pipeline Architecture" width="800" />
 </div>
 
 The pipeline is organized into four color-coded phases:
@@ -187,13 +187,13 @@ Each node has typed inputs and outputs. **If a contract is violated, the pipelin
 
 | Decision | Rationale | Reference |
 |----------|-----------|-----------|
-| LangGraph StateGraph (not agents) | Predictable execution, typed state, testable nodes | [CASE_STUDY.md](CASE_STUDY.md#1-langgraph-over-bare-agents) |
-| 20 Pydantic models with strict validation | Contract enforcement at every boundary | [CASE_STUDY.md](CASE_STUDY.md#2-pydantic-contracts-over-free-form-dicts) |
-| Verification before publish | Safety: unsupported claims never published | [CASE_STUDY.md](CASE_STUDY.md#3-verification-before-publish-not-optional) |
-| Multi-provider LLM, no fine-tuning | Reproducibility across providers | [CASE_STUDY.md](CASE_STUDY.md#4-multi-provider-llm-with-no-fine-tuning) |
-| PMC OA fulltext only | Legal, free, structured (JATS) | [CASE_STUDY.md](CASE_STUDY.md#5-fulltext-via-pmc-open-access-only) |
-| SQLite persistence | Zero-config, sufficient for v0.1 | [CASE_STUDY.md](CASE_STUDY.md#6-sqlite-for-persistence-not-postgres) |
-| Immutable records (Pydantic frozen) | PRISMA count correctness | [INCIDENTS.md](INCIDENTS.md#inc-003-prisma-count-arithmetic-failures) |
+| LangGraph StateGraph (not agents) | Predictable execution, typed state, testable nodes | [Case study](case-study.md#1-langgraph-over-bare-agents) |
+| Pydantic models with strict validation | Contract enforcement at every boundary | [Case study](case-study.md#2-pydantic-contracts-over-free-form-dicts) |
+| Verification before publish | Safety: unsupported claims never published | [Case study](case-study.md#3-verification-before-publish-not-optional) |
+| Multi-provider LLM, no fine-tuning | Reproducibility across providers | [Case study](case-study.md#4-multi-provider-llm-with-no-fine-tuning) |
+| PMC OA fulltext only | Legal, free, structured (JATS) | [Case study](case-study.md#5-fulltext-via-pmc-open-access-only) |
+| SQLite persistence | Zero-config, sufficient for v0.1 | [Case study](case-study.md#6-sqlite-for-persistence-not-postgres) |
+| Immutable records (Pydantic frozen) | PRISMA count correctness | [INC-003](incidents.md#inc-003-prisma-count-arithmetic-failures) |
 
 ## File Organization
 
@@ -202,13 +202,13 @@ src/cdr/
 ├── api/                    # FastAPI routes (18 endpoints)
 ├── composition/            # A+B⇒C hypothesis generation
 ├── core/
-│   ├── schemas.py          # 20 Pydantic models (CDRState, PICO, etc.)
+│   ├── schemas.py          # Pydantic contracts (CDRState, PICO, Record, ...)
 │   └── enums.py            # All enum types
 ├── evaluation/             # Golden set, metrics, semantic harness
 ├── extraction/             # Study card extraction (DSPy-based)
 ├── llm/                    # Multi-provider LLM abstraction
-│   ├── factory.py          # Provider factory
-│   └── providers/          # 8 provider implementations
+│   ├── factory.py          # Provider factory + fallback chain
+│   └── *_provider.py       # One file per provider (8 of them)
 ├── observability/          # Tracing + metrics (OpenTelemetry-compatible)
 ├── orchestration/
 │   ├── graph.py            # LangGraph graph builder + runner (~500 lines)
@@ -222,7 +222,7 @@ src/cdr/
 
 ## Further Reading
 
-- [Pipeline contracts (detailed)](docs/contracts/pipeline_contracts.md) — Full I/O specification per stage
-- [Report JSON Schema](schemas/report.schema.json) — Machine-readable output contract
-- [CASE_STUDY.md](CASE_STUDY.md) — Design decisions and tradeoffs
-- [EVAL.md](EVAL.md) — Evaluation methodology
+- [Pipeline contracts (detailed)](contracts/pipeline_contracts.md) — Full I/O specification per stage
+- [Report JSON Schema](../schemas/report.schema.json) — Machine-readable output contract
+- [Case study](case-study.md) — Design decisions and tradeoffs
+- [EVAL.md](evaluation.md) — Evaluation methodology
