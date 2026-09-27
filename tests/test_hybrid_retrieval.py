@@ -1,7 +1,6 @@
 """
-Tests for hybrid retrieval integration (MEDIUM-3).
+Tests for hybrid retrieval integration.
 
-Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-3
 - BM25 sparse retrieval
 - Optional cross-encoder reranking
 - retrieval_scores per Record

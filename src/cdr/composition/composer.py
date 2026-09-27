@@ -3,8 +3,7 @@ Compositional Inference Engine
 
 Generates novel hypotheses (A+B⇒C) from existing evidence.
 
-HIGH-1 fix: Implementation of compositional inference.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
+Implementation of compositional inference.
 
 The engine:
 1. Extracts mechanistic relations from claims

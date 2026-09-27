@@ -18,7 +18,6 @@ References:
 - PRISMA 2020: Eligibility criteria enforcement
 - GRADE Handbook: Indirectness domain (population, comparator mismatches)
 - Cochrane Handbook Section 5: Eligibility criteria
-- DoD3 Contract: CDR_Agent_Guidance_and_Development_Protocol.md
 """
 
 from __future__ import annotations
@@ -2156,7 +2155,7 @@ class GateReportGenerator:
         )
 
         # =====================================================================
-        # CRITICAL FIX 2: Separate blocker (support_integrity) from warning (retrieval_quality)
+        # CRITICAL: Separate blocker (support_integrity) from warning (retrieval_quality)
         # =====================================================================
 
         # Only support_integrity violations (from INCLUDED evidence) are blockers

@@ -1,10 +1,10 @@
 """
-Tests for Publisher schema synchronization (MEDIUM-5).
+Tests for Publisher schema synchronization.
 
 Verifies that Publisher correctly uses current schema definitions
 and includes new fields like executed_searches and exclusion_reasons.
 
-Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5, PRISMA 2020, PRISMA-S (BMJ 2021)
+Refs: PRISMA 2020, PRISMA-S (BMJ 2021)
 """
 
 import json

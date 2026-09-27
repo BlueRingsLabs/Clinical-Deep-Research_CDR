@@ -525,7 +525,7 @@ class TestGRADECertainty:
 class TestDoDLevelEarlyGates:
     """Tests for DoD Level early gates in synthesis.
 
-    Refs: ADR-005 Post-Change Audit, CDR_Post_ADR005_Full_Audit
+    Refs:  Post-Change Audit, CDR_Post_ADR005_Full_Audit
     - Level 2+: Markdown fallback not allowed (JSON required)
     - Level 3: grade_rationale required for all claims
     """
@@ -589,7 +589,7 @@ class TestDoDLevelEarlyGates:
     def test_dod_level_2_blocks_markdown_fallback(self):
         """Test DoD Level 2 blocks synthesis when Markdown fallback is used.
 
-        Refs: ADR-005, PRISMA 2020 (reproducibility)
+        Refs: PRISMA 2020 (reproducibility)
         """
         from cdr.core.enums import GRADECertainty
         from cdr.core.schemas import EvidenceClaim, SynthesisResult
@@ -628,7 +628,7 @@ class TestDoDLevelEarlyGates:
     def test_dod_level_3_blocks_missing_grade_rationale(self):
         """Test DoD Level 3 blocks claims without grade_rationale.
 
-        Refs: ADR-005, GRADE handbook section 5.2
+        Refs: GRADE handbook section 5.2
         """
         from cdr.core.enums import GRADECertainty
         from cdr.core.schemas import EvidenceClaim
@@ -738,7 +738,7 @@ class TestDoDLevelEarlyGates:
     def test_gate_snippets_without_claims_blocked(self):
         """Test gate blocks when snippets exist but 0 claims generated.
 
-        Refs: ADR-005, CDR_Post_ADR005_Full_Audit (ALTO)
+        Refs: CDR_Post_ADR005_Full_Audit (ALTO)
         This is a different case from "no snippets" - evidence exists but
         synthesis couldn't extract structured claims.
         """
@@ -790,7 +790,7 @@ class TestDoDLevelEarlyGates:
     def test_level3_grade_rationale_requires_all_domains(self):
         """Test Level 3 requires ALL 5 GRADE domains or not_applicable.
 
-        Refs: ADR-005, CDR_Post_ADR005_Full_Audit (ALTO)
+        Refs: CDR_Post_ADR005_Full_Audit (ALTO)
         GRADE domains: risk_of_bias, inconsistency, indirectness, imprecision, publication_bias
         """
         from cdr.core.enums import GRADECertainty
@@ -909,7 +909,7 @@ class TestDoDLevelEarlyGates:
     def test_run_kpis_includes_used_markdown_fallback(self):
         """Test run_kpis dict includes used_markdown_fallback field.
 
-        Refs: ADR-005, CDR_Post_ADR005_Full_Audit (MEDIO)
+        Refs: CDR_Post_ADR005_Full_Audit (MEDIO)
         """
         # Simulate run_kpis structure from publish_node
         run_kpis = {

@@ -85,7 +85,7 @@ class PICOResponse(BaseModel):
 class ClaimResponse(BaseModel):
     """Evidence claim response.
 
-    Refs: EvidenceClaim schema, CDR_Integral_Audit_2026-01-20.md CRITICAL-3
+    Refs: EvidenceClaim schema
     """
 
     claim_id: str
@@ -483,15 +483,13 @@ async def get_run_claims(run_id: str) -> list[ClaimResponse]:
     # PENDING returns empty list (hasn't started), RUNNING returns intermediate data
     # Terminal states (COMPLETED, INSUFFICIENT_EVIDENCE, UNPUBLISHABLE) return final data
     # This is more user-friendly than returning errors
-    # Refs: CDR_Integral_Audit_2026-01-20.md CRITICO-B
 
     result = run.get("result")
     if not result or not result.claims:
         return []
 
-    # CRITICO-A fix: CDRState.verification is a list[VerificationResult], not a dict
+    # CDRState.verification is a list[VerificationResult], not a dict
     # Build lookup by claim_id for efficient access
-    # Refs: CDR_Integral_Audit_2026-01-20.md CRITICO-A
     verification_by_claim: dict = {}
     if result.verification:
         for vr in result.verification:
@@ -1197,7 +1195,7 @@ async def export_run(run_id: str, format: str):
 
         # Study Cards
         # CRITICAL: Filter out records excluded by DoD3 enforcement
-        # Refs: DoD3_ENFORCEMENT_VALIDATION.txt, CDR_Integral_Audit_2026-01-20.md
+        # Refs: DoD3_ENFORCEMENT_VALIDATION.txt
         excluded_record_ids = set()
         if export_data.get("dod3_excluded_records"):
             excluded_record_ids = {rec["record_id"] for rec in export_data["dod3_excluded_records"]}
@@ -2221,8 +2219,7 @@ async def _execute_run(
         run["progress"]["current_node"] = "parse_question"
         run["progress"]["percentage"] = 5
 
-        # ALTO-C fix: Pass run_id to runner for traceability alignment
-        # Refs: CDR_Integral_Audit_2026-01-20.md ALTO-C
+        # Pass run_id to runner for traceability alignment
         result = await runner.run(
             research_question=question,
             max_results=max_results,

@@ -18,7 +18,6 @@ DoD3 Contract Requirements:
 
 Author: CDR System
 Date: 2026-02-01
-Refs: CDR_Agent_Guidance_and_Development_Protocol.md
 """
 
 from __future__ import annotations

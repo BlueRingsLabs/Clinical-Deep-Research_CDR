@@ -399,7 +399,7 @@ class Publisher:
     ) -> str:
         """Generate JSON report.
 
-        MEDIUM-5 sync: Include executed_searches for PRISMA-S compliance.
+        Include executed_searches for PRISMA-S compliance.
         """
         report = {
             "meta": {
@@ -631,8 +631,7 @@ class Publisher:
     def _build_rob2_summary(self, rob2_results: list[RoB2Result]) -> str:
         """Build RoB2 summary.
 
-        MEDIUM-5 fix: Updated to accept list instead of dict.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5
+        Accepts a list (not a dict).
         """
         if not rob2_results:
             return "*No risk of bias assessment performed*"
@@ -710,8 +709,8 @@ class Publisher:
     def _format_search_strategy(self, state: CDRState) -> str:
         """Format search strategy description.
 
-        MEDIUM-5 sync: Include executed searches for PRISMA-S compliance.
-        Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md
+        Include executed searches for PRISMA-S compliance.
+        Refs: PRISMA-S (BMJ 2021)
         """
         lines = ["Databases searched:"]
 
@@ -746,8 +745,8 @@ class Publisher:
     def _build_prisma_text(self, prisma: PRISMACounts) -> str:
         """Build text PRISMA flow.
 
-        MEDIUM-5 fix: Updated to use correct field names and include exclusion reasons.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5, PRISMA 2020
+        Uses current field names and includes exclusion reasons.
+        Refs: PRISMA 2020
         """
         flow_text = f"""
 ```
@@ -818,8 +817,7 @@ Identification → Screening → Eligibility → Included
     def _build_appendix_rob2(self, rob2_results: list[RoB2Result]) -> str:
         """Build detailed RoB2 appendix.
 
-        MEDIUM-5 fix: Updated to accept list instead of dict.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5
+        Accepts a list (not a dict).
         """
         if not rob2_results:
             return "*No RoB2 assessments*"

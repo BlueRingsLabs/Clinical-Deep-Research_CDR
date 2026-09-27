@@ -199,7 +199,7 @@ def degrade_conclusion_for_partial(
     """
     Degrade a conclusion when the run is PARTIALLY_PUBLISHABLE.
 
-    FIX 7: For partial publishability, we keep the valid parts but clearly mark
+    For partial publishability, we keep the valid parts but clearly mark
     which sections are supported vs unsupported.
 
     Args:

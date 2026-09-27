@@ -20,7 +20,6 @@ If these queries return UNPUBLISHABLE, the problem is likely:
 
 Refs:
 - DoD3 Contract
-- CDR_Agent_Guidance_and_Development_Protocol.md
 """
 
 from __future__ import annotations

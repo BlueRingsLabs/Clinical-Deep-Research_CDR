@@ -3,8 +3,7 @@ ROBINS-I Assessor for Non-Randomized Studies
 
 Assessment of risk of bias for non-randomized studies of interventions using ROBINS-I framework.
 
-HIGH-3 fix: Proper bias assessment for observational studies.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-3
+Proper bias assessment for observational studies.
 Documentation: https://methods.cochrane.org/bias/resources/robins-i-tool
 """
 
@@ -92,7 +91,7 @@ class ROBINSIAssessor:
     """
     Assess risk of bias using ROBINS-I framework for observational studies.
 
-    HIGH-3 fix: Dedicated assessor for non-RCT studies.
+    Dedicated assessor for non-RCT studies.
 
     Usage:
         assessor = ROBINSIAssessor()

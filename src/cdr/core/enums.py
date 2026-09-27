@@ -92,7 +92,7 @@ class RoB2Domain(str, Enum):
 class ROBINSIDomain(str, Enum):
     """ROBINS-I domains for non-randomized studies of interventions.
 
-    HIGH-3 fix: ROBINS-I for observational studies.
+    ROBINS-I for observational studies.
     Refs: https://methods.cochrane.org/bias/resources/robins-i-tool
     """
 
@@ -116,7 +116,7 @@ class RoB2Judgment(str, Enum):
 class ROBINSIJudgment(str, Enum):
     """ROBINS-I judgment levels for non-randomized studies.
 
-    HIGH-3 fix: Different judgment levels for observational studies.
+    Different judgment levels for observational studies.
     Refs: https://methods.cochrane.org/bias/resources/robins-i-tool
     """
 
@@ -186,7 +186,7 @@ class RunStatus(str, Enum):
     # Scientific outcome statuses (distinct from technical success)
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
     UNPUBLISHABLE = "unpublishable"
-    # FIX 7: Partial publishability for mixed evidence scenarios
+    # Partial publishability for mixed evidence scenarios
     # Some sub-PICOs have valid evidence, others don't
     PARTIALLY_PUBLISHABLE = "partially_publishable"
 
@@ -207,7 +207,7 @@ class GraphNode(str, Enum):
     EXTRACT_DATA = "extract_data"
     ASSESS_ROB2 = "assess_rob2"
     SYNTHESIZE = "synthesize"
-    COMPOSE = "compose"  # HIGH-1: Compositional inference (A+B⇒C)
+    COMPOSE = "compose"  # Compositional inference (A+B⇒C)
     CRITIQUE = "critique"
     VERIFY = "verify"
     PUBLISH = "publish"
@@ -249,7 +249,7 @@ class Section(str, Enum):
     CONCLUSION = "conclusion"
     REFERENCES = "references"
     SUPPLEMENTARY = "supplementary"
-    FULL_TEXT = "full_text"  # For PMC full-text retrieval (HIGH-2)
+    FULL_TEXT = "full_text"  # For PMC full-text retrieval
     UNKNOWN = "unknown"
 
 

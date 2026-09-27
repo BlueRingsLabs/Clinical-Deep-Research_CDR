@@ -75,8 +75,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
     Input: search_plan
     Output: retrieved_records, prisma_counts (partial), executed_searches
 
-    HIGH-4 fix: Track executed searches for PRISMA-S compliance.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-4
+    Track executed searches for PRISMA-S compliance.
     """
     with tracer.start_span("node.retrieve") as span:
         # Import schemas needed for this node
@@ -85,9 +84,9 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
         from cdr.core.schemas import ExecutedSearch, PRISMACounts
 
         if not state.search_plan:
-            # MEDIO-E fix: Initialize empty PRISMA counts for early failures
+            # Initialize empty PRISMA counts for early failures
             # This ensures report_data always has auditable counts
-            # Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-E, PRISMA 2020
+            # Refs: PRISMA 2020
             return {
                 "errors": [*state.errors, "No search plan available"],
                 "prisma_counts": PRISMACounts(),
@@ -231,9 +230,9 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
             )
 
         # =====================================================================
-        # MEDIUM-3: Hybrid retrieval scoring
+        # Hybrid retrieval scoring
         # Compute BM25 and optional reranking scores for retrieval quality
-        # Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-3, RAG best practices
+        # Refs: RAG best practices
         # =====================================================================
         enable_hybrid = configurable.get("enable_hybrid_retrieval", True)
 

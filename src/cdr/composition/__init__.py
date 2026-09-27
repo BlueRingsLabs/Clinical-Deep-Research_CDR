@@ -4,9 +4,6 @@ CDR Compositional Inference Module
 Implements the A+B⇒C compositional inference capability for generating
 testable hypotheses from combined evidence.
 
-HIGH-1 fix: Compositional inference not implemented beyond comments.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
-
 Key concepts:
 - Compositional Hypothesis: Novel hypothesis C derived from evidence A and B
 - Mechanistic Relation: Causal/mechanistic link extracted from evidence

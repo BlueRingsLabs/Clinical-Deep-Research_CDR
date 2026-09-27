@@ -9,7 +9,6 @@ This module implements the enforcement layer that CLOSES THE LOOP:
 CRITICAL: This is the last line of defense before output generation.
 
 Refs:
-- DoD3 Contract: CDR_Agent_Guidance_and_Development_Protocol.md
 - PRISMA 2020: Eligibility criteria must be enforced
 - GRADE Handbook: Indirectness leads to downgrade
 """

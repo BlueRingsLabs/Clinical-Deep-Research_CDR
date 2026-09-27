@@ -3,7 +3,7 @@ Tests for CDR Retrieval Layer.
 
 Tests for PubMed, ClinicalTrials.gov clients, embeddings, and retrieval components.
 
-Rewritten for public API + deterministic mocks per ADR-005.
+Rewritten for public API + deterministic mocks per .
 
 NCBI Rate Limits (for CI/documentation):
 -----------------------------------------
@@ -757,8 +757,8 @@ class TestRetrievalIntegration:
 class TestFullTextClientMocked:
     """Tests for FullTextClient using mocks (no network access).
 
-    HIGH-2 verification: Full-text fallback with mocked PMC responses.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-2, NCBI guidelines
+    Full-text fallback with mocked PMC responses.
+    Refs: NCBI guidelines
     """
 
     def _run_async(self, coro):

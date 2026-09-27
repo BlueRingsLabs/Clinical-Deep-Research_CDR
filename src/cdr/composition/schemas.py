@@ -3,8 +3,7 @@ Compositional Inference Schemas
 
 Defines data structures for compositional hypothesis generation.
 
-HIGH-1 fix: Schemas for A+B⇒C compositional inference.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
+Schemas for A+B⇒C compositional inference.
 
 Scientific foundations:
 - Causal representation learning: https://arxiv.org/abs/2102.11107

@@ -8,7 +8,6 @@ Uses a realistic mock LLM provider that returns well-structured JSON
 responses (mimicking real HuggingFace/OpenAI output), not trivial stubs.
 
 Refs:
-- CDR_Integral_Audit_2026-01-20.md HIGH-1 (compositional inference)
 - scripts/validate_golden_set_composition.py (quality gates)
 """
 

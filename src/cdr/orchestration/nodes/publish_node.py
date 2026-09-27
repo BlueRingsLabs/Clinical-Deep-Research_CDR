@@ -70,14 +70,12 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
         # Refs: PRISMA 2020 - transparency about evidence availability
         # CRITICAL: Order matters - check from earliest pipeline stage to latest
         # to ensure proper status_reason reflects the actual failure point
-        # Refs: CDR_Integral_Audit_2026-01-20.md CRITICAL-1
         if not state.retrieved_records:
             # Early-exit: no records retrieved at all
             final_status = RunStatus.INSUFFICIENT_EVIDENCE
             status_reason = "no_records_retrieved"
         elif state.flags.get("screening_blocked_no_llm"):
-            # ALTO-D fix: LLM required for screening at this DoD level
-            # Refs: CDR_Integral_Audit_2026-01-20.md ALTO-D (reason_code real)
+            # LLM required for screening at this DoD level
             final_status = RunStatus.INSUFFICIENT_EVIDENCE
             status_reason = "llm_required_for_level_2"
         elif not state.get_included_records():
@@ -119,7 +117,6 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                 status_reason = f"critique_blockers: {state.critique.blockers}"
 
         # DOD LEVEL GATES: Additional requirements for Research/SOTA grade
-        # Refs: ADR-005, CDR_Post_ADR003_v3_PostChange_Audit_and_Actions.md
         if final_status == RunStatus.COMPLETED and dod_level >= 2:
             # Level 2 (Research-grade): Verification coverage gate
             from cdr.core.enums import VerificationStatus
@@ -192,7 +189,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                 gate_status_reason_code = dod3_validation_result.gate_report.status_reason_code  # noqa: F841 — loose end: parsed but not used yet
 
                 # If DoD3 gates fail, determine if UNPUBLISHABLE or PARTIALLY_PUBLISHABLE
-                # FIX 7: PARTIALLY_PUBLISHABLE if:
+                # PARTIALLY_PUBLISHABLE if:
                 # - Some records pass, some fail (mixed evidence quality)
                 # - At least 1 claim has valid supporting evidence after enforcement
                 is_unpublishable = not dod3_validation_result.passed
@@ -314,7 +311,6 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # Generate summary report
         # CRITICAL: Include ALL traceability fields per PRISMA 2020 / GRADE
-        # Refs: ADR-005, CDR_Post_ADR003_v3_PostChange_Audit_and_Actions.md
         # Missing these fields breaks auditability and SOTA-grade compliance
 
         # Build RoB2 lookup by record_id for claim-level linkage
@@ -331,7 +327,6 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
             return sorted(record_ids)
 
         # Calculate KPIs per run (required for Research/SOTA grade)
-        # Refs: CDR_Post_ADR003_v3_Audit_with_Run_KPIs_and_MinEvidence_Checklist.md
         total_claims = len(state.claims)
         claims_with_snippets = sum(1 for c in state.claims if c.supporting_snippet_ids)
         snippet_coverage = claims_with_snippets / total_claims if total_claims > 0 else 0.0
@@ -373,7 +368,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
             "is_negative_outcome": is_negative_outcome,
             "dod_level": configurable.get("dod_level", 1),
             # NEW: Track if synthesis used markdown fallback
-            # Refs: ADR-005, CDR_Post_ADR005_Full_Audit (MEDIO)
+            # Refs: CDR_Post_ADR005_Full_Audit (MEDIO)
             "used_markdown_fallback": (
                 state.synthesis_result.used_markdown_fallback if state.synthesis_result else None
             ),
@@ -382,7 +377,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
         # =====================================================================
         # CONCLUSION DEGRADATION: Conclusions must obey UNPUBLISHABLE status
         # CRITICAL: If status == unpublishable, conclusion cannot affirm effects
-        # FIX 7: Handle PARTIALLY_PUBLISHABLE with appropriate messaging
+        # Handle PARTIALLY_PUBLISHABLE with appropriate messaging
         # Refs: DoD3 Contract, PRISMA 2020 Transparency
         # =====================================================================
         final_answer = state.answer
@@ -453,7 +448,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
             "question": state.question,
             "pico": state.pico.model_dump() if state.pico else None,
             # PRISMA-S: Include reproducible search strategy for auditability
-            # Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md HIGH-4
+            # Refs: PRISMA-S (BMJ 2021)
             "search_plan": (
                 {
                     "pubmed_query": state.search_plan.pubmed_query,
@@ -468,8 +463,8 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                 if state.search_plan
                 else None
             ),
-            # HIGH-4: Track executed searches (may differ from planned due to truncation)
-            # Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md HIGH-4
+            # Track executed searches (may differ from planned due to truncation)
+            # Refs: PRISMA-S (BMJ 2021)
             "executed_searches": [
                 {
                     "database": es.database,
@@ -574,8 +569,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
             ]
             if state.rob2_results
             else [],
-            # HIGH-3: ROBINS-I summary for observational studies
-            # Refs: CDR_Integral_Audit_2026-01-20.md HIGH-3
+            # ROBINS-I summary for observational studies
             "robins_i_summary": [
                 {
                     "record_id": r.record_id,
@@ -610,8 +604,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
             else [],
             # NEW: Run KPIs (required for Research/SOTA grade assessment)
             "run_kpis": run_kpis,
-            # HIGH-1: Compositional inference hypotheses (DoD Level 3 only)
-            # Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
+            # Compositional inference hypotheses (DoD Level 3 only)
             "composed_hypotheses": state.composed_hypotheses if state.composed_hypotheses else [],
             "critique_findings": len(state.critique.findings) if state.critique else 0,
             "critique_blockers": state.critique.blockers if state.critique else [],

@@ -13,8 +13,8 @@ Documentation:
 - ID Converter: https://www.ncbi.nlm.nih.gov/pmc/tools/idconv/
 - PMC OA Service: https://www.ncbi.nlm.nih.gov/pmc/tools/oa-service/
 
-HIGH-2 fix: Full-text fallback before reports_not_retrieved
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-2, PRISMA 2020
+Full-text fallback before reports_not_retrieved
+Refs: PRISMA 2020
 """
 
 import time

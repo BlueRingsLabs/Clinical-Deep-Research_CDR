@@ -4,8 +4,6 @@ Contract Conformity Tests
 These tests validate that schema ↔ prompt ↔ parser contracts are aligned
 without fallback silenciosos.
 
-Based on: CDR_Risk_Matrix_and_Contract_Map.md
-
 Source of Truth:
 - schemas.py defines the models
 - enums.py defines the enum values
@@ -47,8 +45,7 @@ def run_async(coro):
     - If no active loop: use asyncio.run()
     - If active loop: use nest_asyncio + run_until_complete
 
-    LOW-F4/F6 fix: Extracted to module-level to avoid duplication.
-    Refs: CDR_Integral_Audit_2026-01-20.md LOW-F4, LOW-F6
+    Extracted to module-level to avoid duplication.
     """
     import asyncio
 
@@ -366,7 +363,6 @@ class TestSnippetGateFormal:
     Refs:
     - PRISMA 2020: Transparency and traceability of evidence
     - GRADE Handbook: Certainty requires explicit evidence support
-    - CDR_Reconciliation_Note_and_Snippet_Gate_2026-01-18.md
     """
 
     def test_synthesize_node_has_snippet_validation_gate(self):
@@ -439,15 +435,11 @@ class TestSnippetGateFormal:
 
 # =============================================================================
 # FASE 0 REGRESSION TESTS
-# Refs: CDR_Integral_Audit_2026-01-20.md
 # =============================================================================
 
 
 class TestCritical1EarlyExitStatus:
-    """Tests for CRITICAL-1: Early termination must route to publish.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md CRITICAL-1
-    """
+    """Tests: Early termination must route to publish."""
 
     def test_retrieve_early_exit_routes_to_publish(self):
         """should_continue_after_retrieve returns 'publish' not 'end'."""
@@ -500,10 +492,7 @@ class TestCritical1EarlyExitStatus:
 
 
 class TestCritical2ScreeningProviderMismatch:
-    """Tests for CRITICAL-2: Screener must accept provider instances.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md CRITICAL-2
-    """
+    """Tests: Screener must accept provider instances."""
 
     def test_screener_accepts_provider_instance(self):
         """Screener.__init__ must accept BaseLLMProvider instances."""
@@ -536,10 +525,7 @@ class TestCritical2ScreeningProviderMismatch:
 
 
 class TestCritical3APIContract:
-    """Tests for CRITICAL-3: API contract alignment.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md CRITICAL-3
-    """
+    """Tests: API contract alignment."""
 
     def test_run_status_has_running_not_in_progress(self):
         """RunStatus must have RUNNING, not IN_PROGRESS."""
@@ -581,15 +567,11 @@ class TestCritical3APIContract:
 
 # =============================================================================
 # POST-FASE 0 INCREMENTAL AUDIT TESTS
-# Refs: CDR_Integral_Audit_2026-01-20.md (Auditoria incremental post-Fase 0)
 # =============================================================================
 
 
 class TestCriticoAVerificationContract:
-    """Tests for CRITICO-A: API uses verification, not verification_results.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md CRITICO-A
-    """
+    """Tests: API uses verification, not verification_results."""
 
     def test_cdrstate_has_verification_list(self):
         """CDRState.verification is list[VerificationResult], not dict."""
@@ -627,10 +609,7 @@ class TestCriticoAVerificationContract:
 
 
 class TestCriticoBNegativeOutcomes:
-    """Tests for CRITICO-B: API allows negative outcome states.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md CRITICO-B
-    """
+    """Tests: API allows negative outcome states."""
 
     def test_api_claims_allows_insufficient_evidence(self):
         """API claims endpoint must allow INSUFFICIENT_EVIDENCE status."""
@@ -657,10 +636,7 @@ class TestCriticoBNegativeOutcomes:
 
 
 class TestAltoCRunIdAlignment:
-    """Tests for ALTO-C: API run_id aligns with runner.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md ALTO-C
-    """
+    """Tests: API run_id aligns with runner."""
 
     def test_cdr_runner_accepts_run_id_parameter(self):
         """CDRRunner.run must accept optional run_id parameter."""
@@ -692,10 +668,7 @@ class TestAltoCRunIdAlignment:
 
 
 class TestAltoDReasonCodePropagation:
-    """Tests for ALTO-D: Reason code propagation for LLM required.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md ALTO-D
-    """
+    """Tests: Reason code propagation for LLM required."""
 
     def test_publish_node_checks_screening_blocked_no_llm(self):
         """publish_node must check screening_blocked_no_llm flag."""
@@ -723,10 +696,7 @@ class TestAltoDReasonCodePropagation:
 
 
 class TestMedioEPrismaCountsInit:
-    """Tests for MEDIO-E: PRISMA counts initialization on early failure.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-E
-    """
+    """Tests: PRISMA counts initialization on early failure."""
 
     def test_retrieve_node_returns_prisma_counts_on_no_plan(self):
         """retrieve_node must return PRISMACounts when no search_plan."""
@@ -744,8 +714,7 @@ class TestMedioEPrismaCountsInit:
 
 
 # =============================================================================
-# FUNCTIONAL TESTS (MEDIO-F): Runtime behavior validation
-# Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F
+# FUNCTIONAL TESTS: Runtime behavior validation
 # =============================================================================
 
 
@@ -753,7 +722,6 @@ class TestFunctionalPublishGates:
     """Functional tests for publish node gates.
 
     These tests instantiate real state objects and validate behavior.
-    Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F
     """
 
     def test_empty_records_produces_insufficient_evidence(self):
@@ -858,8 +826,7 @@ class TestFunctionalPublishGates:
 
 
 # =============================================================================
-# RUNTIME FUNCTIONAL TESTS (MEDIO-F REAL): Execute actual nodes
-# Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F (post-verificacion auditor)
+# RUNTIME FUNCTIONAL TESTS (real): Execute actual nodes
 # =============================================================================
 
 
@@ -869,7 +836,6 @@ class TestRuntimePublishNode:
     These tests invoke the actual publish_node function to validate
     that status_reason is correctly set based on state conditions.
 
-    Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F
     """
 
     def _make_config(self, tmp_path, dod_level: int = 1):
@@ -1059,8 +1025,7 @@ class TestRuntimePublishNode:
     def test_publish_node_no_studies_returns_no_studies(self, tmp_path):
         """publish_node with snippets but no study_cards.
 
-        MEDIO-F2 fix: Test for no_studies_included gate.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
+        Test for no_studies_included gate.
         """
         from cdr.core.enums import RunStatus
         from cdr.core.schemas import CDRState, ScreeningDecision
@@ -1093,8 +1058,7 @@ class TestRuntimePublishNode:
     def test_publish_node_no_claims_returns_no_claims(self, tmp_path):
         """publish_node with study_cards but no claims.
 
-        MEDIO-F2 fix: Test for no_claims_generated gate.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
+        Test for no_claims_generated gate.
         """
         from cdr.core.enums import RunStatus
         from cdr.core.schemas import CDRState, ScreeningDecision
@@ -1128,8 +1092,7 @@ class TestRuntimePublishNode:
     def test_publish_node_dod2_low_verification_returns_unpublishable(self, tmp_path):
         """publish_node with DoD Level 2 and < 80% verification returns UNPUBLISHABLE.
 
-        MEDIO-F2 fix: Test for verification_coverage_insufficient gate.
-        Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F2
+        Test for verification_coverage_insufficient gate.
         """
         from cdr.core.enums import GRADECertainty, RunStatus, VerificationStatus
         from cdr.core.schemas import (
@@ -1199,8 +1162,8 @@ class TestRuntimePublishNode:
     def test_publish_node_includes_search_plan_for_prisma_s(self, tmp_path):
         """publish_node must include search_plan in report_data for PRISMA-S compliance.
 
-        HIGH-4 fix: report_data must include reproducible search strategy.
-        Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md HIGH-4
+        report_data must include reproducible search strategy.
+        Refs: PRISMA-S (BMJ 2021)
         """
         from cdr.core.enums import GRADECertainty, RunStatus, VerificationStatus
         from cdr.core.schemas import (
@@ -1351,10 +1314,7 @@ class TestRuntimePublishNode:
 
 
 class TestRuntimeRetrieveNode:
-    """Tests that execute retrieve_node with simulated states.
-
-    Refs: CDR_Integral_Audit_2026-01-20.md MEDIO-F
-    """
+    """Tests that execute retrieve_node with simulated states."""
 
     def _make_config(self):
         """Create a mock RunnableConfig for retrieve_node."""
@@ -1392,8 +1352,7 @@ class TestRuntimeRetrieveNode:
 class TestRuntimeParseDocsNode:
     """Tests for parse_documents_node with full-text fallback.
 
-    HIGH-2 fix: Tests full-text retrieval integration.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-2
+    Tests full-text retrieval integration.
     """
 
     def _make_record(self, record_id: str, pmid: str | None, abstract: str):
@@ -1469,8 +1428,7 @@ class TestRuntimeParseDocsNode:
 class TestRiskOfBiasRouting:
     """Tests for RoB2 vs ROBINS-I routing by study type.
 
-    HIGH-3 fix: Routing by StudyType.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-3
+    Routing by StudyType.
     """
 
     def _make_study_card(self, record_id: str, study_type):
@@ -1674,10 +1632,9 @@ class TestRiskOfBiasRouting:
 
 
 class TestCompositionalInference:
-    """Tests for compositional inference (HIGH-1).
+    """Tests for compositional inference.
 
-    HIGH-1 fix: Compositional inference module (A+B⇒C).
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
+    Compositional inference module (A+B⇒C).
     """
 
     def _make_claim(self, claim_id: str, text: str):
@@ -1950,9 +1907,8 @@ class TestCompositionalInference:
 class TestCompositionEngineWithStub:
     """Tests for CompositionEngine with LLM stub (positive paths).
 
-    HIGH-1 verification: Compositional inference with mocked LLM responses.
+    Compositional inference with mocked LLM responses.
     Validates JSON contracts, hypothesis structure, and test design generation.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
     """
 
     def _make_claim(self, claim_id: str, text: str):

@@ -15,7 +15,7 @@ This harness:
 4. Tracks no-regression against baseline
 
 References:
-- DoD3 Contract: CDR_Agent_Guidance_and_Development_Protocol.md
+- DoD3 contract (the gate rules in dod3_gates.py)
 """
 
 from __future__ import annotations

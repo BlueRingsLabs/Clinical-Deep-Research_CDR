@@ -8,7 +8,6 @@ Validates that the FastAPI-generated OpenAPI spec:
 4. Matches the live API router
 
 Refs:
-- CDR_Integral_Audit_2026-01-20.md (API contract)
 - scripts/export_openapi.py (export utility)
 """
 

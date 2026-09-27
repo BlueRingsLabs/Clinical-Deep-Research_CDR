@@ -4,7 +4,7 @@ Tests for message normalization in LLM providers.
 Verifies that providers correctly handle both Message objects and dict-based messages.
 This ensures backward compatibility for code using dicts while enforcing type safety.
 
-Per MEDIUM-4 audit issue: dict messages in question_parser, search_planner, synthesizer
+Background: dict messages in question_parser, search_planner, synthesizer
 should work with any provider.
 """
 

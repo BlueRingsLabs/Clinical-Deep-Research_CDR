@@ -1,8 +1,8 @@
 """
 Tests for PRISMA-S search reporting compliance.
 
-HIGH-4 fix: Ensure executed searches are tracked for reproducibility.
-Refs: PRISMA-S (BMJ 2021), CDR_Integral_Audit_2026-01-20.md HIGH-4
+Ensure executed searches are tracked for reproducibility.
+Refs: PRISMA-S (BMJ 2021)
 
 PRISMA-S requires:
 1. Database name
@@ -323,12 +323,12 @@ class TestReportDataPRISMAS:
 
 
 class TestPRISMAExclusionReasons:
-    """Test PRISMA 2020 exclusion reasons tracking (MEDIUM-2).
+    """Test PRISMA 2020 exclusion reasons tracking.
 
     Per PRISMA 2020 Statement:
     "For each record excluded, a reason for exclusion should be recorded."
 
-    Refs: PRISMA 2020, CDR_Integral_Audit_2026-01-20.md MEDIUM-2
+    Refs: PRISMA 2020
     """
 
     def test_prisma_counts_has_exclusion_reasons_field(self):

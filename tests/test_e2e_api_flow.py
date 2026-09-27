@@ -9,7 +9,6 @@ This validates the full E2E flow without external services.
 All LLM calls are mocked; only the HTTP layer is exercised.
 
 Refs:
-- CDR_Integral_Audit_2026-01-20.md (API contract validation)
 - tests/test_api_integration.py (individual endpoint tests)
 """
 
