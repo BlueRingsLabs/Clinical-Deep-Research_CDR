@@ -55,7 +55,7 @@ def should_continue_after_retrieve(state: CDRState) -> Literal["deduplicate", "p
 
     CRITICAL: On no records, route to publish (not END) for proper negative outcome
     reporting with PRISMA counts and INSUFFICIENT_EVIDENCE status.
-    Refs: PRISMA 2020, CDR_Integral_Audit_2026-01-20.md CRITICAL-1
+    Refs: PRISMA 2020
     """
     if not state.retrieved_records:
         return "publish"  # Force publish for negative outcome reporting
@@ -67,7 +67,7 @@ def should_continue_after_screen(state: CDRState) -> Literal["parse_docs", "publ
 
     CRITICAL: On no included records, route to publish (not END) for proper
     negative outcome reporting with exclusion reasons and INSUFFICIENT_EVIDENCE.
-    Refs: PRISMA 2020, CDR_Integral_Audit_2026-01-20.md CRITICAL-1
+    Refs: PRISMA 2020
     """
     if not state.get_included_records():
         return "publish"  # Force publish for negative outcome reporting
@@ -114,7 +114,7 @@ def build_cdr_graph() -> CompiledStateGraph:
     graph.add_node(GraphNode.SYNTHESIZE.value, synthesize_node)
     graph.add_node(GraphNode.CRITIQUE.value, critique_node)
     graph.add_node(GraphNode.VERIFY.value, verify_node)
-    graph.add_node(GraphNode.COMPOSE.value, compose_node)  # HIGH-1: Compositional inference
+    graph.add_node(GraphNode.COMPOSE.value, compose_node)  # Compositional inference
     graph.add_node(GraphNode.PUBLISH.value, publish_node)
 
     # Add edges
@@ -124,7 +124,7 @@ def build_cdr_graph() -> CompiledStateGraph:
 
     # Conditional: check if retrieval succeeded
     # CRITICAL: On failure, route to PUBLISH (not END) for negative outcome reporting
-    # Refs: PRISMA 2020, CDR_Integral_Audit_2026-01-20.md CRITICAL-1
+    # Refs: PRISMA 2020
     graph.add_conditional_edges(
         GraphNode.RETRIEVE.value,
         should_continue_after_retrieve,
@@ -138,7 +138,7 @@ def build_cdr_graph() -> CompiledStateGraph:
 
     # Conditional: check if screening produced results
     # CRITICAL: On failure, route to PUBLISH (not END) for negative outcome reporting
-    # Refs: PRISMA 2020, CDR_Integral_Audit_2026-01-20.md CRITICAL-1
+    # Refs: PRISMA 2020
     graph.add_conditional_edges(
         GraphNode.SCREEN.value,
         should_continue_after_screen,
@@ -164,7 +164,7 @@ def build_cdr_graph() -> CompiledStateGraph:
     )
 
     graph.add_edge(GraphNode.VERIFY.value, GraphNode.COMPOSE.value)
-    graph.add_edge(GraphNode.COMPOSE.value, GraphNode.PUBLISH.value)  # HIGH-1
+    graph.add_edge(GraphNode.COMPOSE.value, GraphNode.PUBLISH.value)
     graph.add_edge(GraphNode.PUBLISH.value, END)
 
     return graph.compile()
@@ -184,11 +184,9 @@ class CDRRunner:
     - Level 3 (SOTA-grade): Full compositional inference, quantitative predictions, threat analysis
 
     Persistence:
-    - If run_store is provided, persists run state to SQLite (MEDIUM-6 fix)
+    - If run_store is provided, persists run state to SQLite
     - Records, screening decisions, and checkpoints are stored for audit
 
-    Refs: ADR-005, CDR_Post_ADR003_v3_PostChange_Audit_and_Actions.md,
-          CDR_Integral_Audit_2026-01-20.md MEDIUM-6 (persistence layer)
     """
 
     def __init__(
@@ -206,7 +204,7 @@ class CDRRunner:
             model: Model to use
             output_dir: Directory for output files
             dod_level: Definition of Done level (1=exploratory, 2=research, 3=SOTA)
-            run_store: Optional RunStore for persistent storage (MEDIUM-6)
+            run_store: Optional RunStore for persistent storage
         """
         self.llm_provider = llm_provider
         self.model = model
@@ -239,8 +237,7 @@ class CDRRunner:
         effective_dod_level = dod_level if dod_level is not None else self.dod_level
 
         with tracer.start_span("cdr.run") as span:
-            # ALTO-C fix: Use provided run_id or generate new one
-            # Refs: CDR_Integral_Audit_2026-01-20.md ALTO-C (run_id alignment)
+            # Use provided run_id or generate new one
             run_id = run_id or str(uuid.uuid4())[:8]
             span.set_attribute("run_id", run_id)
             span.set_attribute("dod_level", effective_dod_level)
@@ -252,8 +249,7 @@ class CDRRunner:
                 status=RunStatus.RUNNING,
             )
 
-            # MEDIUM-6 fix: Persist run creation if run_store is available
-            # Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-6 (persistence layer)
+            # Persist run creation if run_store is available
             if self.run_store:
                 try:
                     pico_dict = {"question": research_question}  # PICO parsed later
@@ -274,7 +270,7 @@ class CDRRunner:
                     print(f"[CDRRunner] Warning: persistence failed: {persist_err}")
 
             # Build config with dod_level for end-to-end enforcement
-            # Refs: ADR-005 (DoD end-to-end)
+            # dod_level is enforced end to end (early gates in synthesize, final gates in publish)
             # Include run_store in config for node-level persistence
             config = {
                 "llm_provider": self.llm_provider,
@@ -283,7 +279,7 @@ class CDRRunner:
                 "output_dir": self.output_dir,
                 "formats": formats or ["markdown", "json"],
                 "dod_level": effective_dod_level,
-                "run_store": self.run_store,  # MEDIUM-6: Pass for node-level persistence
+                "run_store": self.run_store,  # Pass for node-level persistence
             }
 
             print(f"[CDRRunner] Starting run {run_id} with DoD Level {effective_dod_level}")
@@ -320,8 +316,7 @@ class CDRRunner:
                     # Preserve the scientific status determined by publish_node
                     span.set_attribute("status", final_state.status.value)
 
-                # MEDIUM-6 fix: Persist final state to run_store
-                # Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-6 (persistence layer)
+                # Persist final state to run_store
                 if self.run_store:
                     try:
                         # Update run status
@@ -364,7 +359,7 @@ class CDRRunner:
                     status=RunStatus.FAILED,
                     errors=[str(e)],
                 )
-                # MEDIUM-6 fix: Persist failed state
+                # Persist failed state
                 if self.run_store:
                     try:
                         self.run_store.update_run_status(

@@ -1,8 +1,7 @@
 """
 Tests for RunStore persistence module.
 
-MEDIUM-6 verification: SQLite/JSON storage for run state.
-Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-6
+SQLite/JSON storage for run state.
 
 Tests:
 1. Run lifecycle management (create, get, update, list, delete)
@@ -401,7 +400,7 @@ class TestConcurrency:
     SQLite with WAL mode should handle concurrent reads and serialized writes.
     These tests validate thread safety for multi-run scenarios.
 
-    Refs: CDR_Integral_Audit_2026-01-20.md (session 2026-01-22) - concurrencia pendiente
+    Refs:  - concurrencia pendiente
     """
 
     def test_concurrent_reads_same_run(self, temp_db):

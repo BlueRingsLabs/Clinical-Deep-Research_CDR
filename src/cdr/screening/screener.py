@@ -101,7 +101,6 @@ class Screener:
             model: Model name (used only if provider is None or string).
             temperature: Sampling temperature (0 = deterministic).
 
-        Refs: CDR_Integral_Audit_2026-01-20.md CRITICAL-2
         """
         from cdr.llm.base import BaseLLMProvider
 

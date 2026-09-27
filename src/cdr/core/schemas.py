@@ -158,8 +158,7 @@ class ExecutedSearch(BaseModel):
     - Date of search
     - Results count
 
-    HIGH-4 fix: Capture executed queries for reproducibility.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-4
+    Capture executed queries for reproducibility.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -561,7 +560,7 @@ class ROBINSIDomainResult(BaseModel):
     """
     Evaluación de un dominio ROBINS-I para estudios no randomizados.
 
-    HIGH-3 fix: ROBINS-I domains for observational studies.
+    ROBINS-I domains for observational studies.
     Refs: https://methods.cochrane.org/bias/resources/robins-i-tool
     """
 
@@ -580,7 +579,7 @@ class ROBINSIResult(BaseModel):
     ROBINS-I (Risk Of Bias In Non-randomised Studies of Interventions) is used
     for cohort studies, case-control studies, and other non-randomized designs.
 
-    HIGH-3 fix: Separate assessment tool for observational studies.
+    Separate assessment tool for observational studies.
     Refs: https://methods.cochrane.org/bias/resources/robins-i-tool
 
     Invariants:
@@ -639,7 +638,7 @@ class EvidenceClaim(BaseModel):
     - grade_rationale captures explicit reasons for certainty level
     - Keys: "risk_of_bias", "inconsistency", "indirectness", "imprecision", "publication_bias"
     - Values: explanation text or None if not applicable
-    Refs: GRADE Handbook Section 5.2, ADR-004 Audit v3
+    Refs: GRADE Handbook Section 5.2
     """
 
     model_config = ConfigDict(frozen=True)
@@ -667,7 +666,7 @@ class EvidenceClaim(BaseModel):
     # Per GRADE Handbook Section 5.2: Each domain that leads to downgrade
     # must be explicitly documented with rationale
     # Keys: risk_of_bias, inconsistency, indirectness, imprecision, publication_bias
-    # Refs: https://gradepro.org/handbook/, ADR-004 Audit v3
+    # Refs: https://gradepro.org/handbook/
     grade_rationale: dict[str, str] = Field(
         default_factory=dict,
         description="Structured GRADE rationale per domain (risk_of_bias, inconsistency, etc.)",
@@ -888,7 +887,7 @@ class SynthesisResult(BaseModel):
 
     DoD Level Gates rely on used_markdown_fallback to determine
     if claims were extracted via heuristic parsing (not allowed in Level 2+).
-    Refs: ADR-005 Post-Change Audit, PRISMA 2020 (reproducibility)
+    Refs:  Post-Change Audit, PRISMA 2020 (reproducibility)
     """
 
     model_config = ConfigDict(frozen=True)
@@ -900,7 +899,7 @@ class SynthesisResult(BaseModel):
 
     # DoD Level tracking: indicates if fallback parsing was used
     # Level 2+ requires JSON structured outputs; Markdown fallback is blocked
-    # Refs: ADR-005 Post-Change Audit, GRADE handbook (reproducibility)
+    # Refs:  Post-Change Audit, GRADE handbook (reproducibility)
     used_markdown_fallback: bool = Field(
         default=False,
         description="True if claims were extracted via Markdown fallback (heuristic parsing)",
@@ -949,7 +948,7 @@ class CDRState(BaseModel):
     # Generated artifacts
     pico: PICO | None = None
     search_plan: SearchPlan | None = None
-    # PRISMA-S: Track actually executed searches for reproducibility (HIGH-4)
+    # PRISMA-S: Track actually executed searches for reproducibility
     executed_searches: list[ExecutedSearch] = Field(
         default_factory=list,
         description="Record of searches actually executed for PRISMA-S compliance",
@@ -964,15 +963,14 @@ class CDRState(BaseModel):
     study_cards: list[StudyCard] = Field(default_factory=list)
     rob2_results: list[RoB2Result] = Field(default_factory=list)
     robins_i_results: list[ROBINSIResult] = Field(
-        default_factory=list,
-        description="ROBINS-I results for observational studies (HIGH-3 fix)",
+        default_factory=list, description="ROBINS-I results for observational studies"
     )
 
     # Synthesis artifacts
     claims: list[EvidenceClaim] = Field(default_factory=list)
     synthesis_result: SynthesisResult | None = None
 
-    # Compositional inference (HIGH-1 fix)
+    # Compositional inference
     # Note: Stores as dict to avoid circular import with composition module
     composed_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,

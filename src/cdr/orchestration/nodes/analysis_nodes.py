@@ -79,8 +79,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
     Input: study_cards, parsed_documents
     Output: rob2_results, robins_i_results
 
-    HIGH-3 fix: Routes by StudyType - RoB2 for RCTs, ROBINS-I for observational.
-    Refs: CDR_Integral_Audit_2026-01-20.md HIGH-3
+    Routes by StudyType - RoB2 for RCTs, ROBINS-I for observational.
 
     Study type routing:
     - RCT, META_ANALYSIS, SYSTEMATIC_REVIEW → RoB2
@@ -203,7 +202,7 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                 )
                 rob2_results.append(failed_result)
 
-        # Assess observational studies with ROBINS-I (HIGH-3 fix: proper ROBINS-I assessment)
+        # Assess observational studies with ROBINS-I (proper ROBINS-I assessment)
         robins_i_assessor = ROBINSIAssessor(provider=llm, model=model)
 
         for card in observational_studies:

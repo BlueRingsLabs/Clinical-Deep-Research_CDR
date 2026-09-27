@@ -1,8 +1,7 @@
 """
 Tests for Compositional Inference module.
 
-HIGH-1 verification: A+B⇒C compositional inference.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-1
+A+B⇒C compositional inference.
 
 Tests:
 1. Schema validation for all composition types
@@ -578,7 +577,6 @@ class TestCompositionEdgeCases:
 # HYPOTHESIS QUALITY VALIDATION
 #
 # These tests validate that composition output meets scientific rigor criteria.
-# Refs: CDR_Integral_Audit_2026-01-20.md (Task 4: composición con LLM mock)
 # ============================================================================
 
 

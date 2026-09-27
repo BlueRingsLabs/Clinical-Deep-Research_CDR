@@ -201,7 +201,7 @@ class EvidenceSynthesizer:
             valid_snippet_ids: Optional set of valid snippet IDs for early filtering.
                                If provided, claims with invalid snippet_ids are rejected
                                at parsing time, not at the gate.
-                               Refs: PRISMA 2020 traceability, ADR-003
+                               Refs: PRISMA 2020 traceability
 
         Returns:
             SynthesisResult with claims and narrative
@@ -353,7 +353,7 @@ class EvidenceSynthesizer:
             study_cards: Study cards for context
             valid_snippet_ids: If provided, filter snippet_ids to only those that exist.
                                This enables early rejection of claims with invalid snippets.
-                               Refs: PRISMA 2020 traceability, ADR-003 post-audit
+                               Refs: PRISMA 2020 traceability
         """
         import re
 
@@ -387,7 +387,7 @@ class EvidenceSynthesizer:
         # === STAGE 2: Markdown fallback parsing ===
         # CRITICAL: Only trigger fallback if JSON parsing FAILED
         # If JSON parsed but has no claims, that's a valid (empty) result, not fallback
-        # Refs: ADR-005 DoD Level 2+ gate requires distinguishing JSON vs fallback
+        # Refs:  DoD Level 2+ gate requires distinguishing JSON vs fallback
 
         if data is None or not data.get("claims"):
             # If JSON was parsed successfully but has no claims, return empty result (not fallback)
@@ -403,7 +403,7 @@ class EvidenceSynthesizer:
 
             # Try to extract claims from Markdown format
             # CRITICAL: Pass valid_snippet_ids to unify validation across ALL paths
-            # Refs: ADR-004 Audit v3 finding - fallback was creating "doomed" claims
+            # Refs:  finding - fallback was creating "doomed" claims
             markdown_claims = self._parse_markdown_claims(
                 original_content, study_cards, valid_snippet_ids
             )
@@ -430,7 +430,7 @@ class EvidenceSynthesizer:
         # CRITICAL: Per PRISMA 2020 / GRADE, claims MUST have traceable evidence
         # If valid_snippet_ids is provided, filter early to avoid creating claims
         # that will be rejected by the gate (reduces false negatives from timing issues)
-        # Refs: ADR-003 post-audit, PRISMA 2020 traceability
+        # Refs: PRISMA 2020 traceability
         claims = []
         skipped_for_no_snippets = 0
         skipped_for_invalid_snippets = 0
@@ -467,7 +467,7 @@ class EvidenceSynthesizer:
 
             # EARLY VALIDATION: If valid_snippet_ids provided, filter to only existing ones
             # This prevents creating claims that will be rejected by the gate
-            # Refs: ADR-003 post-audit finding about false negatives
+            # Refs:  finding about false negatives
             if valid_snippet_ids is not None and supporting_snippet_ids:
                 valid_support = [sid for sid in supporting_snippet_ids if sid in valid_snippet_ids]
                 if not valid_support and supporting_snippet_ids:
@@ -538,7 +538,7 @@ class EvidenceSynthesizer:
                     supporting_snippet_ids=supporting_snippet_ids,
                     conflicting_snippet_ids=[],  # To be populated by verification
                     limitations=limitations,
-                    grade_rationale=grade_rationale,  # Structured GRADE rationale per ADR-004
+                    grade_rationale=grade_rationale,  # Structured GRADE rationale per
                     studies_supporting=len(claim_data.get("supporting_studies", []))
                     or len(supporting_snippet_ids),
                     studies_conflicting=0,
@@ -632,7 +632,7 @@ class EvidenceSynthesizer:
             study_cards: Study cards for context
             valid_snippet_ids: If provided, validate snippet_ids before creating claims.
                                Claims with NO valid snippets are skipped.
-                               Refs: PRISMA 2020 traceability, ADR-004 Audit v3
+                               Refs: PRISMA 2020 traceability
 
         Handles patterns like:
         - **Claim 1:** or 1. **Claim ID:**
@@ -735,7 +735,7 @@ class EvidenceSynthesizer:
 
                 # CRITICAL: Validate with valid_snippet_ids if provided
                 # This prevents creating "doomed" claims that will be rejected by gate
-                # Refs: ADR-004 Audit v3, PRISMA 2020 traceability
+                # Refs: PRISMA 2020 traceability
                 if valid_snippet_ids is not None:
                     supporting_snippet_ids = [
                         sid for sid in candidate_snippet_ids if sid in valid_snippet_ids

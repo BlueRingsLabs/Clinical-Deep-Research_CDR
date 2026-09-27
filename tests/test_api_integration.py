@@ -2,7 +2,6 @@
 Tests for CDR API endpoints.
 
 API integration tests using FastAPI TestClient.
-Refs: CDR_Integral_Audit_2026-01-20.md (API contract validation)
 
 Tests:
 1. Health endpoint
@@ -1050,7 +1049,6 @@ class TestErrorHandling:
 #
 # These tests validate that the API correctly reads from RunStore when
 # configured, falling back to in-memory _runs when not.
-# Refs: CDR_Integral_Audit_2026-01-20.md (API + RunStore integration)
 # =============================================================================
 
 

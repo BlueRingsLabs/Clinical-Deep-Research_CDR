@@ -5,7 +5,7 @@ Evidence-based medical research assistant with full traceability.
 """
 
 __version__ = "0.1.0"
-__author__ = "DeepRatAI Team"
+__author__ = "Gonzalo Romero and CDR contributors"
 
 from cdr.config import Settings, get_settings
 

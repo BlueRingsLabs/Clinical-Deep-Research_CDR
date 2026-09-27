@@ -1,8 +1,7 @@
 """
 Tests for CDRRunner persistence integration.
 
-MEDIUM-6 verification: CDRRunner correctly persists run state to RunStore.
-Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-6
+CDRRunner correctly persists run state to RunStore.
 
 Tests:
 1. CDRRunner accepts RunStore parameter

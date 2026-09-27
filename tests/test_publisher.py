@@ -1,8 +1,7 @@
 """
 Tests for CDR Publisher Layer.
 
-MEDIUM-5 fix: Tests for Publisher alignment with current schemas.
-Refs: CDR_Integral_Audit_2026-01-20.md MEDIUM-5
+Tests for Publisher alignment with current schemas.
 """
 
 import pytest

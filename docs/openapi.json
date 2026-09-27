@@ -795,7 +795,7 @@
           "verification_status"
         ],
         "title": "ClaimResponse",
-        "description": "Evidence claim response.\n\nRefs: EvidenceClaim schema, CDR_Integral_Audit_2026-01-20.md CRITICAL-3"
+        "description": "Evidence claim response.\n\nRefs: EvidenceClaim schema"
       },
       "EvaluationDimensionResponse": {
         "properties": {

@@ -36,7 +36,6 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
     - Study design filtering
 
     Per PRISMA 2020: All screening decisions must be traceable with reasons.
-    Refs: ADR-004 Audit v3 (level-gating)
     """
     with tracer.start_span("node.screen") as span:
         if not state.pico:
@@ -83,7 +82,7 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
             # Fallback: PICO-informed heuristic screening (less accurate than LLM)
             # ⚠️ LEVEL-GATING: This fallback is ONLY acceptable for Level 1 (exploratory)
             # For Research-grade (Level 2+), LLM or manual review is REQUIRED
-            # Refs: PRISMA 2020 Flow Diagram, ADR-004 Audit v3 (level-gating)
+            # Refs: PRISMA 2020 Flow Diagram,  (level-gating)
 
             # CRITICAL: Block heuristic screening for Research-grade (Level 2+)
             if dod_level >= 2:
@@ -261,9 +260,9 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
                 span.set_attribute("gate_excluded", gate_excluded_count)
                 span.set_attribute("gate_warned", gate_warned_count)
 
-        # MEDIUM-2 fix: Aggregate exclusion reasons for PRISMA 2020 flow diagram
+        # Aggregate exclusion reasons for PRISMA 2020 flow diagram
         # Per PRISMA 2020: "reasons for exclusion should be recorded and reported"
-        # Refs: PRISMA 2020 Statement, CDR_Integral_Audit_2026-01-20.md MEDIUM-2
+        # Refs: PRISMA 2020 Statement
         exclusion_reasons_count: dict[str, int] = {}
         for decision in screened:
             if not decision.included and decision.reason_code:
@@ -291,7 +290,7 @@ async def screen_node(state: CDRState, config: RunnableConfig) -> dict:
             records_screened=len(state.retrieved_records),
             records_excluded=excluded_count,
             studies_included=included_count,
-            # MEDIUM-2: Include exclusion reasons breakdown for PRISMA 2020
+            # Include exclusion reasons breakdown for PRISMA 2020
             exclusion_reasons=exclusion_reasons_count,
         )
 
@@ -317,8 +316,8 @@ async def parse_documents_node(state: CDRState, config: RunnableConfig) -> dict:
     Per PRISMA 2020: Records without retrievable reports (no abstract >= 10 chars)
     are counted in reports_not_retrieved and excluded from synthesis.
 
-    HIGH-2 fix: Attempts PMC full-text retrieval before marking as not_retrieved.
-    Refs: PRISMA 2020 Flow Diagram, CDR_Integral_Audit_2026-01-20.md HIGH-2
+    Attempts PMC full-text retrieval before marking as not_retrieved.
+    Refs: PRISMA 2020 Flow Diagram
     """
     configurable = config.get("configurable", {})
     enable_fulltext = configurable.get("enable_fulltext_retrieval", True)
@@ -385,7 +384,7 @@ async def parse_documents_node(state: CDRState, config: RunnableConfig) -> dict:
                     print(f"[ParseDocs] ⚠️ PMC retrieval failed for {record.record_id}: {e}")
                     # Continue with abstract fallback
 
-            # CRITICAL: Check minimum content requirement per PRISMA/ADR-004
+            # CRITICAL: Check minimum content requirement per PRISMA/
             if not document_text or len(document_text) < 10:
                 reports_not_retrieved += 1
                 print(

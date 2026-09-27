@@ -58,7 +58,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
         # CRITICAL: Pass valid_snippet_ids for early filtering
         # This prevents creating claims with invalid snippets that would be rejected
         # by the gate, reducing false negatives from pipeline timing issues
-        # Refs: ADR-003 post-audit, PRISMA 2020 traceability
+        # Refs: PRISMA 2020 traceability
         result = synthesizer.synthesize(
             state.study_cards,
             state.rob2_results,
@@ -155,7 +155,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
 
                     new_limitations = [*claim.limitations, grade_downgrade_text]
 
-                    # Build structured GRADE rationale per ADR-004
+                    # Build structured GRADE rationale per
                     # Keys: risk_of_bias, inconsistency, indirectness, imprecision, publication_bias
                     new_grade_rationale = {
                         **claim.grade_rationale,
@@ -241,7 +241,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # =====================================================================
         # EARLY GATE: Snippets exist but no claims generated
-        # Refs: ADR-005, PRISMA 2020 (transparency about evidence gaps)
+        # Refs: PRISMA 2020 (transparency about evidence gaps)
         # CRITICAL: This is different from "no snippets" - evidence exists but
         # synthesis couldn't extract structured claims. This must be flagged.
         # =====================================================================
@@ -268,7 +268,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # =====================================================================
         # DOD LEVEL EARLY GATES (synthesize_node)
-        # Refs: ADR-005 Post-Change Audit, CDR_Post_ADR005_Full_Audit
+        # Refs:  Post-Change Audit, CDR_Post_ADR005_Full_Audit
         # CRITICAL: Block early to avoid wasting compute on invalid syntheses
         # =====================================================================
 
@@ -306,7 +306,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # GATE: Level 3 requires grade_rationale COMPLETE per GRADE domain
         # Per GRADE handbook: ALL 5 domains must be explicitly justified
-        # Refs: ADR-005, GRADE handbook section 5.2, CDR_Post_ADR005_Full_Audit
+        # Refs: GRADE handbook section 5.2, CDR_Post_ADR005_Full_Audit
         # CRITICAL: Not just "exists" but contains all 5 GRADE domains or "not_applicable"
         GRADE_REQUIRED_DOMAINS = frozenset(
             [
@@ -578,7 +578,7 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
     Input: claims, verification, pico
     Output: composed_hypotheses
 
-    IMPLEMENTATION (HIGH-1):
+    IMPLEMENTATION:
     Uses CompositionEngine to detect mechanistic relations between claims
     and propose novel hypotheses from composition (A+B⇒C).
 
@@ -596,7 +596,7 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
         dod_level = configurable.get("dod_level", 1)
         llm = configurable.get("llm_provider")
 
-        # HIGH-1: Compositional inference only for Level 3
+        # Compositional inference only for Level 3
         if dod_level < 3:
             print(f"[Compose] Skipping for DoD level {dod_level} (requires Level 3)")
             span.set_attribute("skipped_reason", f"dod_level_{dod_level}")

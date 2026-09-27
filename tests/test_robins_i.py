@@ -1,8 +1,7 @@
 """
 Tests for ROBINS-I Assessor
 
-HIGH-3: Validates ROBINS-I assessment for observational studies.
-Refs: CDR_Integral_Audit_2026-01-20.md HIGH-3
+Validates ROBINS-I assessment for observational studies.
 """
 
 from unittest.mock import MagicMock, patch
