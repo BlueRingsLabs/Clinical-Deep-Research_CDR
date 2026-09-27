@@ -1,5 +1,8 @@
 # CDR Report — Sample Output
 
+> ⚠️ **Illustrative sample.** Hand-written to show the report format; the PMIDs are
+> placeholders, not real papers. For real runs see `examples/output/online/`.
+
 > **Question**: Is aspirin effective for secondary prevention of cardiovascular events in adults?
 >
 > **Status**: `completed`  

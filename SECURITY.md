@@ -8,19 +8,18 @@
 
 ## Reporting a Vulnerability
 
-**Do not open a public GitHub issue for security vulnerabilities.**
+**Please don't open a public issue for security problems.**
 
-Instead, please report them privately:
+Report privately through GitHub:
+**[Report a vulnerability](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/security/advisories/new)**
+(Security tab → "Report a vulnerability").
 
-1. **Email**: security@deepratai.com
-2. **Subject**: `[CDR Security] <brief description>`
-3. **Include**:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if any)
+Include what you found, how to reproduce it, and what an attacker could do with it. A suggested
+fix is welcome but not required.
 
-We will acknowledge receipt within **48 hours** and aim to provide a fix or mitigation within **7 days** for critical issues.
+CDR is maintained by a small team, not a security department. Expect an acknowledgment within a
+few days and a straight answer about what happens next. Valid reports are credited in the
+release notes unless you'd rather stay anonymous.
 
 ## Security Practices
 
@@ -34,7 +33,7 @@ We will acknowledge receipt within **48 hours** and aim to provide a fix or miti
 ### Dependency Management
 
 - Dependencies are declared in `pyproject.toml` with minimum version pins
-- A pinned `requirements.lock` is provided for reproducible builds
+- `uv.lock` pins every dependency for reproducible installs
 - Run `pip audit` periodically to check for known vulnerabilities
 - Frontend dependencies use `npm audit` in CI
 
@@ -49,7 +48,8 @@ We will acknowledge receipt within **48 hours** and aim to provide a fix or miti
 
 - All external API calls use HTTPS
 - Tests are fully mocked — no network calls in the test suite
-- The API server binds to `0.0.0.0:8000` by default; restrict in production
+- The API has **no authentication** and allows all CORS origins. Run it locally or behind
+  your own auth. Don't expose it to the internet as-is
 
 ### Supply Chain
 
@@ -64,7 +64,7 @@ We will acknowledge receipt within **48 hours** and aim to provide a fix or miti
 |--------|------------|--------|
 | LLM prompt injection via user query | Input sanitization + structured extraction | Partial |
 | API key leakage in outputs | Keys never enter the pipeline state | Implemented |
-| Malicious PDF in retrieval | PDFs parsed in sandboxed parser (PyMuPDF) | Partial |
+| Malicious PDF in retrieval | Full text comes from PMC JATS XML; PDF parsing (PyMuPDF) is not sandboxed | Partial |
 | Supply chain attack via deps | Pinned deps + `pip audit` | Implemented |
 | Unauthorized API access | No auth in v0.1 (research tool) | TODO for v0.2 |
 

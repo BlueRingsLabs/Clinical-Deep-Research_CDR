@@ -2,258 +2,169 @@
 
 # Clinical Deep Research (CDR)
 
-**Automated evidence engine for clinical discovery & systematic review**
+**An open research engine that reads the clinical literature, shows its work,
+and is being built to propose the questions nobody has tested yet.**
 
-[![CI](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepRatAI/Clinical-Deep-Research_CDR/actions)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Alpha](https://img.shields.io/badge/status-v0.1_Open_Alpha-orange.svg)](RELEASE_CRITERIA.md)
+[![CI](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/actions/workflows/ci.yml/badge.svg)](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/actions/workflows/ci.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Status: open alpha](https://img.shields.io/badge/status-open_alpha-orange.svg)](ROADMAP.md)
+[![Good first issues](https://img.shields.io/github/issues/BlueRingsLabs/Clinical-Deep-Research_CDR/good%20first%20issue?label=good%20first%20issues&color=7057ff)](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
 
-<img src="docs/assets/demo.svg" alt="CDR demo — make demo" width="720" />
+<img src="docs/assets/demo.svg" alt="CDR running a clinical question through the pipeline" width="720" />
 
 </div>
 
-> **⚠️ NOT MEDICAL ADVICE.** CDR is a research exploration tool. It does not diagnose, prescribe, or replace professional medical judgment. See [DISCLAIMER.md](DISCLAIMER.md).
+> **Not medical advice.** CDR is a research tool. It does not diagnose, prescribe, or replace
+> clinical judgment. Everything it produces needs expert review. See [DISCLAIMER.md](DISCLAIMER.md).
 
 ---
 
-## What is CDR?
+## Why this exists
 
-Given a **clinical research question**, CDR produces a **structured, evidence-traced research report** — from literature retrieval through risk-of-bias assessment to verified synthesis — in a single automated pipeline.
+A good systematic review takes months. By the time it's published, part of it is already
+out of date. LLMs can read faster than any team of reviewers, but left alone they do something
+unacceptable in medicine: they make things up and cite real papers for claims those papers
+never made.
 
-**Example:**
+**CDR is an attempt to get the speed without the fabrication.** Every claim it outputs points
+to a specific passage in a specific study. If the evidence doesn't hold up, the report is marked
+unpublishable instead of being dressed up to look confident.
 
-```
-Input:  "What is the efficacy of GLP-1 receptor agonists vs placebo
-         for HbA1c reduction in type 2 diabetes?"
+That's the part that works today. The long game is bigger.
 
-Output: Structured report with PICO, PRISMA flow, study cards,
-        RoB2 assessment, evidence claims with citations,
-        GRADE certainty, and clinical disclaimer.
-```
+## Where this is going
 
-## What Makes CDR Different?
+AI systems have started producing real results on open problems in mathematics. Medicine has
+its own open problems: associations nobody can explain, drugs that work for reasons nobody fully
+understands, patients who fall between two specialties and two literatures. The answers are
+often already sitting in the papers, split across studies that never cite each other.
 
-- **Full traceability**: Every claim links to specific snippets from specific studies. No unsupported assertions.
-- **PRISMA-aligned workflow**: 13-node pipeline following systematic review methodology (search → screen → extract → synthesize → verify → publish).
-- **Risk of Bias (RoB2)**: Automated per-study bias assessment across all five Cochrane domains.
-- **Adversarial critique**: Built-in Skeptic agent challenges claims before publication.
-- **Verification gates**: Citation coverage, entailment checking, and evidence-quality thresholds enforced before any report is published.
-- **Multi-provider LLM**: Supports 8 LLM providers (Gemini, OpenAI, Anthropic, HuggingFace, Groq, Cerebras, OpenRouter, Cloudflare) — no vendor lock-in.
+**CDR's goal is to become an engine that can propose credible, testable clinical hypotheses:**
+"A is linked to B, B is linked to C, so here's why A might affect C, here's what could make
+that wrong, and here's the study that would settle it."
 
-## Architecture
+There's a rule behind the order of the work: **you don't get to speculate until you can prove
+you don't hallucinate.** That's why the evidence engine came first, and why it's strict.
 
-<div align="center">
-<img src="docs/assets/architecture.svg" alt="CDR Pipeline Architecture — 13-node LangGraph" width="800" />
-</div>
+The first version of the hypothesis layer already exists
+([`composition/`](src/cdr/composition/)). It extracts mechanistic relations, chains them into
+A + B ⇒ C hypotheses, attacks them with rival explanations and confounders, and proposes a study
+design to test them. **It hasn't produced a verified hypothesis on a real run yet.** Getting it
+there is the most interesting open problem in this repo. [The vision doc](docs/vision.md) has
+the details.
 
-The CDR pipeline is a **13-node LangGraph StateGraph** organized in four phases:
+## What works today
 
-| Phase | Nodes | Purpose |
-|-------|-------|---------|
-| **Retrieval** | parse_question → plan_search → retrieve → deduplicate | PICO extraction, PubMed/CT.gov search, deduplication |
-| **Screening** | screen → parse_docs → extract_data | Inclusion/exclusion, full-text parsing, study card extraction |
-| **Analysis** | assess_rob2 → synthesize → critique | RoB2 bias assessment, evidence synthesis, adversarial critique |
-| **Output** | verify → compose → publish | Entailment checking, hypothesis composition, report generation |
+| | Status |
+|---|---|
+| PICO extraction from a free-text clinical question | ✅ Works |
+| PubMed + ClinicalTrials.gov search, dedup, hybrid ranking (BM25 + dense + rerank) | ✅ Works |
+| LLM screening with explicit exclusion reasons (PRISMA-style) | ✅ Works |
+| Full-text parsing from PMC Open Access | ✅ Works (abstracts when no OA full text) |
+| Risk of bias: RoB 2 (trials) and ROBINS-I (observational) | ⚠️ Works, but weak on abstracts alone ([why](docs/incidents.md#inc-002-uniform-rob2-some-concerns)) |
+| Evidence claims traced to exact snippets + verification gates | ✅ Works |
+| Skeptic agent that attacks claims before publication | ✅ Works |
+| Reports in JSON / Markdown / HTML, API, basic web UI | ✅ Works |
+| Hypothesis composition (A + B ⇒ C) | 🧪 Implemented and tested, not yet producing on real runs |
+| Full GRADE, meta-analysis, Embase/Cochrane, streaming, auth | ❌ Not yet ([roadmap](ROADMAP.md)) |
 
-For deeper technical details, see [ARCHITECTURE.md](ARCHITECTURE.md), [CASE_STUDY.md](CASE_STUDY.md) and [docs/contracts/](docs/contracts/).
+Real runs on free-tier 8B models include 7 to 27 studies, produce 3 or 4 traced claims, and take
+6 to 26 minutes. The raw outputs are in [`examples/output/online/`](examples/output/online/),
+unedited, and [the run notes](docs/online-run-notes.md) describe how each one was made.
 
-## Quick Start
+## Try it
 
-### Option A: Make (recommended)
+You need [uv](https://docs.astral.sh/uv/) and Python 3.12. Node 20 is only needed for the UI.
 
 ```bash
-git clone https://github.com/DeepRatAI/Clinical-Deep-Research_CDR.git
+git clone https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR.git
 cd Clinical-Deep-Research_CDR
-
-# Setup environment + install dependencies
-make setup
-
-# Configure API keys
-cp .env.example .env
-# Edit .env — at minimum set one LLM provider key (e.g., HF_TOKEN)
-
-# Run the test suite
-make test
-
-# Start the API server
-make server
+make setup          # Python deps (uv), UI deps (npm), creates .env
+make demo           # no API keys: renders the bundled sample report
+make test           # the whole backend suite runs offline in under a minute
 ```
 
-### Option B: Docker
+> The bundled `examples/output/sample_report.json` is **illustrative**. It was written by hand to
+> show every field of the report format, and its PMIDs are placeholders. For real output, look at
+> [`examples/output/online/`](examples/output/online/).
+
+**Run a real question.** Put one LLM key in `.env`; Gemini, Groq and OpenRouter all have free
+tiers ([providers guide](docs/providers.md)). Then:
 
 ```bash
-git clone https://github.com/DeepRatAI/Clinical-Deep-Research_CDR.git
-cd Clinical-Deep-Research_CDR
-cp .env.example .env
-# Edit .env with your API keys
+make dev            # API on http://localhost:8000/docs
 
-docker-compose up -d
-# API at http://localhost:8000  |  UI at http://localhost:5173
-```
-
-### Option C: Manual
-
-```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-cp .env.example .env
-# Edit .env with at least one LLM provider key
-
-pytest tests/ -v               # Run tests
-uvicorn cdr.api.routes:app \
-  --host 0.0.0.0 --port 8000  # Start server
-```
-
-### Run a Query
-
-```bash
 curl -X POST http://localhost:8000/api/v1/runs \
   -H "Content-Type: application/json" \
-  -d '{
-    "question": "What is the efficacy of GLP-1 agonists vs placebo for HbA1c reduction in T2DM?",
-    "provider": "gemini",
-    "dod_level": 2
-  }'
+  -d '{"research_question": "Is low-dose aspirin effective for secondary prevention of cardiovascular events?", "max_results": 20}'
+
+# → {"run_id": "...", "status": "..."}   then poll:
+curl http://localhost:8000/api/v1/runs/<run_id>
 ```
 
-### Run Evaluation
+Or run everything in containers with `make docker-up`. The UI is at http://localhost:5173.
 
-```bash
-make eval
-# Results → eval/results/baseline_v0_1.json
-```
+## How it works
 
-## Demo & Sample Outputs
+<div align="center">
+<img src="docs/assets/architecture.svg" alt="The 13-node CDR pipeline" width="800" />
+</div>
 
-### Offline Demo (no API keys needed)
+A 13-node [LangGraph](https://github.com/langchain-ai/langgraph) pipeline with typed contracts
+between every step. If a node hands the next one something malformed, the run fails loudly
+instead of quietly producing garbage.
 
-```bash
-make demo
-```
+| Phase | Nodes | What happens |
+|---|---|---|
+| **Retrieve** | parse_question → plan_search → retrieve → deduplicate | Question → PICO → database queries → records |
+| **Screen** | screen → parse_docs → extract_data | Include/exclude with reasons, pull full text, extract study data |
+| **Analyze** | assess_rob2 → synthesize → critique | Risk of bias, evidence claims, adversarial critique |
+| **Publish** | verify → compose → publish | Check every claim against its sources, compose hypotheses, write the report |
 
-Validates the bundled [sample_report.json](examples/output/sample_report.json) against the [JSON Schema](schemas/report.schema.json) and renders a human-readable [sample_report.md](examples/output/sample_report.md).
+The strictness is configurable through **DoD levels** ("definition of done"):
+1 = exploratory, 2 = research-grade, 3 = full gates plus hypothesis composition. The
+[glossary](docs/glossary.md) explains these and every other acronym in this repo.
 
-### Online Demo (real pipeline, requires API keys)
+Start with [docs/architecture.md](docs/architecture.md). If you want to know why it's built this
+way, read [docs/case-study.md](docs/case-study.md) and the
+[incident postmortems](docs/incidents.md). They're the honest version.
 
-```bash
-# Configure at least one LLM provider key in .env
-make demo-online
-```
+## Contributing
 
-Runs 5 clinical questions through the full 13-node pipeline (PubMed retrieval → synthesis → verification → publication). Results are saved to `examples/output/online/run_01..05/`.
+CDR sits at an awkward intersection: engineers who don't know what RoB 2 is, and clinicians
+who don't know what LangGraph is. **Both are needed**, and neither has to learn the other's job
+to help.
 
-See [online run notes](docs/online_run_notes.md) for metadata on pre-computed runs.
+- **Engineers:** [good first issues](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
+  or grep for `loose end` in the code for things that are half-wired and waiting.
+- **Clinicians, methodologists, researchers:** run a question you know the answer to and tell us
+  where CDR got it wrong. A precise "this claim is not supported by that paper" report is worth
+  more than most PRs. There's an [issue form for exactly that](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/new?template=evidence_problem.yml).
+- **Everyone:** [Case Files](docs/case-files.md) are clinical questions with known answers that
+  CDR has to get right. Adding one is the fastest way to make the engine better.
 
-### Evaluation Charts
-
-```bash
-make figures
-```
-
-Generates [latency charts](eval/results/fig_latency.png) from baseline evaluation data.
-
-### Understanding a CDR Report
-
-See [Report Anatomy](docs/report_anatomy.md) for a field-by-field guide on reading and auditing CDR output.
-
-## Output Sample
-
-CDR produces structured reports with fixed sections:
-
-```json
-{
-  "run_id": "a1b2c3d4",
-  "question": "...",
-  "pico": {
-    "population": "Adults with type 2 diabetes",
-    "intervention": "GLP-1 receptor agonists",
-    "comparator": "Placebo",
-    "outcome": "HbA1c reduction"
-  },
-  "prisma_counts": { "records_identified": 150, "studies_included": 8 },
-  "claims": [
-    {
-      "claim_text": "GLP-1 agonists reduce HbA1c by 1.0–1.5% vs placebo",
-      "certainty": "high",
-      "supporting_snippet_ids": ["snip_001", "snip_003"]
-    }
-  ],
-  "rob2_summary": { "overall": "low_to_some_concerns" },
-  "verification_summary": { "overall_status": "verified" },
-  "disclaimer": "⚠️ This report is machine-generated. Not medical advice."
-}
-```
-
-Full schema: [schemas/report.schema.json](schemas/report.schema.json)
-
-## Project Structure
-
-```
-cdr/
-├── src/cdr/              # Source code (18 subpackages)
-│   ├── api/              # FastAPI endpoints (18 routes)
-│   ├── core/             # Schemas, enums, exceptions
-│   ├── orchestration/    # LangGraph workflow (13 nodes)
-│   ├── retrieval/        # PubMed, CT.gov, BM25, dense, rerank
-│   ├── rob2/             # Risk of Bias 2.0 assessment
-│   ├── synthesis/        # Evidence claims + GRADE
-│   ├── verification/     # Citation coverage + entailment
-│   ├── publisher/        # MD / JSON / HTML report generation
-│   ├── llm/              # Multi-provider LLM abstraction
-│   └── observability/    # Structured tracing + metrics
-├── tests/                # 635 backend + 81 frontend tests
-├── eval/                 # Evaluation framework + baseline results
-├── ui/                   # React 18 + TypeScript frontend
-├── schemas/              # Output JSON schema (v0.1)
-├── docs/contracts/       # Stage-level input/output contracts
-├── examples/             # Usage examples with sample outputs
-└── .github/              # CI workflows + issue templates
-```
-
-## Testing
-
-```bash
-make test        # Backend (635 tests)
-make test-ui     # Frontend (81 tests)
-make eval        # Evaluation baseline
-make lint        # Ruff lint + format check
-```
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| `ModuleNotFoundError: cdr` | Run `pip install -e .` or set `PYTHONPATH=src` |
-| `openai.AuthenticationError` | Check `.env` has a valid key for your chosen provider |
-| `Connection refused :8000` | Server not running — run `make server` |
-| `weasyprint` install fails | `apt-get install libpango-1.0-0 libharfbuzz0b libffi-dev` |
-| Tests fail with network errors | Tests are fully mocked — check `no_proxy` isn't interfering |
-| Docker healthcheck fails | Wait 30s for startup; run `docker logs cdr-api-1` |
+Read [CONTRIBUTING.md](CONTRIBUTING.md). It's short, and your first PR can land the same day.
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Pipeline design, data model, stage contracts |
-| [CASE_STUDY.md](CASE_STUDY.md) | Technical narrative: decisions, tradeoffs, hard problems |
-| [EVAL.md](EVAL.md) | Evaluation methodology + baseline results |
-| [docs/report_anatomy.md](docs/report_anatomy.md) | How to read and audit a CDR report |
-| [docs/online_run_notes.md](docs/online_run_notes.md) | Metadata for pre-computed online runs |
-| [DISCLAIMER.md](DISCLAIMER.md) | Clinical disclaimer and responsible use |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute: setup, tests, PR guidelines |
-| [ROADMAP.md](ROADMAP.md) | v0.1 → v0.2 → v1.0 milestones |
-| [SECURITY.md](SECURITY.md) | Vulnerability reporting + security practices |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [RELEASE_CRITERIA.md](RELEASE_CRITERIA.md) | Definition of Done for v0.1 |
-| [INCIDENTS.md](INCIDENTS.md) | Postmortems: real problems encountered |
-| [docs/contracts/](docs/contracts/) | Stage-level I/O contracts |
+| | |
+|---|---|
+| [docs/vision.md](docs/vision.md) | Where CDR is going and why the order of work matters |
+| [docs/glossary.md](docs/glossary.md) | PICO, PRISMA, RoB 2, GRADE, DoD levels in plain language |
+| [docs/architecture.md](docs/architecture.md) | Pipeline, data model, stage contracts |
+| [docs/case-study.md](docs/case-study.md) | Design decisions, trade-offs, hard problems |
+| [docs/incidents.md](docs/incidents.md) | Postmortems of things that broke |
+| [docs/evaluation.md](docs/evaluation.md) | How output quality is measured |
+| [docs/report-anatomy.md](docs/report-anatomy.md) | How to read and audit a CDR report |
+| [docs/providers.md](docs/providers.md) | LLM provider setup and free tiers |
+| [ROADMAP.md](ROADMAP.md) | What's next |
+
+## Citing CDR
+
+If you use CDR in research, cite it with the metadata in [CITATION.cff](CITATION.cff). GitHub
+shows a "Cite this repository" button in the sidebar.
 
 ## License
 
-[Apache 2.0](LICENSE) — Copyright 2025–2026 DeepRatAI
-
----
-
-> ⚠️ **CDR is NOT a medical device.** It does not provide medical advice, diagnose conditions, or recommend treatments. All outputs require expert review. See [DISCLAIMER.md](DISCLAIMER.md).
+[Apache 2.0](LICENSE).
