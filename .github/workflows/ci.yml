@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Backend Tests (635)
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -86,7 +86,7 @@ jobs:
       run:
         working-directory: ui
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -118,7 +118,7 @@ jobs:
       run:
         working-directory: ui
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -156,7 +156,7 @@ jobs:
     name: OpenAPI Spec Validation
     needs: [backend]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -189,7 +189,7 @@ jobs:
     name: Integration Tests
     needs: [backend]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -222,7 +222,7 @@ jobs:
     name: Eval Offline (Golden Set)
     needs: [backend]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
