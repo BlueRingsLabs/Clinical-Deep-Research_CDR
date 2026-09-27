@@ -6,16 +6,15 @@ Demonstrates how to use CDR programmatically to run a clinical
 research query and inspect the results.
 
 Requirements:
-    pip install -e ".[dev]"
-    cp .env.example .env  # Configure at least HF_TOKEN
+    make setup
+    cp .env.example .env  # add at least one LLM provider key
 
 Usage:
-    PYTHONPATH=src python examples/run_query.py
+    python examples/run_query.py
 """
 
 import asyncio
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -28,34 +27,36 @@ async def main():
 
     # Lazy import — only import after path is set up
     try:
-        from cdr.orchestration.graph import create_graph, run_graph
+        from cdr.llm.factory import create_provider_with_fallback
+        from cdr.orchestration.graph import CDRRunner
     except ImportError:
-        print("❌  CDR not installed. Run: pip install -e '.[dev]'")
+        print("❌  CDR not installed. Run: make setup")
         sys.exit(1)
 
     # Define a clinical question
     question = "Is aspirin effective for secondary prevention of cardiovascular events in adults?"
 
-    print(f"🔬  Running CDR query:")
+    print("🔬  Running CDR query:")
     print(f"    {question}")
     print()
 
     # Run the pipeline
     try:
-        result = await run_graph(question)
+        provider = create_provider_with_fallback()
+        runner = CDRRunner(llm_provider=provider, output_dir="reports", dod_level=1)
+        state = await runner.run(research_question=question, max_results=20)
     except Exception as e:
         print(f"❌  Pipeline error: {e}")
         print()
         print("Common fixes:")
-        print("  - Check .env has HF_TOKEN configured")
+        print("  - Check .env has at least one LLM provider key (see .env.example)")
         print("  - Check .env has NCBI_EMAIL set")
         print("  - Verify network connectivity")
         sys.exit(1)
 
-    # Inspect results
-    report = result.get("report", {})
+    report = state.report or {}
 
-    print(f"✅  Pipeline complete!")
+    print("✅  Pipeline complete!")
     print(f"    Status: {report.get('status', 'unknown')}")
     print(f"    Studies found: {report.get('study_count', 0)}")
     print(f"    Claims generated: {report.get('claim_count', 0)}")
@@ -77,14 +78,14 @@ async def main():
     # Show PRISMA counts
     prisma = report.get("prisma_counts", {})
     if prisma:
-        print(f"📊  PRISMA Flow:")
+        print("📊  PRISMA Flow:")
         print(f"    Identified: {prisma.get('records_identified', 0)}")
         print(f"    Screened:   {prisma.get('records_screened', 0)}")
         print(f"    Included:   {prisma.get('studies_included', 0)}")
         print()
 
     # Save report
-    output_path = Path("examples/output/sample_report.json")
+    output_path = Path("reports/run_query_report.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(report, f, indent=2, default=str)
