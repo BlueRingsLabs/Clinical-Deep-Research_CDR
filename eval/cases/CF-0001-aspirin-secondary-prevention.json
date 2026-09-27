@@ -1,0 +1,23 @@
+{
+  "id": "CF-0001",
+  "title": "Low-dose aspirin after a heart attack or stroke",
+  "case_type": "settled",
+  "question": "Is low-dose aspirin effective for secondary prevention of cardiovascular events in adults with established vascular disease?",
+  "population": "Adults with previous myocardial infarction, stroke or other established vascular disease",
+  "intervention": "Low-dose aspirin",
+  "comparator": "Placebo or no aspirin",
+  "outcome": "Serious vascular events (MI, stroke, vascular death) and major bleeding",
+  "expected_evidence_level": "high",
+  "expected_min_studies": 10,
+  "expected_claim_patterns": ["aspirin", "secondary prevention", "vascular events", "bleeding"],
+  "composition_expected": false,
+  "known_answer": "In secondary prevention, aspirin reduces serious vascular events by roughly a fifth in relative terms. It increases major bleeding, but the absolute benefit clearly outweighs the bleeding risk in this population. This is different from primary prevention, where the balance is much closer.",
+  "references": [
+    "Antithrombotic Trialists' (ATT) Collaboration. Aspirin in the primary and secondary prevention of vascular disease: collaborative meta-analysis of individual participant data from randomised trials. Lancet. 2009;373(9678):1849-1860."
+  ],
+  "traps": [
+    "Mixing primary-prevention trials into a secondary-prevention answer",
+    "Reporting the benefit without the bleeding trade-off"
+  ],
+  "contributed_by": "glromero"
+}

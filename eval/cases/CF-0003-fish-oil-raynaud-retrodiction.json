@@ -1,0 +1,26 @@
+{
+  "id": "CF-0003",
+  "title": "Swanson's fish oil and Raynaud's syndrome",
+  "case_type": "retrodiction",
+  "question": "Which dietary interventions might plausibly reduce symptoms of Raynaud's syndrome?",
+  "population": "Patients with Raynaud's syndrome",
+  "intervention": "Dietary interventions (open-ended)",
+  "comparator": null,
+  "outcome": "Frequency and severity of vasospastic attacks",
+  "expected_evidence_level": "very_low",
+  "expected_min_studies": 2,
+  "expected_claim_patterns": ["blood viscosity", "platelet aggregation", "fish oil", "omega-3"],
+  "composition_expected": true,
+  "known_answer": "Before 1986 no study linked fish oil to Raynaud's. But one literature showed dietary fish oil lowers blood viscosity and platelet aggregation, and another showed Raynaud's patients have raised blood viscosity and platelet aggregation. Swanson connected the two in 1986. A controlled trial later found a benefit.",
+  "expected_hypothesis": "Dietary fish oil (omega-3 fatty acids) may reduce Raynaud's symptoms by lowering blood viscosity and platelet aggregation.",
+  "literature_cutoff_year": 1985,
+  "references": [
+    "Swanson DR. Fish oil, Raynaud's syndrome, and undiscovered public knowledge. Perspect Biol Med. 1986;30(1):7-18.",
+    "DiGiacomo RA, Kremer JM, Shah DM. Fish-oil dietary supplementation in patients with Raynaud's phenomenon: a double-blind, controlled, prospective study. Am J Med. 1989;86(2):158-164."
+  ],
+  "traps": [
+    "Using post-1985 literature, which already contains the answer",
+    "Proposing the link without the mechanistic chain that justifies it"
+  ],
+  "contributed_by": "glromero"
+}

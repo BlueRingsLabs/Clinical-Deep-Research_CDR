@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/blob/main/schemas/case_file.schema.json",
+  "title": "CDR Case File",
+  "description": "A clinical question with a known answer that CDR should reproduce. See docs/case-files.md.",
+  "type": "object",
+  "required": [
+    "id", "title", "case_type", "question", "population", "intervention", "outcome",
+    "expected_evidence_level", "expected_min_studies", "composition_expected",
+    "known_answer", "references"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^CF-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 5, "maxLength": 120 },
+    "case_type": { "enum": ["settled", "uncertain", "retrodiction"] },
+    "question": { "type": "string", "minLength": 10 },
+    "population": { "type": "string", "minLength": 3 },
+    "intervention": { "type": "string", "minLength": 3 },
+    "comparator": { "type": ["string", "null"] },
+    "outcome": { "type": "string", "minLength": 3 },
+    "expected_evidence_level": { "enum": ["high", "moderate", "low", "very_low"] },
+    "expected_min_studies": { "type": "integer", "minimum": 0 },
+    "expected_claim_patterns": { "type": "array", "items": { "type": "string" } },
+    "composition_expected": { "type": "boolean" },
+    "known_answer": {
+      "type": "string",
+      "minLength": 20,
+      "description": "What a careful expert would conclude, in plain language, with its caveats."
+    },
+    "expected_hypothesis": {
+      "type": "string",
+      "description": "Retrodiction only: the A -> C link CDR should propose."
+    },
+    "literature_cutoff_year": {
+      "type": "integer",
+      "minimum": 1900,
+      "description": "Retrodiction only: CDR may only use literature published up to this year."
+    },
+    "references": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 10 },
+      "description": "Where the known answer comes from. Full citation; add PMID or DOI when you have verified it."
+    },
+    "traps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What a naive system would get wrong."
+    },
+    "contributed_by": { "type": "string", "description": "GitHub handle" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "case_type": { "const": "retrodiction" } } },
+      "then": { "required": ["expected_hypothesis", "literature_cutoff_year"] }
+    }
+  ]
+}

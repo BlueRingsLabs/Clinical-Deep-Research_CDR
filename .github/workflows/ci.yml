@@ -105,6 +105,7 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen
       - run: uv run python -m eval.eval_runner --dataset eval/datasets/golden_set_toy.json --output eval/results/
+      - run: uv run python -m eval.eval_runner --dataset eval/cases/ --output eval/results/cases/
       - name: Summarize
         run: |
           LATEST=$(ls -t eval/results/*_results.json 2>/dev/null | head -1)
