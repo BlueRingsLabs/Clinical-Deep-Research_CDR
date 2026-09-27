@@ -1,0 +1,18 @@
+name: Docs problem
+description: Something in the docs is wrong, missing, or confusing.
+title: "[docs] "
+labels: ["documentation"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      placeholder: "README → Try it, or docs/glossary.md"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong or missing
+    validations:
+      required: true

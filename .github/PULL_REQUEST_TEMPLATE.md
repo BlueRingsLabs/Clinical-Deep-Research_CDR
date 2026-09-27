@@ -1,21 +1,14 @@
-## What does this PR do?
+## What and why
 
-<!-- Brief description of the change. -->
+<!-- One or two sentences. Link the issue: "Closes #123". -->
 
-## Related issue
+## How I checked it
 
-<!-- Link to the issue this PR addresses, e.g. "Closes #3" -->
-
-Closes #
-
-## Changes
-
-- 
+<!-- Tests added? Ran `make check`? Tried a real run? Screenshots for UI changes. -->
 
 ## Checklist
 
-- [ ] Code runs locally without errors
-- [ ] Tests pass (`make test`)
-- [ ] Lint passes (`make lint`)
-- [ ] Docstrings / comments updated if needed
-- [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] `make check` passes
+- [ ] Behavior changes come with tests
+- [ ] No evidence gate or threshold was loosened (or, if it was, this PR explains why)
+- [ ] Docs updated if users would notice the change

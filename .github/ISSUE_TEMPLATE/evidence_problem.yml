@@ -1,0 +1,56 @@
+name: Evidence problem
+description: CDR said something the evidence doesn't support (or missed something it should have found).
+title: "[evidence] "
+labels: ["evidence", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most useful report a clinician or researcher can file. You don't need to
+        know anything about the code. Tell us what CDR claimed and why it's wrong.
+  - type: textarea
+    id: question
+    attributes:
+      label: The question you asked
+      placeholder: "Is low-dose aspirin effective for secondary prevention of cardiovascular events?"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong?
+      options:
+        - A claim isn't supported by the passage it cites
+        - A claim overstates the evidence (certainty too high)
+        - Missed an important study or body of evidence
+        - Included a study that should have been excluded
+        - Risk-of-bias or GRADE judgment looks wrong
+        - Wrong PICO (misread the question)
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What CDR said vs. what's actually true
+      description: Quote the claim and, if you can, the snippet or paper it cites. Link the paper (PMID/DOI) you think is right.
+      placeholder: |
+        Claim: "Aspirin reduces MACE by 40%..."
+        Cited snippet (PMID 12345678) actually says: "...a 19% relative reduction..."
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Report or run details (optional)
+      description: Attach or paste the report JSON, or the run ID, DoD level and LLM provider/model.
+  - type: dropdown
+    id: background
+    attributes:
+      label: Your background (optional, helps us weigh the report)
+      options:
+        - Clinician
+        - Researcher / epidemiologist / methodologist
+        - Student
+        - Engineer
+        - Other
