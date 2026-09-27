@@ -56,7 +56,7 @@ setup:
 
 check-env:
 	@[ -f .env ] || { echo "No .env yet. Run: cp .env.example .env"; exit 1; }
-	@if grep -Eq '^(GEMINI_API_KEY|GOOGLE_API_KEY|GROQ_API_KEY|CEREBRAS_API_KEY|OPENROUTER_API_KEY|CLOUDFLARE_API_KEY|HF_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)=.+' .env; then \
+	@if grep -Eq '^(GEMINI_API_KEY|GOOGLE_API_KEY|GROQ_API_KEY|CEREBRAS_API_KEY|OPENROUTER_API_KEY|CLOUDFLARE_API_KEY|HF_TOKEN|OPENAI_API_KEY|OPENAI_BASE_URL|ANTHROPIC_API_KEY)=.+' .env; then \
 		echo "LLM provider key: found"; \
 	else \
 		echo "LLM provider key: MISSING — set at least one in .env (see .env.example)"; exit 1; \
