@@ -238,4 +238,4 @@ critique → verify → compose → publish
 
 ---
 
-*For the JSON Schema of the final report, see [schemas/report.schema.json](../schemas/report.schema.json).*
+*For the JSON Schema of the final report, see [schemas/report.schema.json](../../schemas/report.schema.json).*

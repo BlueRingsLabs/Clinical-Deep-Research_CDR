@@ -69,7 +69,7 @@
 | After screening | 15 | 8 | 10 | 12 | 5 |
 | Recall@20 (est.) | High | Moderate | Moderate | High | Moderate |
 
-> **Note on Recall@k**: True Recall@k requires a labeled relevance set, which we don't have for v0.1. The values above are estimated based on known landmark studies appearing in results. Creating a proper relevance-labeled test set is a v0.2 goal (see [ROADMAP.md](ROADMAP.md)).
+> **Note on Recall@k**: True Recall@k requires a labeled relevance set, which we don't have for v0.1. The values above are estimated based on known landmark studies appearing in results. Creating a proper relevance-labeled test set is a v0.2 goal (see [ROADMAP.md](../../ROADMAP.md)).
 
 ## Failure Modes Observed
 
@@ -99,4 +99,4 @@ PYTHONPATH=src python -m eval.eval_runner \
 
 ---
 
-*Raw data: [eval/results/baseline_v0_1.json](eval/results/baseline_v0_1.json)*
+*Raw data: [eval/results/baseline_v0_1.json](baseline_v0_1.json)*
