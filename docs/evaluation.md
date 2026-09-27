@@ -156,7 +156,7 @@ See `eval/results/baseline_v0_1.json` for the reference baseline.
 ### Pipeline Latency Profile
 
 <div align="center">
-<img src="eval/results/fig_latency.png" alt="CDR Pipeline Latency — p50/p95 per Stage" width="720" />
+<img src="../eval/results/fig_latency.png" alt="CDR Pipeline Latency — p50/p95 per Stage" width="720" />
 </div>
 
 **Key observations:**
@@ -186,7 +186,7 @@ Generate this chart locally with `make figures`.
 1. Pin `seed=42` in evaluation configs
 2. Run evaluation within a short time window (hours, not days)
 3. Record LLM provider + model in results
-4. Use `requirements.lock` for exact dependency versions
+4. Install from `uv.lock` (`make setup`) for exact dependency versions
 
 ## Semantic Coherence Harness
 
@@ -213,4 +213,4 @@ PYTHONPATH=src python -m cdr.evaluation.semantic_harness
 
 ---
 
-*See [CASE_STUDY.md](CASE_STUDY.md) for how evaluation shaped CDR's design.*
+*See [Case study](case-study.md) for how evaluation shaped CDR's design.*
