@@ -12,7 +12,7 @@
     "avg_claims_generated": 7,
     "snippet_coverage": 1.0,
     "avg_verification_coverage": 0.82,
-    "publishable_rate": 0.60,
+    "publishable_rate": 0.6,
     "pipeline_completion_rate": 1.0
   },
   "results": [
@@ -50,7 +50,7 @@
         "studies_found": 10,
         "claims_generated": 5,
         "snippet_coverage": 1.0,
-        "verification_coverage": 0.70,
+        "verification_coverage": 0.7,
         "composition_emitted": false,
         "pipeline_status": "completed"
       }
@@ -76,10 +76,11 @@
         "studies_found": 5,
         "claims_generated": 6,
         "snippet_coverage": 1.0,
-        "verification_coverage": 0.80,
+        "verification_coverage": 0.8,
         "composition_emitted": true,
         "pipeline_status": "completed"
       }
     }
-  ]
+  ],
+  "provenance": "unverified: no run outputs or logs accompany these values; treat as a target profile, not a measurement. See docs/evaluation.md#about-baseline_v0_1"
 }
