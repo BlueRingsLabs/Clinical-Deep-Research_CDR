@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI: new lint job, mypy explicitly advisory, OpenAPI spec drift check, duplicate integration job removed.
 - Dependabot uses the `uv` ecosystem and groups updates.
 - Code comments no longer reference internal audit documents that were never published.
+- **Figures are built from measured data only.** The per-stage latency chart was drawn from hardcoded numbers (implying ~28 s runs; real runs take 7–27 minutes) and has been replaced by `fig_runs.png`, generated from the real runs' own metadata. `baseline_v0_1` is now labeled unverified. See `docs/evaluation.md`.
+- New README hero (a real claim traced to its snippets and source, from `run_06`) and a redrawn, correct pipeline diagram.
 - **Comprehensive type annotations in `eval_runner.py`**: Added 7 type aliases (`EvalMode`, `OutputFormat`, `QuestionDict`, `MetricsDict`, `EvalResult`, `EvalSummary`, `ComparisonResult`), explicit variable annotations, and full `typing` imports. Passes `mypy --strict` with 0 errors. Closes [#1](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues/1). ([#25](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/pull/25))
 
 ### Fixed

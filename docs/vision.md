@@ -5,8 +5,8 @@
 
 ## The problem worth solving
 
-Medicine has open problems that aren't waiting on a new experiment. They're waiting on someone
-to connect results that are already published.
+Some of medicine's open problems may not be waiting on a new experiment. They may be waiting on
+someone to connect results that are already published.
 
 This isn't a new idea. In 1986 Don Swanson, an information scientist, noticed two groups of
 papers that never cited each other:
@@ -24,6 +24,12 @@ read across all of it, invent things.
 
 **CDR is an attempt to build the machine Swanson would have wanted: one that reads everything,
 connects across literatures, and never lies about where a claim came from.**
+
+People reach for the comparison with AI attacking Millennium Prize problems in mathematics.
+It's a useful ambition and a misleading analogy. Math has proofs: an answer checks itself.
+Medicine only has evidence, and evidence is partial, biased and sometimes wrong. There's no
+proof checker at the end. That's exactly why every link in CDR's reasoning has to be traceable
+by a human who can say "no, that's not what the paper says".
 
 ## Why the order of the work matters
 
