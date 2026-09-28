@@ -24,8 +24,11 @@ Refs:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Literal
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -189,9 +192,10 @@ async def run_publishable_harness(
     async with httpx.AsyncClient(timeout=300.0) as client:
         for query in PUBLISHABLE_QUERIES:
             if verbose:
-                print(f"\n{'=' * 60}")
-                print(f"Running {query.query_id}: {query.name}")
-                print(f"{'=' * 60}")
+                logger.debug(
+                    "publishable_query_started",
+                    extra={"query_id": query.query_id, "query_name": query.name},
+                )
 
             # Start run
             try:
@@ -205,7 +209,14 @@ async def run_publishable_harness(
                 )
 
                 if response.status_code != 202:
-                    print(f"  ERROR: Failed to start run: {response.text}")
+                    logger.error(
+                        "publishable_query_start_failed",
+                        extra={
+                            "query_id": query.query_id,
+                            "status_code": response.status_code,
+                            "response": response.text,
+                        },
+                    )
                     results["failed"] += 1
                     results["details"].append(
                         {
@@ -218,7 +229,10 @@ async def run_publishable_harness(
 
                 run_data = response.json()
                 run_id = run_data["run_id"]
-                print(f"  Run ID: {run_id}")
+                logger.debug(
+                    "publishable_query_run_started",
+                    extra={"query_id": query.query_id, "run_id": run_id},
+                )
 
                 # Poll for completion
                 for _ in range(60):  # Max 10 minutes
@@ -241,13 +255,27 @@ async def run_publishable_harness(
                         break
 
                     if verbose:
-                        print(f"  Status: {current_status}...")
+                        logger.debug(
+                            "publishable_query_status",
+                            extra={
+                                "query_id": query.query_id,
+                                "run_id": run_id,
+                                "status": current_status,
+                            },
+                        )
 
                 # Check result
                 final_status = status_data.get("status", "unknown")
 
                 if final_status in ("completed", "publishable"):
-                    print(f"  ✅ PASS: {final_status}")
+                    logger.info(
+                        "publishable_query_passed",
+                        extra={
+                            "query_id": query.query_id,
+                            "run_id": run_id,
+                            "status": final_status,
+                        },
+                    )
                     results["passed"] += 1
                     results["details"].append(
                         {
@@ -258,10 +286,19 @@ async def run_publishable_harness(
                         }
                     )
                 else:
-                    print(f"  ❌ FAIL: {final_status}")
-                    print("  Debug hints:")
+                    logger.warning(
+                        "publishable_query_failed",
+                        extra={
+                            "query_id": query.query_id,
+                            "run_id": run_id,
+                            "status": final_status,
+                        },
+                    )
                     for hint in query.if_fails_check:
-                        print(f"    - {hint}")
+                        logger.debug(
+                            "publishable_query_debug_hint",
+                            extra={"query_id": query.query_id, "hint": hint},
+                        )
 
                     results["failed"] += 1
                     results["details"].append(
@@ -276,7 +313,10 @@ async def run_publishable_harness(
                     )
 
             except Exception as e:
-                print(f"  ERROR: {e}")
+                logger.exception(
+                    "publishable_query_error",
+                    extra={"query_id": query.query_id, "error": str(e)},
+                )
                 results["failed"] += 1
                 results["details"].append(
                     {
@@ -287,18 +327,22 @@ async def run_publishable_harness(
                 )
 
     # Summary
-    print(f"\n{'=' * 60}")
-    print("PUBLISHABLE HARNESS RESULTS")
-    print(f"{'=' * 60}")
-    print(f"Total: {results['total']}")
-    print(f"Passed: {results['passed']}")
-    print(f"Failed: {results['failed']}")
+    logger.info(
+        "publishable_harness_results",
+        extra={
+            "total": results["total"],
+            "passed": results["passed"],
+            "failed": results["failed"],
+        },
+    )
 
     if results["failed"] > 0:
-        print(f"\n⚠️ {results['failed']} publishable queries failed!")
-        print("This indicates DoD3 gates may be too strict or retrieval/extraction issues.")
+        logger.warning(
+            "publishable_harness_failures",
+            extra={"failed": results["failed"]},
+        )
     else:
-        print("\n✅ All publishable queries passed - DoD3 happy path validated!")
+        logger.info("publishable_harness_passed")
 
     return results
 
@@ -311,4 +355,5 @@ def get_publishable_queries() -> list[PublishableQuery]:
 if __name__ == "__main__":
     import asyncio
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     asyncio.run(run_publishable_harness())
