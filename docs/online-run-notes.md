@@ -93,6 +93,22 @@ These runs were executed against the **real CDR pipeline** — fetching from Pub
 | **Snippets** | 55 |
 | **Output** | `examples/output/online/run_05/cdr_report_run_05.json` |
 
+### Run 06 — SGLT2 Inhibitors vs GLP-1 Agonists
+
+| Field | Value |
+|-------|-------|
+| **ID** | `run_06` |
+| **Question** | What is the comparative effectiveness of SGLT2 inhibitors versus GLP-1 receptor agonists for cardiovascular outcomes in type 2 diabetes? |
+| **Provider** | OpenRouter (model not recorded) |
+| **Latency** | 478.8s |
+| **Max Records** | 15 per source |
+| **Studies** | 8 |
+| **Claims** | 3 |
+| **Date** | 2026-02-19 |
+| **Output** | `examples/output/online/run_06/` (JSON, Markdown and HTML exports) |
+
+This is the run shown in the README's evidence-chain figure.
+
 ## Summary
 
 | Run | Studies | Claims | Latency | Provider |
@@ -102,7 +118,8 @@ These runs were executed against the **real CDR pipeline** — fetching from Pub
 | run_03 | 21 | 3 | 641.5s | OpenRouter |
 | run_04 | 8 | 3 | 396.6s | OpenRouter |
 | run_05 | 20 | 3 | 808.5s | OpenRouter |
-| **Total** | **94** | **17** | **4590.6s** | — |
+| run_06 | 8 | 3 | 478.8s | OpenRouter |
+| **Total** | **102** | **20** | **5069.4s** | — |
 
 ## Reproduction
 
