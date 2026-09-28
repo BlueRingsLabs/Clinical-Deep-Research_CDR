@@ -48,7 +48,7 @@ dependencies = [
     "dspy-ai>=2.5.0",
     
     # LLM Providers
-    "openai>=1.30.0",
+    "openai>=3.19.2",
     "anthropic>=0.25.0",
     
     # API
