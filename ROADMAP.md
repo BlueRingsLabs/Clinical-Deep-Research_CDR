@@ -15,8 +15,8 @@ Working end to end: question → PICO → PubMed + ClinicalTrials.gov → screen
 RoB 2 / ROBINS-I → traced claims → skeptic critique → verification → JSON/Markdown/HTML report.
 Eight hosted LLM providers plus any local OpenAI-compatible server. FastAPI + a basic React UI.
 
-Known limits: qualitative synthesis only, PubMed + CT.gov only, no auth, no streaming, and the
-hypothesis composer has not yet produced on a real run.
+Known limits: qualitative synthesis only, PubMed + CT.gov only, no auth, no streaming, runs take
+7–27 minutes on free tiers, and the hypothesis composer has not yet produced on a real run.
 
 ## Next: v0.2
 
@@ -24,7 +24,8 @@ hypothesis composer has not yet produced on a real run.
 
 | Item | Why it matters |
 |---|---|
-| Full GRADE (all five downgrade domains) | Certainty labels today are partial |
+| Put the snippet text in the report 🙋 | Reports carry snippet IDs only, so a reader can't audit a claim without re-running |
+| Full GRADE (all five downgrade domains) | Certainty labels today are partial, and 8B runs under-rate strong evidence ([CF-0001](eval/cases/CF-0001-aspirin-secondary-prevention.json)) |
 | Wire up the parsed-but-dropped metadata 🙋 | CT.gov phase/status/enrollment and PubMed study type are extracted and then thrown away (grep `loose end`) |
 | Enforce the observational-design check 🙋 | `pico_allows_observational` is computed and never used |
 | Streaming progress (SSE) | Runs take minutes. Watching a spinner that long is bad UX |
@@ -37,6 +38,7 @@ hypothesis composer has not yet produced on a real run.
 | Item | Why it matters |
 |---|---|
 | Get the composer producing on real runs | The whole point. Find out what blocks it (DoD-3 gate? too few verified claims?) |
+| Re-measure the golden set, with outputs committed | The v0.1 baseline has no run artifacts behind it ([why this matters](docs/evaluation.md#about-baseline_v0_1)) |
 | Case Files: first 10 cases 🙋 | Known-answer questions are how we know anything works ([docs/case-files.md](docs/case-files.md)) |
 | Time-sliced retrieval ("PubMed as of year X") | Prerequisite for the retrodiction benchmark |
 | Two-hop retrieval (find the B-literature) | Swanson-style discovery needs literatures that don't cite each other |

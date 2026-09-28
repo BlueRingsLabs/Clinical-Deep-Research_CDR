@@ -19,6 +19,10 @@ engine, and they're the benchmark the [vision](vision.md) is aiming at. Today CD
 a literature cutoff, so retrodiction cases are targets, not yet runnable tests. Building that
 is on the [roadmap](../ROADMAP.md).
 
+The first case already bites. On CF-0001 (aspirin after a heart attack), a real run on a free 8B
+model rated every claim *low* certainty, when the established answer is high. That's the point:
+a Case File turns "the output feels off" into a specific, fixable failure.
+
 ## What makes a good case
 
 - **The answer has a source you can point to.** A Cochrane review, a major guideline, a
