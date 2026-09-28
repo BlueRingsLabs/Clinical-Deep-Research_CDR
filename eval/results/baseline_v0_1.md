@@ -1,5 +1,10 @@
 # CDR v0.1 Baseline Results
 
+> ⚠️ **Unverified.** No run outputs or logs accompany these numbers, the dataset checksum below
+> doesn't match `golden_set_toy.json`, and the composition results aren't reproduced by any
+> bundled run. Treat this as a target profile, not a measurement. Measured results:
+> [docs/evaluation.md](../../docs/evaluation.md#measured-results).
+
 > Evaluation baseline for CDR v0.1 Open Alpha — February 2026
 
 ## Configuration

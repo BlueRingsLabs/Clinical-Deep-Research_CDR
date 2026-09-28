@@ -116,9 +116,9 @@ critique → verify → compose → publish
 
 ## Evidence
 
-See [EVAL.md](evaluation.md) for full evaluation methodology and results.
+See [evaluation.md](evaluation.md) for methodology and the [measured results](evaluation.md#measured-results) from the bundled real runs.
 
-**Baseline summary (v0.1, 5-query golden set):**
+**Targets vs. what development runs showed (v0.1):**
 
 | Metric | Target | Measured |
 |--------|--------|----------|

@@ -145,35 +145,32 @@ Each evaluation run produces:
 - `eval/results/<timestamp>_results.json` — Full metrics per question (latency p50/p95, token estimates, coverage)
 - `eval/results/<timestamp>_summary.md` — Human-readable summary with baseline comparison
 
-## Baseline Results (v0.1)
+## Measured results
 
-See `eval/results/baseline_v0_1.json` for the reference baseline.
-
-**Summary (5-question golden set, HuggingFace Llama-3.1-70B, February 2026):**
-
-| Metric | GS-001 | GS-002 | GS-003 | GS-004 | GS-005 |
-|--------|--------|--------|--------|--------|--------|
-| Studies found | 15+ | 8+ | 10+ | 12+ | 5+ |
-| Claims generated | 6–12 | 5–10 | 4–8 | 6–10 | 4–8 |
-| Snippet coverage | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Verification coverage | ≥0.85 | ≥0.80 | ≥0.70 | ≥0.80 | ≥0.75 |
-| Pipeline status | completed | completed | completed | completed | varies |
-
-### Pipeline Latency Profile
+The numbers CDR can stand behind today come from the six bundled real runs in
+[`examples/output/online/`](../examples/output/online/): real PubMed/ClinicalTrials.gov retrieval,
+free-tier 8B models, DoD level 1. How each one was made is in [online-run-notes.md](online-run-notes.md).
 
 <div align="center">
-<img src="../eval/results/fig_latency.png" alt="CDR Pipeline Latency — p50/p95 per Stage" width="720" />
+<img src="../eval/results/fig_runs.png" alt="End-to-end time of six real CDR runs: 7 to 27 minutes each" width="760" />
 </div>
 
-**Key observations:**
-- **Hotspot**: `synthesize` is the slowest stage (p95 = 10s) — it aggregates all extracted data and claims into a coherent evidence summary.
-- **Deduplication** is near-instant (deterministic BM25 hashing, no LLM call).
-- Total end-to-end p50 ≈ 28s, p95 ≈ 57s for a typical 5-study question.
-- Latency is dominated by LLM round-trips; retrieval (PubMed/CT.gov network I/O) adds 3–6s.
+- **A run takes 7–27 minutes**, almost all of it LLM round-trips and free-tier rate limits.
+- **8–27 studies included, 3–4 claims per run**, every claim traced to snippets.
+- **No composed hypotheses.** Composition only runs at DoD level 3, and none of these runs used it.
+- **Per-stage timing isn't recorded yet.** The runner has a placeholder for it (`stage_latencies`,
+  a `loose end`), so there's no per-stage chart until someone wires it up.
 
-Generate this chart locally with `make figures`.
+The chart is generated from the runs' own metadata: `make figures`.
 
-> **Note**: Results vary by LLM provider and are affected by PubMed availability. The baseline was generated with `seed=42` for maximum reproducibility, but LLM non-determinism means exact replication is not guaranteed.
+### About `baseline_v0_1`
+
+`eval/results/baseline_v0_1.json` and `.md` record a February 2026 baseline on a Hugging Face
+70B model. **Treat them as a target profile, not a measurement.** No run outputs or logs
+accompany them, the dataset checksum they cite doesn't match the golden set, and they report
+hypotheses on two questions, which the bundled runs never produced. Re-measuring the golden set
+with outputs committed alongside is on the [roadmap](../ROADMAP.md). Until then, the real runs
+above are the reference.
 
 ## Determinism & Reproducibility
 
