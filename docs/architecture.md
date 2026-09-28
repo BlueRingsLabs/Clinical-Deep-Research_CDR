@@ -14,10 +14,10 @@ The pipeline is organized into four color-coded phases:
 
 | Phase | Color | Nodes |
 |-------|-------|-------|
-| **Retrieval** | 🔵 Blue | parse_question, plan_search, retrieve, deduplicate |
-| **Screening** | 🟡 Amber | screen, parse_docs, extract_data |
-| **Analysis** | 🟣 Purple / 🔴 Red | assess_rob2, synthesize, critique |
-| **Output** | 🟢 Green | verify, compose, publish |
+| **Retrieve** | 🔵 Blue | parse_question, plan_search, retrieve, deduplicate |
+| **Screen** | 🟡 Amber | screen, parse_docs, extract_data |
+| **Analyze** | 🟣 Purple | assess_rob2, synthesize, critique |
+| **Publish** | 🟢 Green | verify, compose, publish |
 
 ## Data Model
 
@@ -225,4 +225,4 @@ src/cdr/
 - [Pipeline contracts (detailed)](contracts/pipeline_contracts.md) — Full I/O specification per stage
 - [Report JSON Schema](../schemas/report.schema.json) — Machine-readable output contract
 - [Case study](case-study.md) — Design decisions and tradeoffs
-- [EVAL.md](evaluation.md) — Evaluation methodology
+- [evaluation.md](evaluation.md) — Evaluation methodology

@@ -11,7 +11,7 @@ and is being built to propose the questions nobody has tested yet.**
 [![Status: open alpha](https://img.shields.io/badge/status-open_alpha-orange.svg)](ROADMAP.md)
 [![Good first issues](https://img.shields.io/github/issues/BlueRingsLabs/Clinical-Deep-Research_CDR/good%20first%20issue?label=good%20first%20issues&color=7057ff)](https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
 
-<img src="docs/assets/demo.svg" alt="CDR running a clinical question through the pipeline" width="720" />
+<img src="docs/assets/evidence-chain.svg" alt="A real CDR claim traced from the question to its snippets and the PubMed paper they came from" width="860" />
 
 </div>
 
@@ -29,7 +29,8 @@ never made.
 
 **CDR is an attempt to get the speed without the fabrication.** Every claim it outputs points
 to a specific passage in a specific study. If the evidence doesn't hold up, the report is marked
-unpublishable instead of being dressed up to look confident.
+unpublishable instead of being dressed up to look confident. An honest "the evidence isn't there"
+beats a confident wrong answer, every time.
 
 That's the part that works today. The long game is bigger.
 
@@ -37,8 +38,10 @@ That's the part that works today. The long game is bigger.
 
 AI systems have started producing real results on open problems in mathematics. Medicine has
 its own open problems: associations nobody can explain, drugs that work for reasons nobody fully
-understands, patients who fall between two specialties and two literatures. The answers are
-often already sitting in the papers, split across studies that never cite each other.
+understands, patients who fall between two specialties and two literatures. Some of those
+answers may already be sitting in the papers, split across studies that never cite each other.
+It's happened before: in 1986 Don Swanson connected fish oil to Raynaud's syndrome by reading two
+literatures that had never met, and a trial later backed him up.
 
 **CDR's goal is to become an engine that can propose credible, testable clinical hypotheses:**
 "A is linked to B, B is linked to C, so here's why A might affect C, here's what could make
@@ -63,15 +66,20 @@ the details.
 | LLM screening with explicit exclusion reasons (PRISMA-style) | ✅ Works |
 | Full-text parsing from PMC Open Access | ✅ Works (abstracts when no OA full text) |
 | Risk of bias: RoB 2 (trials) and ROBINS-I (observational) | ⚠️ Works, but weak on abstracts alone ([why](docs/incidents.md#inc-002-uniform-rob2-some-concerns)) |
-| Evidence claims traced to exact snippets + verification gates | ✅ Works |
+| Evidence claims traced to exact snippets + verification gates | ✅ Works (reports carry snippet IDs; including the snippet text is an open issue) |
 | Skeptic agent that attacks claims before publication | ✅ Works |
 | Reports in JSON / Markdown / HTML, API, basic web UI | ✅ Works |
 | Hypothesis composition (A + B ⇒ C) | 🧪 Implemented and tested, not yet producing on real runs |
 | Full GRADE, meta-analysis, Embase/Cochrane, streaming, auth | ❌ Not yet ([roadmap](ROADMAP.md)) |
 
-Real runs on free-tier 8B models include 7 to 27 studies, produce 3 or 4 traced claims, and take
-6 to 26 minutes. The raw outputs are in [`examples/output/online/`](examples/output/online/),
+Real runs on free-tier 8B models include 8 to 27 studies, produce 3 or 4 traced claims, and take
+7 to 27 minutes. The raw outputs are in [`examples/output/online/`](examples/output/online/),
 unedited, and [the run notes](docs/online-run-notes.md) describe how each one was made.
+
+They're also humbling. On aspirin after a heart attack, one of the best-established answers in
+cardiology, the 8B run rated every claim *low* certainty. That's the kind of gap
+[Case File CF-0001](eval/cases/CF-0001-aspirin-secondary-prevention.json) exists to catch, and
+closing it is real work waiting to be done.
 
 ## Try it
 
@@ -144,7 +152,7 @@ to help.
 - **Everyone:** [Case Files](docs/case-files.md) are clinical questions with known answers that
   CDR has to get right. Adding one is the fastest way to make the engine better.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md). It's short, and your first PR can land the same day.
+Read [CONTRIBUTING.md](CONTRIBUTING.md). It opens with the three-step version.
 
 ## Documentation
 
@@ -159,6 +167,13 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md). It's short, and your first PR can land 
 | [docs/report-anatomy.md](docs/report-anatomy.md) | How to read and audit a CDR report |
 | [docs/providers.md](docs/providers.md) | LLM provider setup and free tiers |
 | [ROADMAP.md](ROADMAP.md) | What's next |
+
+## Who's behind this
+
+CDR was started by Gonzalo Romero ([@glromero](https://github.com/glromero)) and lives at
+[BlueRingsLabs](https://github.com/BlueRingsLabs). It's an open project: the roadmap, the
+arguments and the mistakes all happen in public. See [GOVERNANCE.md](GOVERNANCE.md) for how
+decisions get made.
 
 ## Citing CDR
 
