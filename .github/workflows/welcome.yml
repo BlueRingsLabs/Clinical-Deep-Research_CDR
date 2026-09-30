@@ -1,4 +1,7 @@
 # Says hello on someone's first issue or PR. No checkout, no code from the PR runs.
+#
+# Not actions/first-interaction: it greeted Dependabot and people who already had
+# merged PRs here. This asks the API directly and skips bots.
 name: Welcome
 
 on:
@@ -15,14 +18,34 @@ jobs:
   welcome:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/first-interaction@v3
+      - uses: actions/github-script@v9
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          issue_message: |
-            Thanks for opening your first issue here. A maintainer will take a look within a few days.
+          script: |
+            const item = context.payload.pull_request ?? context.payload.issue;
+            if (item.user.type === 'Bot') return;
 
-            If it's about something CDR claimed, the more exact the better: the claim, the snippet or PMID it cited, and what the source actually says.
-          pr_message: |
-            Thanks for your first PR to CDR!
+            const { owner, repo } = context.repo;
+            const isPR = Boolean(context.payload.pull_request);
 
-            A few things that help it land fast: `make check` passing locally, a test for any behavior change, and a note if anything touches an evidence gate. If CI goes red and you're not sure why, just ask here. That's what review is for.
+            // Issues and PRs by this author in this repo, open or closed.
+            const previous = await github.rest.issues.listForRepo({
+              owner, repo, creator: item.user.login, state: 'all', per_page: 10,
+            });
+            const seenBefore = previous.data.some(
+              (i) => i.number !== item.number && Boolean(i.pull_request) === isPR,
+            );
+            if (seenBefore) return;
+
+            const body = isPR
+              ? [
+                  'Thanks for your first PR to CDR!',
+                  '',
+                  "A few things that help it land fast: `make check` passing locally, a test for any behavior change, and a note if anything touches an evidence gate. If CI goes red and you're not sure why, just ask here. That's what review is for.",
+                ].join('\n')
+              : [
+                  'Thanks for opening your first issue here. A maintainer will take a look within a few days.',
+                  '',
+                  "If it's about something CDR claimed, the more exact the better: the claim, the snippet or PMID it cited, and what the source actually says.",
+                ].join('\n');
+
+            await github.rest.issues.createComment({ owner, repo, issue_number: item.number, body });
