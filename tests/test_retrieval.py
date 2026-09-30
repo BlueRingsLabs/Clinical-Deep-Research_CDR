@@ -211,6 +211,32 @@ class TestClinicalTrialsClient:
         assert "phase:3" in agg
         assert "status:com" in agg
 
+    def test_sanitize_query_caps_length_at_word_boundary(self, client):
+        """Long PICO-style queries are bounded without cutting a term."""
+        filler = " ".join(f"biomarker{i}" for i in range(180))
+        query = f"diabetes semaglutide cardiovascular outcomes randomized trial {filler}"
+
+        sanitized = client._sanitize_query(query)
+
+        assert len(sanitized) <= 500
+        assert sanitized == sanitized.rstrip()
+        assert sanitized.split()[-1] in query.split()
+        assert "diabetes" in sanitized
+        assert "semaglutide" in sanitized
+        assert "cardiovascular" in sanitized
+
+    def test_sanitize_query_removes_query_syntax_but_keeps_clinical_terms(self, client):
+        """Clinical terms survive removal of database-specific query syntax."""
+        query = '"semaglutide" AND diabetes[mh] OR cardiovascular[tiab]'
+
+        assert client._sanitize_query(query) == "semaglutide diabetes cardiovascular"
+
+    def test_sanitize_query_leaves_short_query_unchanged(self, client):
+        """Short, already-safe queries should not be rewritten."""
+        query = "diabetes semaglutide"
+
+        assert client._sanitize_query(query) == query
+
 
 # =============================================================================
 # EMBEDDER TESTS
