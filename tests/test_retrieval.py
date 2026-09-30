@@ -258,7 +258,7 @@ class TestEmbedder:
     def mock_model(self):
         """Create deterministic mock for SentenceTransformer."""
         mock = MagicMock()
-        mock.get_sentence_embedding_dimension.return_value = 384
+        mock.get_embedding_dimension.return_value = 384
         mock.encode.return_value = np.array([0.1, 0.2, 0.3, 0.4] * 96)  # 384-dim
         return mock
 

@@ -59,7 +59,7 @@ class Embedder:
         with self._tracer.span("load_model", attributes={"model": self._model_name}) as span:
             try:
                 self._model = SentenceTransformer(self._model_name, device=device)
-                self._dimension = self._model.get_sentence_embedding_dimension()
+                self._dimension = self._model.get_embedding_dimension()
                 span.set_attribute("dimension", self._dimension)
             except Exception as e:
                 raise EmbeddingError(f"Failed to load model: {e}") from e
