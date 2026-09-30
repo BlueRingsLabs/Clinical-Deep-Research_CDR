@@ -193,7 +193,9 @@ async def run_publishable_harness(
         for query in PUBLISHABLE_QUERIES:
             if verbose:
                 logger.debug(
-                    "publishable_query_started",
+                    "running publishable query %s (%s)",
+                    query.query_id,
+                    query.name,
                     extra={"query_id": query.query_id, "query_name": query.name},
                 )
 
@@ -210,7 +212,11 @@ async def run_publishable_harness(
 
                 if response.status_code != 202:
                     logger.error(
-                        "publishable_query_start_failed",
+                        "publishable query %s (%s) failed to start (HTTP %d): %s",
+                        query.query_id,
+                        query.name,
+                        response.status_code,
+                        response.text,
                         extra={
                             "query_id": query.query_id,
                             "status_code": response.status_code,
@@ -230,7 +236,10 @@ async def run_publishable_harness(
                 run_data = response.json()
                 run_id = run_data["run_id"]
                 logger.debug(
-                    "publishable_query_run_started",
+                    "publishable query %s (%s) started run %s",
+                    query.query_id,
+                    query.name,
+                    run_id,
                     extra={"query_id": query.query_id, "run_id": run_id},
                 )
 
@@ -256,7 +265,10 @@ async def run_publishable_harness(
 
                     if verbose:
                         logger.debug(
-                            "publishable_query_status",
+                            "publishable query %s (%s) status: %s",
+                            query.query_id,
+                            query.name,
+                            current_status,
                             extra={
                                 "query_id": query.query_id,
                                 "run_id": run_id,
@@ -269,7 +281,10 @@ async def run_publishable_harness(
 
                 if final_status in ("completed", "publishable"):
                     logger.info(
-                        "publishable_query_passed",
+                        "publishable query %s (%s) passed: %s",
+                        query.query_id,
+                        query.name,
+                        final_status,
                         extra={
                             "query_id": query.query_id,
                             "run_id": run_id,
@@ -287,7 +302,10 @@ async def run_publishable_harness(
                     )
                 else:
                     logger.warning(
-                        "publishable_query_failed",
+                        "publishable query %s (%s) failed: %s",
+                        query.query_id,
+                        query.name,
+                        final_status,
                         extra={
                             "query_id": query.query_id,
                             "run_id": run_id,
@@ -296,7 +314,10 @@ async def run_publishable_harness(
                     )
                     for hint in query.if_fails_check:
                         logger.debug(
-                            "publishable_query_debug_hint",
+                            "publishable query %s (%s) debug hint: %s",
+                            query.query_id,
+                            query.name,
+                            hint,
                             extra={"query_id": query.query_id, "hint": hint},
                         )
 
@@ -314,7 +335,10 @@ async def run_publishable_harness(
 
             except Exception as e:
                 logger.exception(
-                    "publishable_query_error",
+                    "publishable query %s (%s) errored: %s",
+                    query.query_id,
+                    query.name,
+                    e,
                     extra={"query_id": query.query_id, "error": str(e)},
                 )
                 results["failed"] += 1
@@ -328,7 +352,10 @@ async def run_publishable_harness(
 
     # Summary
     logger.info(
-        "publishable_harness_results",
+        "publishable harness: %d/%d passed, %d failed",
+        results["passed"],
+        results["total"],
+        results["failed"],
         extra={
             "total": results["total"],
             "passed": results["passed"],
@@ -338,11 +365,16 @@ async def run_publishable_harness(
 
     if results["failed"] > 0:
         logger.warning(
-            "publishable_harness_failures",
+            "publishable harness had %d failed queries",
+            results["failed"],
             extra={"failed": results["failed"]},
         )
     else:
-        logger.info("publishable_harness_passed")
+        logger.info(
+            "publishable harness: all %d queries passed",
+            results["total"],
+            extra={"total": results["total"]},
+        )
 
     return results
 
