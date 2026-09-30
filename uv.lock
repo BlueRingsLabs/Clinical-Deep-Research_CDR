@@ -527,7 +527,7 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "anthropic", specifier = ">=0.25.0" },
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
-    { name = "dspy-ai", specifier = ">=3.3.1" },
+    { name = "dspy-ai", specifier = ">=3.4.0" },
     { name = "fastapi", specifier = ">=0.141.1" },
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "langchain-core", specifier = ">=0.3.0" },
@@ -544,7 +544,7 @@ requires-dist = [
     { name = "structlog", specifier = ">=24.1.0" },
     { name = "tenacity", specifier = ">=8.2.0" },
     { name = "transformers", specifier = ">=4.40.0" },
-    { name = "unstructured", specifier = ">=0.27.8" },
+    { name = "unstructured", specifier = ">=0.27.9" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
     { name = "weasyprint", specifier = ">=70.0" },
 ]
@@ -1350,14 +1350,14 @@ wheels = [
 
 [[package]]
 name = "dspy-ai"
-version = "3.3.1"
+version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dspy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/35/80/a1b573c8c2f6a649e7e65802927bfdf289d16338b2fbf9efe8fc5b869168/dspy_ai-3.3.1.tar.gz", hash = "sha256:09ffb30df2e0692f387bbcdde4e542b965c8e15e90e2ac5de48a61c36ea9af5c", size = 1254, upload-time = "2026-08-21T23:06:21.746Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0c/df/86d7c3efbf81528e5f385def06380d477263f3d9a64a01dc5a67eb3bc48d/dspy_ai-3.4.0.tar.gz", hash = "sha256:4250d439ef5c12475e04ce57eeff4f8379905a5fcbb9827f49a062adb4e12010", size = 1239, upload-time = "2026-09-25T04:04:31.489Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/8c/09d4ace01fc63f534748ee2025d6b1fcb8b12d803768ecd7587e723ca945/dspy_ai-3.3.1-py3-none-any.whl", hash = "sha256:84760146779baa173d10b6164438c3ddc2eb58f164ed33d318c943304ab8b2ad", size = 1170, upload-time = "2026-08-21T23:06:20.945Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/48/99b957c07f8a4a81931e34c7dfdb7930eaab82fefef748b02a02e9cc6f87/dspy_ai-3.4.0-py3-none-any.whl", hash = "sha256:74c8899a92db77fd3b57744e5fa36686e017f4bb43e748f40bf6b40b6c098b9f", size = 1170, upload-time = "2026-09-25T04:04:30.339Z" },
 ]
 
 [[package]]
@@ -7727,7 +7727,7 @@ wheels = [
 
 [[package]]
 name = "unstructured"
-version = "0.27.8"
+version = "0.27.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -7760,9 +7760,9 @@ dependencies = [
     { name = "unstructured-client" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f1/dd/4ce6d239b133bd7c17c7b68b6a9af19453a2620b3e1e1de5ac7165333414/unstructured-0.27.8.tar.gz", hash = "sha256:23e46e424e1fc357f26b93353347ce30859e87f278aba20e3f2470507efdf443", size = 1570860, upload-time = "2026-09-22T04:15:51.014Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9a/dc/4d682c2d37aa39ad1c8678980b4ff85a6a1857cd0bfdcf407880cde98957/unstructured-0.27.9.tar.gz", hash = "sha256:d751ef3cf3c639f22260146081abe8ebb0c306cbbac8e7ac15e7bf635c07d9d4", size = 1577515, upload-time = "2026-09-26T17:51:47.857Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/16/9e4042c8a5c20fa39e78bcdc6aaad32c661ab316e974c9627b4778f4b46f/unstructured-0.27.8-py3-none-any.whl", hash = "sha256:74d34b3dd9d94b7c5812c480e5ee4d886ad152ff9a62e68c6dd9bc53d833397b", size = 1631185, upload-time = "2026-09-22T04:15:48.668Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/bc/21c561143556d7a24929589ab33040ae6288b9eabaffde2f48508fb572cd/unstructured-0.27.9-py3-none-any.whl", hash = "sha256:09bcfffc1d4326c1e52c3cdfd91febf99d526b4ce314f2c304ecd76495bd71cb", size = 1638594, upload-time = "2026-09-26T17:51:45.223Z" },
 ]
 
 [[package]]
