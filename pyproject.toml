@@ -155,7 +155,7 @@ strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["tests"]
 
-[tool.mypy.overrides]
+[[tool.mypy.overrides]]
 module = [
     "rank_bm25.*",
     "sentence_transformers.*",
