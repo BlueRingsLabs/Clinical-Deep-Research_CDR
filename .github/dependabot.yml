@@ -22,6 +22,16 @@ updates:
         update-types: [minor, patch]
     open-pull-requests-limit: 5
     labels: [dependencies, frontend]
+    # Majors that need a real migration (#97), not a bump PR that can't go green:
+    # - ESLint 10: plugins still declare eslint <=9 as a peer
+    # - Tailwind 4: new config format and engine
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
