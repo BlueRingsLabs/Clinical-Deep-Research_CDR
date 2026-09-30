@@ -32,7 +32,7 @@ dependencies = [
     "rank-bm25>=0.2.2",
     
     # Retrieval - Dense
-    "sentence-transformers>=3.0.0",
+    "sentence-transformers>=6.1.0",
     "qdrant-client>=1.19.1",
     
     # Retrieval - Reranking
