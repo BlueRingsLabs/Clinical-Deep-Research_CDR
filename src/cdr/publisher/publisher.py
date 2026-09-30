@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from cdr.core.enums import VerificationStatus
 from cdr.core.schemas import (
     CDRState,
+    Critique,
     EvidenceClaim,
     PRISMACounts,
     RoB2Result,
@@ -24,7 +25,6 @@ from cdr.core.schemas import (
 from cdr.observability.tracer import tracer
 
 if TYPE_CHECKING:
-    from cdr.skeptic.skeptic_agent import CritiqueResult
     from cdr.synthesis.synthesizer import SynthesisResult
 
 
@@ -276,7 +276,7 @@ class Publisher:
         self,
         state: CDRState,
         synthesis_result: SynthesisResult,
-        critique_result: CritiqueResult | None = None,
+        critique_result: Critique | None = None,
         verification_results: dict[str, VerificationResult] | None = None,
         formats: list[str] | None = None,
     ) -> PublishResult:
@@ -334,7 +334,7 @@ class Publisher:
         self,
         state: CDRState,
         synthesis_result: SynthesisResult,
-        critique_result: CritiqueResult | None,
+        critique_result: Critique | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate Markdown report."""
@@ -394,7 +394,7 @@ class Publisher:
         self,
         state: CDRState,
         synthesis_result: SynthesisResult,
-        critique_result: CritiqueResult | None,
+        critique_result: Critique | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate JSON report.
@@ -474,12 +474,7 @@ class Publisher:
         }
 
         if critique_result:
-            report["critiques"] = {
-                "overall_confidence": critique_result.overall_confidence.value,
-                "key_concerns": critique_result.key_concerns,
-                "strengths": critique_result.strengths,
-                "recommendation": critique_result.recommendation,
-            }
+            report["critiques"] = critique_result.model_dump(mode="json")
 
         if verification_results:
             report["verification"] = {
@@ -496,7 +491,7 @@ class Publisher:
         self,
         state: CDRState,
         synthesis_result: SynthesisResult,
-        critique_result: CritiqueResult | None,
+        critique_result: Critique | None,
         verification_results: dict[str, VerificationResult] | None,
     ) -> str:
         """Generate HTML report."""
@@ -586,7 +581,7 @@ class Publisher:
     def _build_executive_summary(
         self,
         synthesis_result: SynthesisResult,
-        critique_result: CritiqueResult | None,
+        critique_result: Critique | None,
     ) -> str:
         """Build executive summary section."""
         lines = []
@@ -607,9 +602,13 @@ class Publisher:
 
         # Critique summary
         if critique_result:
-            lines.append(f"\n**Overall confidence:** {critique_result.overall_confidence.value}")
-            if critique_result.key_concerns:
-                lines.append(f"**Main concern:** {critique_result.key_concerns[0]}")
+            if critique_result.overall_assessment:
+                lines.append(f"\n**Overall assessment:** {critique_result.overall_assessment}")
+            if critique_result.blockers:
+                lines.append(f"**Publication blocker:** {critique_result.blockers[0]}")
+            elif critique_result.findings:
+                finding = critique_result.findings[0]
+                lines.append(f"**Main critique ({finding.severity.value}):** {finding.finding}")
 
         return "\n".join(lines)
 
@@ -771,14 +770,20 @@ Identification → Screening → Eligibility → Included
             lines.append(f"- **{claim.certainty.value.upper()}**: {claim.claim_text}")
         return "\n".join(lines) or "*No key findings*"
 
-    def _build_limitations(self, critique_result: CritiqueResult | None) -> str:
+    def _build_limitations(self, critique_result: Critique | None) -> str:
         """Build limitations section."""
         if not critique_result:
             return "- Limitations not formally assessed"
 
-        lines = []
-        for concern in critique_result.key_concerns[:5]:
-            lines.append(f"- {concern}")
+        lines = [f"- **Blocker:** {blocker}" for blocker in critique_result.blockers[:5]]
+        seen = set(critique_result.blockers)
+        for finding in critique_result.findings:
+            if finding.finding not in seen and len(lines) < 5:
+                lines.append(
+                    f"- **{finding.severity.value.upper()} / {finding.dimension.value}:** "
+                    f"{finding.finding}"
+                )
+                seen.add(finding.finding)
 
         return "\n".join(lines) or "- No major limitations identified"
 

@@ -113,56 +113,57 @@ class PDFParser:
 
         with self._tracer.span("parse_pdf", attributes={"path": str(path)}) as span:
             try:
-                doc = self._fitz.open(path)
                 elements: list[ParsedElement] = []
                 current_section: Section | None = None
 
-                for page_num in range(len(doc)):
-                    page = doc[page_num]
-                    blocks = page.get_text("dict")["blocks"]
+                with self._fitz.open(path) as doc:
+                    page_count = len(doc)
+                    for page_num in range(page_count):
+                        page = doc[page_num]
+                        blocks = page.get_text("dict")["blocks"]
 
-                    for block in blocks:
-                        if block.get("type") != 0:  # 0 = text block
-                            continue
-
-                        for line in block.get("lines", []):
-                            text = "".join(span["text"] for span in line.get("spans", [])).strip()
-
-                            if not text:
+                        for block in blocks:
+                            if block.get("type") != 0:  # 0 = text block
                                 continue
 
-                            # Detect if this is a section header
-                            detected_section = _detect_section(text)
-                            if detected_section:
-                                current_section = detected_section
-                                elements.append(
-                                    ParsedElement(
-                                        text=text,
-                                        element_type="title",
-                                        section=current_section,
-                                        page=page_num + 1,
-                                    )
-                                )
-                            else:
-                                # Regular text
-                                elements.append(
-                                    ParsedElement(
-                                        text=text,
-                                        element_type="narrative_text",
-                                        section=current_section,
-                                        page=page_num + 1,
-                                    )
-                                )
+                            for line in block.get("lines", []):
+                                text = "".join(
+                                    span["text"] for span in line.get("spans", [])
+                                ).strip()
 
-                doc.close()
+                                if not text:
+                                    continue
 
-                span.set_attribute("page_count", len(doc))
+                                # Detect if this is a section header
+                                detected_section = _detect_section(text)
+                                if detected_section:
+                                    current_section = detected_section
+                                    elements.append(
+                                        ParsedElement(
+                                            text=text,
+                                            element_type="title",
+                                            section=current_section,
+                                            page=page_num + 1,
+                                        )
+                                    )
+                                else:
+                                    # Regular text
+                                    elements.append(
+                                        ParsedElement(
+                                            text=text,
+                                            element_type="narrative_text",
+                                            section=current_section,
+                                            page=page_num + 1,
+                                        )
+                                    )
+
+                span.set_attribute("page_count", page_count)
                 span.set_attribute("element_count", len(elements))
 
                 return ParsedDocument(
                     source_path=str(path),
                     elements=elements,
-                    metadata={"page_count": len(doc)},
+                    metadata={"page_count": page_count},
                 )
 
             except Exception as e:

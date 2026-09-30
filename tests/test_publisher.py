@@ -4,16 +4,21 @@ Tests for CDR Publisher Layer.
 Tests for Publisher alignment with current schemas.
 """
 
+import json
+
 import pytest
 
 from cdr.core.enums import GRADECertainty, RoB2Domain, RoB2Judgment
 from cdr.core.schemas import (
     PICO,
     CDRState,
+    Critique,
+    CritiqueResult,
     EvidenceClaim,
     PRISMACounts,
     RoB2DomainResult,
     RoB2Result,
+    SynthesisResult,
 )
 from cdr.publisher.publisher import Publisher
 
@@ -179,6 +184,41 @@ class TestPublisherSchemaAlignment:
 
 class TestPublisherFormatting:
     """Tests for Publisher formatting helpers."""
+
+    def test_generate_json_serializes_current_critique_schema(self):
+        """Critique output uses fields from the current aggregate schema."""
+        from cdr.core.enums import CritiqueDimension, CritiqueSeverity
+
+        critique = Critique(
+            findings=[
+                CritiqueResult(
+                    dimension=CritiqueDimension.INTERNAL_VALIDITY,
+                    severity=CritiqueSeverity.HIGH,
+                    finding="The allocation process is not described.",
+                    affected_claims=["claim-1"],
+                    recommendation="Clarify the randomization method.",
+                ),
+                CritiqueResult(
+                    dimension=CritiqueDimension.MISSING_EVIDENCE,
+                    severity=CritiqueSeverity.MEDIUM,
+                    finding="The search strategy may have missed unpublished studies.",
+                ),
+            ],
+            blockers=["The allocation process is not described."],
+            recommendations=["Clarify the randomization method."],
+            overall_assessment="Clarify the randomization method.",
+        )
+        state = CDRState(run_id="run-1", question="Does treatment X help?")
+
+        result = Publisher()._generate_json(state, SynthesisResult(), critique, None)
+
+        assert json.loads(result)["critiques"] == critique.model_dump(mode="json")
+        summary = Publisher()._build_executive_summary(SynthesisResult(), critique)
+        limitations = Publisher()._build_limitations(critique)
+        assert "Overall assessment" in summary
+        assert "Publication blocker" in summary
+        assert "The allocation process is not described." in limitations
+        assert "MEDIUM / missing_evidence" in limitations
 
     def test_build_grade_table(self):
         """Test GRADE table building."""
