@@ -237,6 +237,23 @@ class TestClinicalTrialsClient:
 
         assert client._sanitize_query(query) == query
 
+    @pytest.mark.parametrize(
+        "query",
+        [
+            "ANDROGEN deprivation",
+            "CORTICOSTEROIDS sepsis",
+            "NORADRENALINE shock",
+            "INOTROPES NOT placebo",
+        ],
+    )
+    def test_sanitize_query_preserves_uppercase_terms_containing_boolean_substrings(
+        self, client, query
+    ):
+        """Uppercase clinical terms containing AND/OR/NOT substrings stay intact."""
+        expected = "INOTROPES placebo" if " NOT " in query else query
+        assert client._sanitize_query(query) == expected
+
+
 
 # =============================================================================
 # EMBEDDER TESTS

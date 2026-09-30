@@ -13,6 +13,7 @@ Key API Parameters:
 - pageSize: Results per page (max 1000)
 """
 
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -192,7 +193,7 @@ class ClinicalTrialsClient:
         """
         # Remove complex operators that CT.gov doesn't handle well
         sanitized = query.replace("[tiab]", "").replace("[mh]", "")
-        sanitized = sanitized.replace("AND", " ").replace("OR", " ")
+        sanitized = re.sub(r"\b(AND|OR|NOT)\b", " ", sanitized)
         sanitized = sanitized.replace("(", " ").replace(")", " ")
         sanitized = sanitized.replace('"', " ").replace("'", " ")
 
