@@ -11,6 +11,11 @@ updates:
         update-types: [minor, patch]
     open-pull-requests-limit: 5
     labels: [dependencies]
+    ignore:
+      # openai 3: blocked by ragas -> instructor (eval extra), which caps openai below 3.19.
+      # Revisit when instructor supports openai 3.
+      - dependency-name: "openai"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /ui
