@@ -14,7 +14,7 @@ from cdr.core.enums import RoB2Domain, RoB2Judgment
 from cdr.core.exceptions import ExtractionError
 from cdr.core.schemas import RoB2DomainResult, RoB2Result
 from cdr.llm import build_messages, create_provider
-from cdr.observability import get_cdr_metrics, get_tracer
+from cdr.observability import SpanStatus, get_cdr_metrics, get_tracer
 
 if TYPE_CHECKING:
     from cdr.llm.base import BaseLLMProvider
@@ -175,7 +175,7 @@ Assess the risk of bias for this randomized trial across all 5 RoB2 domains."""
                 return result
 
             except Exception as e:
-                span.set_status("error", str(e))
+                span.set_status(SpanStatus.ERROR, str(e))
                 raise ExtractionError(f"RoB2 assessment failed: {e}") from e
 
     def _parse_response(self, record_id: str, content: str) -> RoB2Result:
