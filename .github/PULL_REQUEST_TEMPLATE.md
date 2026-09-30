@@ -12,3 +12,4 @@
 - [ ] Behavior changes come with tests
 - [ ] No evidence gate or threshold was loosened (or, if it was, this PR explains why)
 - [ ] Docs updated if users would notice the change
+- [ ] I opened this PR myself and can explain every change (AI assistance is fine, see CONTRIBUTING)

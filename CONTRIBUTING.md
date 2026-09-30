@@ -83,6 +83,22 @@ weeks, it's fair game again. No hard feelings.
 What to expect from us: a first response within a few days, a straight answer on whether the
 change fits, and help finishing it if it's close. If a PR can't be merged, we'll say why.
 
+## AI-assisted contributions
+
+Using AI tools to write code, tests or docs is fine. The rules are about who is responsible:
+
+- **No automated PRs or issues.** Every PR is opened by a person who read the diff, ran
+  `make check`, and can answer questions about it. PRs and issues opened by bots, agents or
+  scripts on their own get closed without review. (Dependabot is the one exception.)
+- **You own every line.** If a reviewer asks why something is there, "the model wrote it" isn't
+  an answer.
+- **One focused change per PR.** A batch of generated PRs across the codebase gets closed.
+- **Say so.** A one-line note in the PR ("AI-assisted: first draft of the tests") is appreciated.
+  It doesn't lower the bar and it doesn't raise it.
+- **Clinical content gets checked against the source.** Anything touching evidence, Case Files
+  or methodology has to be verified against the actual paper. Generated citations are exactly the
+  failure mode CDR exists to prevent.
+
 ## The non-negotiables
 
 CDR is only useful if it can be trusted. These rules hold in every PR:
