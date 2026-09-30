@@ -62,7 +62,7 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.2.3",
     "tenacity>=8.2.0",
-    "structlog>=24.1.0",
+    "structlog>=26.1.0",
     "aiosqlite>=0.20.0",
     
     # PDF Export
