@@ -28,7 +28,7 @@ import {
   CheckCircle,
   TrendingUp,
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { RunStatus, PRISMACounts } from '../types'
 
@@ -52,10 +52,13 @@ export default function RunDetail() {
   const location = useLocation()
   const [activeTab, setActiveTab] = useState<Tab>(() => getTabFromPath(location.pathname))
 
-  // Sync tab with URL path changes
-  useEffect(() => {
+  // Follow URL changes without an effect: adjust state during render when the path changes.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [syncedPath, setSyncedPath] = useState(location.pathname)
+  if (syncedPath !== location.pathname) {
+    setSyncedPath(location.pathname)
     setActiveTab(getTabFromPath(location.pathname))
-  }, [location.pathname])
+  }
 
   // Fetch run detail with auto-polling for active runs
   const { 
