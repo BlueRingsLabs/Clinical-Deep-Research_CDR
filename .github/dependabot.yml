@@ -16,6 +16,10 @@ updates:
       # Revisit when instructor supports openai 3.
       - dependency-name: "openai"
         update-types: ["version-update:semver-major"]
+      # anthropic 1.x: messages.create no longer takes temperature, so the provider
+      # breaks on every call. Migration in #119.
+      - dependency-name: "anthropic"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /ui
