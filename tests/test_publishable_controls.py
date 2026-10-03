@@ -34,7 +34,9 @@ async def test_harness_logs_readable_failure_and_summary(
         expected_study_types=[],
         expected_comparator="placebo",
         expected_population="adults",
-        if_fails_check=[],
+        if_fails_check=(
+            ["Check if PubMed retrieval includes PMID 18997196"] if start_status == 202 else []
+        ),
     )
     monkeypatch.setattr(publishable_controls, "PUBLISHABLE_QUERIES", [query])
 
@@ -75,3 +77,6 @@ async def test_harness_logs_readable_failure_and_summary(
     assert result["failed"] == 1
     assert expected_failure in caplog.text
     assert "publishable harness: 0/1 passed, 1 failed" in caplog.text
+    if start_status == 202:
+        assert "started run run-1" in caplog.text
+        assert "Check if PubMed retrieval includes PMID 18997196" in caplog.text
