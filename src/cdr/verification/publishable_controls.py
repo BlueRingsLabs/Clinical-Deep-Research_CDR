@@ -235,7 +235,7 @@ async def run_publishable_harness(
 
                 run_data = response.json()
                 run_id = run_data["run_id"]
-                logger.debug(
+                logger.info(
                     "publishable query %s (%s) started run %s",
                     query.query_id,
                     query.name,
@@ -313,7 +313,7 @@ async def run_publishable_harness(
                         },
                     )
                     for hint in query.if_fails_check:
-                        logger.debug(
+                        logger.warning(
                             "publishable query %s (%s) debug hint: %s",
                             query.query_id,
                             query.name,
