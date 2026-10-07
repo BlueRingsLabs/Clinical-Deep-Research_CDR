@@ -254,7 +254,6 @@ class TestClinicalTrialsClient:
         assert client._sanitize_query(query) == expected
 
 
-
 # =============================================================================
 # EMBEDDER TESTS
 # =============================================================================
