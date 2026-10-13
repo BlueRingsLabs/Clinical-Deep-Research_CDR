@@ -306,6 +306,17 @@ class TestEmbedder:
         """Test dimension property returns correct value."""
         assert embedder.dimension == 384
 
+    def test_embedder_rejects_model_without_output_dimension(self, mock_settings, mock_model):
+        """Fail at initialization when a model cannot supply a vector dimension."""
+        from cdr.core.exceptions import EmbeddingError
+        from cdr.retrieval.embedder import Embedder
+
+        mock_model.get_embedding_dimension.return_value = None
+        with patch("cdr.retrieval.embedder.get_settings", return_value=mock_settings):
+            with patch("cdr.retrieval.embedder.SentenceTransformer", return_value=mock_model):
+                with pytest.raises(EmbeddingError, match="does not expose an output dimension"):
+                    Embedder()
+
     def test_embedder_model_name_property(self, embedder):
         """Test model_name property returns correct value."""
         assert embedder.model_name == "test-model"
@@ -655,6 +666,34 @@ class TestQdrantStore:
             store.upsert(ids, embeddings, payloads, collection_name="test_collection")
 
             mock_client.upsert.assert_called_once()
+
+    def test_search_uses_query_points_api(self, store, mock_client):
+        """Use the supported Qdrant query API and return its scored points."""
+        hit = MagicMock(id="doc-1", payload={"text": "hello"}, score=0.75)
+        mock_client.query_points.return_value = MagicMock(points=[hit])
+
+        results = store.search([0.1, 0.2], top_k=1)
+
+        assert results == [("doc-1", {"text": "hello"}, 0.75)]
+        mock_client.query_points.assert_called_once_with(
+            collection_name="test_collection",
+            query=[0.1, 0.2],
+            limit=1,
+            query_filter=None,
+            score_threshold=None,
+        )
+
+    def test_get_by_id_returns_only_single_dense_vectors(self, store, mock_client):
+        """Do not leak Qdrant named or multivector shapes through the dense API."""
+        mock_client.retrieve.return_value = [
+            MagicMock(vector=[0.1, 0.2], payload={"text": "hello"})
+        ]
+        assert store.get_by_id("doc-1") == ([0.1, 0.2], {"text": "hello"})
+
+        mock_client.retrieve.return_value = [
+            MagicMock(vector={"title": [0.1, 0.2]}, payload={"text": "hello"})
+        ]
+        assert store.get_by_id("doc-1") is None
 
     def test_store_raises_on_missing_library(self, mock_settings):
         """Test store raises error when qdrant-client not installed."""

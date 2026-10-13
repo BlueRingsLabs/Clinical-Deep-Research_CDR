@@ -89,7 +89,7 @@ class BM25Retriever:
 
             # Build inverted index
             inverted: dict[str, list[tuple[int, int]]] = defaultdict(list)
-            doc_freqs: dict[str, set] = defaultdict(set)
+            doc_freqs: dict[str, set[int]] = defaultdict(set)
 
             for doc_idx, text in enumerate(texts):
                 tokens = self._tokenize(text)
