@@ -695,6 +695,39 @@ class TestQdrantStore:
         ]
         assert store.get_by_id("doc-1") is None
 
+    def test_dense_vector_lifecycle_with_in_memory_qdrant(self, mock_settings):
+        """Exercise the current Qdrant query API without a server or network."""
+        from qdrant_client import QdrantClient as RealQdrantClient
+
+        from cdr.retrieval.qdrant_store import QdrantStore
+
+        client = RealQdrantClient(location=":memory:")
+        with patch("cdr.retrieval.qdrant_store.get_settings", return_value=mock_settings):
+            with patch("cdr.retrieval.qdrant_store.QdrantClient", return_value=client):
+                store = QdrantStore()
+
+        point_id = "11111111-1111-4111-8111-111111111111"
+        try:
+            store.create_collection(vector_size=2, distance="dot")
+            store.upsert([point_id], [[0.1, 0.2]], [{"text": "hello"}])
+
+            results = store.search([0.1, 0.2], top_k=1)
+
+            assert len(results) == 1
+            assert results[0][0] == point_id
+            assert results[0][1] == {"text": "hello"}
+            assert isinstance(results[0][2], float)
+            assert store.count() == 1
+            retrieved = store.get_by_id(point_id)
+            assert retrieved is not None
+            assert retrieved[0] == pytest.approx([0.1, 0.2])
+            assert retrieved[1] == {"text": "hello"}
+
+            store.delete([point_id])
+            assert store.count() == 0
+        finally:
+            store.close()
+
     def test_store_raises_on_missing_library(self, mock_settings):
         """Test store raises error when qdrant-client not installed."""
         from cdr.retrieval.qdrant_store import QdrantStore
