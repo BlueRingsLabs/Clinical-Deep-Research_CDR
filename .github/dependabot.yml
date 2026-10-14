@@ -20,6 +20,10 @@ updates:
       # breaks on every call. Migration in #119.
       - dependency-name: "anthropic"
         update-types: ["version-update:semver-major"]
+      # vllm 0.30+ (local-llm extra) pins fastapi <0.137 and we're on 0.143, so the
+      # weekly update job fails trying to resolve it. Bump by hand once vllm catches up.
+      - dependency-name: "vllm"
+        versions: [">=0.30.0"]
 
   - package-ecosystem: npm
     directory: /ui
