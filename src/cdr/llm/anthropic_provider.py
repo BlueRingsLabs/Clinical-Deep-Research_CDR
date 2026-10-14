@@ -4,6 +4,8 @@ Anthropic Provider
 LLM provider implementation for Anthropic Claude API.
 """
 
+import logging
+import re
 from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
@@ -19,19 +21,33 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 
+logger = logging.getLogger(__name__)
+_MODEL_VERSION = re.compile(r"^claude-(?:[a-z]+-)?(?P<major>\d+)-(?P<minor>\d+)(?:-|$)")
+_SAMPLING_PARAMETERS = ("temperature", "top_p", "top_k")
+
+
+def _is_default_sampling_value(parameter: str, value: Any) -> bool:
+    """Return whether a sampling value is accepted as default by current Claude models."""
+    if parameter == "temperature":
+        return value == 1.0
+    if parameter == "top_p":
+        return isinstance(value, (int, float)) and value >= 0.99
+    return False
+
+
 class AnthropicProvider(BaseLLMProvider):
     """
     Anthropic Claude API provider.
 
     Supports:
-        - Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
+        - Claude Messages API models, including current Claude Sonnet
         - Streaming responses
         - Extended context (up to 200K tokens)
     """
 
     def __init__(
         self,
-        model: str = "claude-3-5-sonnet-20241022",
+        model: str = "claude-sonnet-5-5",
         api_key: str | None = None,
         base_url: str | None = None,
         timeout: float = 60.0,
@@ -41,7 +57,7 @@ class AnthropicProvider(BaseLLMProvider):
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (claude-3-5-sonnet-20241022, etc.).
+            model: Model name (claude-sonnet-5-5, etc.).
             api_key: Anthropic API key.
             base_url: Custom base URL.
             timeout: Request timeout.
@@ -54,6 +70,7 @@ class AnthropicProvider(BaseLLMProvider):
             )
 
         super().__init__(model, api_key, base_url, timeout, max_retries)
+        self._warned_unsupported_sampling_parameters: set[str] = set()
 
         # Initialize clients
         client_kwargs: dict[str, Any] = {
@@ -92,6 +109,54 @@ class AnthropicProvider(BaseLLMProvider):
 
         return system_prompt, converted
 
+    @staticmethod
+    def _model_supports_sampling_parameters(model: str) -> bool:
+        """Claude 4.7+ removed non-default sampling controls; custom APIs may differ."""
+        if not model.startswith("claude-"):
+            return True
+
+        match = _MODEL_VERSION.match(model)
+        if match is None:
+            return False
+
+        version = (int(match.group("major")), int(match.group("minor")))
+        return version < (4, 7)
+
+    def _request_options(self, temperature: float, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """Route sampling parameters through SDK 1.x extra_body only when the model accepts them."""
+        request_options = dict(kwargs)
+        extra_body = dict(request_options.pop("extra_body", {}) or {})
+        sampling_options: dict[str, Any] = {"temperature": temperature}
+
+        for parameter in ("top_p", "top_k"):
+            if parameter in request_options:
+                sampling_options[parameter] = request_options.pop(parameter)
+
+        # The SDK documents extra_body as taking precedence over normal request options.
+        for parameter in _SAMPLING_PARAMETERS:
+            if parameter in extra_body:
+                sampling_options[parameter] = extra_body.pop(parameter)
+
+        if self._model_supports_sampling_parameters(self._model):
+            extra_body.update(sampling_options)
+        else:
+            for parameter, value in sampling_options.items():
+                if value is None or _is_default_sampling_value(parameter, value):
+                    continue
+                if parameter not in self._warned_unsupported_sampling_parameters:
+                    logger.warning(
+                        "Anthropic model %s ignores non-default %s=%r; omitting it. "
+                        "Sampling controls have no direct mapping to output_config.effort.",
+                        self._model,
+                        parameter,
+                        value,
+                    )
+                    self._warned_unsupported_sampling_parameters.add(parameter)
+
+        if extra_body:
+            request_options["extra_body"] = extra_body
+        return request_options
+
     def complete(
         self,
         messages: list[Message],
@@ -108,12 +173,11 @@ class AnthropicProvider(BaseLLMProvider):
             call_kwargs: dict[str, Any] = {
                 "model": self._model,
                 "messages": converted_messages,
-                "temperature": temperature,
                 "max_tokens": max_tokens or 4096,
             }
             if system_prompt:
                 call_kwargs["system"] = system_prompt
-            call_kwargs.update(kwargs)
+            call_kwargs.update(self._request_options(temperature, kwargs))
 
             response = self._client.messages.create(**call_kwargs)
 
@@ -163,12 +227,11 @@ class AnthropicProvider(BaseLLMProvider):
             call_kwargs: dict[str, Any] = {
                 "model": self._model,
                 "messages": converted_messages,
-                "temperature": temperature,
                 "max_tokens": max_tokens or 4096,
             }
             if system_prompt:
                 call_kwargs["system"] = system_prompt
-            call_kwargs.update(kwargs)
+            call_kwargs.update(self._request_options(temperature, kwargs))
 
             response = await self._async_client.messages.create(**call_kwargs)
 
@@ -212,12 +275,11 @@ class AnthropicProvider(BaseLLMProvider):
             call_kwargs: dict[str, Any] = {
                 "model": self._model,
                 "messages": converted_messages,
-                "temperature": temperature,
                 "max_tokens": max_tokens or 4096,
             }
             if system_prompt:
                 call_kwargs["system"] = system_prompt
-            call_kwargs.update(kwargs)
+            call_kwargs.update(self._request_options(temperature, kwargs))
 
             with self._client.messages.stream(**call_kwargs) as stream:
                 for text in stream.text_stream:
@@ -243,12 +305,11 @@ class AnthropicProvider(BaseLLMProvider):
             call_kwargs: dict[str, Any] = {
                 "model": self._model,
                 "messages": converted_messages,
-                "temperature": temperature,
                 "max_tokens": max_tokens or 4096,
             }
             if system_prompt:
                 call_kwargs["system"] = system_prompt
-            call_kwargs.update(kwargs)
+            call_kwargs.update(self._request_options(temperature, kwargs))
 
             async with self._async_client.messages.stream(**call_kwargs) as stream:
                 async for text in stream.text_stream:

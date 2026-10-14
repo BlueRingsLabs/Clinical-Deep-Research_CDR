@@ -49,7 +49,7 @@ dependencies = [
     
     # LLM Providers
     "openai>=2.54.0",
-    "anthropic>=0.125.0",
+    "anthropic>=1.8.0",
     
     # API
     "fastapi>=0.143.0",
