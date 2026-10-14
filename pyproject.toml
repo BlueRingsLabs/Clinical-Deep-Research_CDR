@@ -21,7 +21,7 @@ classifiers = [
 
 dependencies = [
     # Core
-    "pydantic>=2.14.0",
+    "pydantic>=2.14.1",
     "pydantic-settings>=2.15.0",
     
     # Orchestration
@@ -40,7 +40,7 @@ dependencies = [
     
     # Parsing
     "pymupdf>=1.28.2",
-    "unstructured>=0.27.22",
+    "unstructured>=0.27.25",
     "beautifulsoup4>=4.15.0",
     "lxml>=6.1.3",
     
@@ -57,7 +57,7 @@ dependencies = [
     
     # HTTP
     "httpx>=0.27.0",
-    "aiohttp>=3.14.4",
+    "aiohttp>=3.14.5",
     
     # Utilities
     "python-dotenv>=1.2.4",
@@ -80,8 +80,8 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
-    "hypothesis>=6.168.5",
-    "ruff>=0.16.10",
+    "hypothesis>=6.169.0",
+    "ruff>=0.17.0",
     "mypy>=2.4.0",
     "pre-commit>=4.6.2",
     "respx>=0.23.1",  # HTTP mocking
