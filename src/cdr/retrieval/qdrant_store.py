@@ -7,6 +7,7 @@ Vector storage and retrieval using Qdrant.
 from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from cdr.config import get_settings
 from cdr.core.exceptions import VectorStoreError
@@ -19,6 +20,7 @@ try:
         FieldCondition,
         Filter,
         MatchValue,
+        PointIdsList,
         PointStruct,
         VectorParams,
     )
@@ -69,7 +71,7 @@ class QdrantStore:
                 self._client = QdrantClient(
                     url=self._url,
                     api_key=self._api_key,
-                    timeout=30.0,
+                    timeout=30,
                 )
             except Exception as e:
                 raise VectorStoreError(f"Failed to connect to Qdrant: {e}") from e
@@ -132,7 +134,7 @@ class QdrantStore:
     def upsert(
         self,
         ids: list[str],
-        embeddings: np.ndarray | list[list[float]],
+        embeddings: NDArray[Any] | list[list[float]],
         payloads: list[dict[str, Any]] | None = None,
         collection_name: str | None = None,
     ) -> None:
@@ -177,7 +179,7 @@ class QdrantStore:
 
     def search(
         self,
-        query_embedding: np.ndarray | list[float],
+        query_embedding: NDArray[Any] | list[float],
         top_k: int = 10,
         collection_name: str | None = None,
         filter_conditions: dict[str, Any] | None = None,
@@ -214,15 +216,15 @@ class QdrantStore:
                     ]
                     query_filter = Filter(must=conditions)
 
-                results = self._client.search(
+                results = self._client.query_points(
                     collection_name=collection,
-                    query_vector=query_embedding,
+                    query=query_embedding,
                     limit=top_k,
                     query_filter=query_filter,
                     score_threshold=score_threshold,
                 )
 
-                output = [(str(hit.id), hit.payload or {}, hit.score) for hit in results]
+                output = [(str(hit.id), hit.payload or {}, hit.score) for hit in results.points]
 
                 span.set_attribute("result_count", len(output))
                 return output
@@ -242,7 +244,7 @@ class QdrantStore:
             try:
                 self._client.delete(
                     collection_name=collection,
-                    points_selector=ids,
+                    points_selector=PointIdsList(points=ids),
                 )
             except Exception as e:
                 raise VectorStoreError(f"Delete failed: {e}") from e
@@ -252,7 +254,7 @@ class QdrantStore:
         collection = collection_name or self._default_collection
         try:
             info = self._client.get_collection(collection)
-            return info.points_count
+            return info.points_count or 0
         except Exception:
             return 0
 
@@ -271,7 +273,11 @@ class QdrantStore:
             )
             if results:
                 point = results[0]
-                return (point.vector, point.payload or {})
+                vector = point.vector
+                if isinstance(vector, list):
+                    dense_vector = [value for value in vector if isinstance(value, (int, float))]
+                    if len(dense_vector) == len(vector):
+                        return ([float(value) for value in dense_vector], point.payload or {})
             return None
         except Exception:
             return None

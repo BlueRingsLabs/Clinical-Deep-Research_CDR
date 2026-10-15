@@ -16,6 +16,7 @@ Key API Parameters:
 import re
 import time
 from dataclasses import dataclass, field
+from types import TracebackType
 from typing import Any
 
 import httpx
@@ -447,7 +448,12 @@ class ClinicalTrialsClient:
     def __enter__(self) -> "ClinicalTrialsClient":
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         self.close()
 
     def search_rcts(
@@ -497,7 +503,7 @@ class ClinicalTrialsClient:
         query: str,
         max_results: int | None = None,
         filters: CTSearchFilters | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[Record]:
         """
         Search and fetch studies in one call.

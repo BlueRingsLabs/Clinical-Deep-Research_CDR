@@ -20,7 +20,7 @@ Refs: PRISMA 2020
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 import httpx
 
@@ -139,17 +139,18 @@ class FullTextClient:
 
                     data = response.json()
                     records = data.get("records", [])
-                    if records and "pmcid" in records[0]:
-                        pmcid = records[0]["pmcid"]
-                        span.set_attribute("pmcid", pmcid)
-                        return pmcid
+                    if records and isinstance(records[0], dict):
+                        pmcid = records[0].get("pmcid")
+                        if isinstance(pmcid, str):
+                            span.set_attribute("pmcid", pmcid)
+                            return pmcid
                     return None
 
             except Exception as e:
                 span.set_attribute("error", str(e))
                 return None
 
-    async def _check_oa_availability(self, pmcid: str) -> dict | None:
+    async def _check_oa_availability(self, pmcid: str) -> dict[str, Any] | None:
         """Check if article is in PMC Open Access subset.
 
         Docs: https://www.ncbi.nlm.nih.gov/pmc/tools/oa-service/
@@ -251,7 +252,7 @@ class FullTextClient:
         Returns:
             Dict mapping section name to text content
         """
-        sections = {}
+        sections: dict[str, str] = {}
 
         try:
             root = ET.fromstring(xml_content)
