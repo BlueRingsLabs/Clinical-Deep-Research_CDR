@@ -9,8 +9,11 @@ from typing import Any
 
 import pytest
 
+from cdr.config import LLMSettings
 from cdr.llm.anthropic_provider import AnthropicProvider
 from cdr.llm.base import Message
+
+CURRENT_CLAUDE_MODEL = "claude-sonnet-5"
 
 
 class _RecordingHTTPServer(ThreadingHTTPServer):
@@ -42,7 +45,7 @@ def fake_anthropic_api() -> Iterator[tuple[str, list[dict[str, Any]]]]:
                 self.wfile.write(encoded)
 
         def _write_stream(self) -> None:
-            response = _message_response("claude-sonnet-5-5")
+            response = _message_response(CURRENT_CLAUDE_MODEL)
             response["content"] = []
             response["usage"]["output_tokens"] = 0
             events = [
@@ -110,12 +113,18 @@ def _message_response(model: str) -> dict[str, Any]:
     }
 
 
-def _provider(base_url: str, model: str = "claude-sonnet-5-5") -> AnthropicProvider:
+def _provider(base_url: str, model: str | None = None) -> AnthropicProvider:
+    if model is None:
+        return AnthropicProvider(api_key="test-key", base_url=base_url, max_retries=0)
     return AnthropicProvider(model=model, api_key="test-key", base_url=base_url, max_retries=0)
 
 
 def _messages() -> list[Message]:
     return [Message(role="user", content="hello")]
+
+
+def test_current_anthropic_model_is_configured_as_default():
+    assert LLMSettings.model_fields["anthropic_model"].default == CURRENT_CLAUDE_MODEL
 
 
 def test_complete_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
@@ -124,7 +133,7 @@ def test_complete_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
     response = _provider(base_url).complete(_messages())
 
     assert response.content == "fake response"
-    assert requests[0]["model"] == "claude-sonnet-5-5"
+    assert requests[0]["model"] == CURRENT_CLAUDE_MODEL
     assert "temperature" not in requests[0]
 
 
@@ -134,7 +143,7 @@ def test_acomplete_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
     response = asyncio.run(_provider(base_url).acomplete(_messages()))
 
     assert response.content == "fake response"
-    assert requests[0]["model"] == "claude-sonnet-5-5"
+    assert requests[0]["model"] == CURRENT_CLAUDE_MODEL
     assert "temperature" not in requests[0]
 
 
@@ -145,7 +154,7 @@ def test_stream_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
 
     assert "".join(chunk.content for chunk in chunks) == "fake streamed response"
     assert chunks[-1].is_final
-    assert requests[0]["model"] == "claude-sonnet-5-5"
+    assert requests[0]["model"] == CURRENT_CLAUDE_MODEL
     assert requests[0]["stream"] is True
     assert "temperature" not in requests[0]
 
@@ -160,7 +169,7 @@ def test_astream_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
 
     assert "".join(chunk.content for chunk in chunks) == "fake streamed response"
     assert chunks[-1].is_final
-    assert requests[0]["model"] == "claude-sonnet-5-5"
+    assert requests[0]["model"] == CURRENT_CLAUDE_MODEL
     assert requests[0]["stream"] is True
     assert "temperature" not in requests[0]
 
@@ -183,8 +192,8 @@ def test_new_model_omits_accepted_compatibility_sampling_values_without_warning(
     base_url, requests = fake_anthropic_api
     provider = _provider(base_url)
 
-    for top_p in (0.99, 1.0):
-        provider.complete(_messages(), temperature=1.0, top_p=top_p)
+    provider.complete(_messages(), temperature=1.0, top_p=1.0)
+    provider.complete(_messages(), temperature=1.0, top_p=1.0)
 
     assert len(requests) == 2
     assert all(not {"temperature", "top_p", "top_k"}.intersection(body) for body in requests)
@@ -201,4 +210,19 @@ def test_new_model_warns_once_and_omits_unsupported_sampling_options(fake_anthro
     assert len(requests) == 2
     assert all(not {"temperature", "top_p", "top_k"}.intersection(body) for body in requests)
     warnings = [record for record in caplog.records if "ignores non-default" in record.message]
-    assert len(warnings) == 3
+    assert len(warnings) == 1
+    assert all(parameter in warnings[0].message for parameter in ("temperature", "top_p", "top_k"))
+
+
+def test_new_model_warns_for_top_p_slightly_below_default(fake_anthropic_api, caplog):
+    base_url, requests = fake_anthropic_api
+
+    _provider(base_url).complete(_messages(), temperature=1.0, top_p=0.995)
+
+    assert len(requests) == 1
+    assert "top_p" not in requests[0]
+    warnings = [
+        record.message for record in caplog.records if "ignores non-default" in record.message
+    ]
+    assert len(warnings) == 1
+    assert "top_p=0.995" in warnings[0]

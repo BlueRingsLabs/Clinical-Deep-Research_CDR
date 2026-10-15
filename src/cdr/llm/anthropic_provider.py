@@ -31,7 +31,7 @@ def _is_default_sampling_value(parameter: str, value: Any) -> bool:
     if parameter == "temperature":
         return value == 1.0
     if parameter == "top_p":
-        return isinstance(value, (int, float)) and value >= 0.99
+        return value == 1.0
     return False
 
 
@@ -47,7 +47,7 @@ class AnthropicProvider(BaseLLMProvider):
 
     def __init__(
         self,
-        model: str = "claude-sonnet-5-5",
+        model: str = "claude-sonnet-5",
         api_key: str | None = None,
         base_url: str | None = None,
         timeout: float = 60.0,
@@ -57,7 +57,7 @@ class AnthropicProvider(BaseLLMProvider):
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (claude-sonnet-5-5, etc.).
+            model: Model name (claude-sonnet-5, etc.).
             api_key: Anthropic API key.
             base_url: Custom base URL.
             timeout: Request timeout.
@@ -140,18 +140,24 @@ class AnthropicProvider(BaseLLMProvider):
         if self._model_supports_sampling_parameters(self._model):
             extra_body.update(sampling_options)
         else:
+            unsupported_options: dict[str, Any] = {}
             for parameter, value in sampling_options.items():
                 if value is None or _is_default_sampling_value(parameter, value):
                     continue
                 if parameter not in self._warned_unsupported_sampling_parameters:
-                    logger.warning(
-                        "Anthropic model %s ignores non-default %s=%r; omitting it. "
-                        "Sampling controls have no direct mapping to output_config.effort.",
-                        self._model,
-                        parameter,
-                        value,
-                    )
+                    unsupported_options[parameter] = value
                     self._warned_unsupported_sampling_parameters.add(parameter)
+            if unsupported_options:
+                formatted_options = ", ".join(
+                    f"{parameter}={value!r}" for parameter, value in unsupported_options.items()
+                )
+                logger.warning(
+                    "Anthropic model %s ignores non-default sampling parameters (%s); "
+                    "omitting them. Sampling controls have no direct mapping to "
+                    "output_config.effort.",
+                    self._model,
+                    formatted_options,
+                )
 
         if extra_body:
             request_options["extra_body"] = extra_body
