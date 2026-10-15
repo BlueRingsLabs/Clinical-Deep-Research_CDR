@@ -177,6 +177,20 @@ def test_legacy_model_sampling_options_use_extra_body(fake_anthropic_api):
     assert requests[0]["top_k"] == 20
 
 
+def test_new_model_omits_accepted_compatibility_sampling_values_without_warning(
+    fake_anthropic_api, caplog
+):
+    base_url, requests = fake_anthropic_api
+    provider = _provider(base_url)
+
+    for top_p in (0.99, 1.0):
+        provider.complete(_messages(), temperature=1.0, top_p=top_p)
+
+    assert len(requests) == 2
+    assert all(not {"temperature", "top_p", "top_k"}.intersection(body) for body in requests)
+    assert not [record for record in caplog.records if "ignores non-default" in record.message]
+
+
 def test_new_model_warns_once_and_omits_unsupported_sampling_options(fake_anthropic_api, caplog):
     base_url, requests = fake_anthropic_api
     provider = _provider(base_url)
