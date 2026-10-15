@@ -31,7 +31,7 @@ CDR, it's how free tiers work. When one runs out, switch providers or go local.
 | Cloudflare Workers AI | `CLOUDFLARE_API_KEY` + `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → AI | `@cf/meta/llama-3.1-8b-instruct` |
 | Hugging Face | `HF_TOKEN` (optional `HF_ENDPOINT_URL`) | https://huggingface.co/settings/tokens | `Qwen/Qwen2.5-72B-Instruct` |
 | OpenAI | `OPENAI_API_KEY` | https://platform.openai.com/api-keys | `gpt-4o` |
-| Anthropic | `ANTHROPIC_API_KEY` | https://console.anthropic.com | set `ANTHROPIC_MODEL` |
+| Anthropic | `ANTHROPIC_API_KEY` | https://console.anthropic.com | Defaults to `claude-sonnet-5-5`; set `ANTHROPIC_MODEL` to override |
 
 Defaults live in `src/cdr/llm/*_provider.py` and `src/cdr/config.py`. Providers deprecate
 models regularly. If a default starts returning 404s, that's a
