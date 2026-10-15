@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 from cdr.config import LLMSettings
+from cdr.core.exceptions import LLMError
 from cdr.llm.anthropic_provider import AnthropicProvider
 from cdr.llm.base import Message
 
@@ -34,9 +35,11 @@ def fake_anthropic_api() -> Iterator[tuple[str, list[dict[str, Any]]]]:
             self.server.requests.append(body)  # type: ignore[attr-defined]
 
             if body.get("stream"):
-                self._write_stream()
+                self._write_stream(body["model"], body.get("test_stop_reason", "end_turn"))
             else:
-                response = _message_response(body["model"])
+                response = _message_response(
+                    body["model"], body.get("test_stop_reason", "end_turn")
+                )
                 encoded = json.dumps(response).encode()
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
@@ -44,39 +47,46 @@ def fake_anthropic_api() -> Iterator[tuple[str, list[dict[str, Any]]]]:
                 self.end_headers()
                 self.wfile.write(encoded)
 
-        def _write_stream(self) -> None:
-            response = _message_response(CURRENT_CLAUDE_MODEL)
+        def _write_stream(self, model: str, stop_reason: str) -> None:
+            response = _message_response(model, None)
             response["content"] = []
             response["usage"]["output_tokens"] = 0
-            events = [
-                ("message_start", {"type": "message_start", "message": response}),
-                (
-                    "content_block_start",
-                    {
-                        "type": "content_block_start",
-                        "index": 0,
-                        "content_block": {"type": "text", "text": ""},
-                    },
-                ),
-                (
-                    "content_block_delta",
-                    {
-                        "type": "content_block_delta",
-                        "index": 0,
-                        "delta": {"type": "text_delta", "text": "fake streamed response"},
-                    },
-                ),
-                ("content_block_stop", {"type": "content_block_stop", "index": 0}),
-                (
-                    "message_delta",
-                    {
-                        "type": "message_delta",
-                        "delta": {"stop_reason": "end_turn", "stop_sequence": None},
-                        "usage": {"output_tokens": 3},
-                    },
-                ),
-                ("message_stop", {"type": "message_stop"}),
-            ]
+            events = [("message_start", {"type": "message_start", "message": response})]
+            if stop_reason != "refusal":
+                events.extend(
+                    [
+                        (
+                            "content_block_start",
+                            {
+                                "type": "content_block_start",
+                                "index": 0,
+                                "content_block": {"type": "text", "text": ""},
+                            },
+                        ),
+                        (
+                            "content_block_delta",
+                            {
+                                "type": "content_block_delta",
+                                "index": 0,
+                                "delta": {"type": "text_delta", "text": "fake streamed response"},
+                            },
+                        ),
+                        ("content_block_stop", {"type": "content_block_stop", "index": 0}),
+                    ]
+                )
+            events.extend(
+                [
+                    (
+                        "message_delta",
+                        {
+                            "type": "message_delta",
+                            "delta": {"stop_reason": stop_reason, "stop_sequence": None},
+                            "usage": {"output_tokens": 3},
+                        },
+                    ),
+                    ("message_stop", {"type": "message_stop"}),
+                ]
+            )
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Connection", "close")
@@ -100,14 +110,14 @@ def fake_anthropic_api() -> Iterator[tuple[str, list[dict[str, Any]]]]:
         server.server_close()
 
 
-def _message_response(model: str) -> dict[str, Any]:
+def _message_response(model: str, stop_reason: str | None = "end_turn") -> dict[str, Any]:
     return {
         "id": "msg_test",
         "type": "message",
         "role": "assistant",
         "model": model,
-        "content": [{"type": "text", "text": "fake response"}],
-        "stop_reason": "end_turn",
+        "content": [] if stop_reason == "refusal" else [{"type": "text", "text": "fake response"}],
+        "stop_reason": stop_reason,
         "stop_sequence": None,
         "usage": {"input_tokens": 3, "output_tokens": 2},
     }
@@ -178,6 +188,8 @@ def test_astream_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
     "model",
     [
         "claude-sonnet-4-6",
+        "claude-sonnet-4-20250514",
+        "claude-opus-4-20250514",
         "claude-3-5-sonnet-20241022",
         "claude-3-haiku-20240307",
         "claude-custom-deployment",
@@ -234,14 +246,100 @@ def test_sampling_cutoff_model_omits_non_default_options(fake_anthropic_api, cap
     assert len(warnings) == 1
 
 
+@pytest.mark.parametrize("model", [CURRENT_CLAUDE_MODEL, "claude-opus-4-7", "claude-opus-5-5"])
 @pytest.mark.parametrize("top_p", [0.99, 0.995])
-def test_new_model_preserves_compatible_top_p_value_without_warning(
-    fake_anthropic_api, caplog, top_p
+def test_thinking_model_omits_top_p_close_to_default_and_warns(
+    fake_anthropic_api, caplog, model, top_p
 ):
     base_url, requests = fake_anthropic_api
 
-    _provider(base_url).complete(_messages(), temperature=1.0, top_p=top_p)
+    _provider(base_url, model=model).complete(_messages(), temperature=1.0, top_p=top_p)
 
     assert len(requests) == 1
-    assert requests[0]["top_p"] == top_p
-    assert not [record for record in caplog.records if "ignores non-default" in record.message]
+    assert "top_p" not in requests[0]
+    warnings = [record for record in caplog.records if "ignores non-default" in record.message]
+    assert len(warnings) == 1
+    assert "top_p" in warnings[0].message
+
+
+@pytest.mark.parametrize("mode", ["complete", "acomplete", "stream", "astream"])
+@pytest.mark.parametrize("model", [CURRENT_CLAUDE_MODEL, "claude-opus-5-5"])
+@pytest.mark.parametrize("requested_tokens", [500, 800])
+def test_default_thinking_model_uses_minimum_output_budget(
+    fake_anthropic_api, mode, model, requested_tokens
+):
+    base_url, requests = fake_anthropic_api
+    provider = _provider(base_url, model=model)
+
+    if mode == "complete":
+        provider.complete(_messages(), temperature=1.0, max_tokens=requested_tokens)
+    elif mode == "acomplete":
+        asyncio.run(provider.acomplete(_messages(), temperature=1.0, max_tokens=requested_tokens))
+    elif mode == "stream":
+        list(provider.stream(_messages(), temperature=1.0, max_tokens=requested_tokens))
+    else:
+
+        async def collect_chunks():
+            return [
+                chunk
+                async for chunk in provider.astream(
+                    _messages(), temperature=1.0, max_tokens=requested_tokens
+                )
+            ]
+
+        asyncio.run(collect_chunks())
+
+    assert requests[0]["max_tokens"] == 4096
+
+
+def test_non_thinking_model_preserves_requested_output_budget(fake_anthropic_api):
+    base_url, requests = fake_anthropic_api
+
+    _provider(base_url, model="claude-sonnet-4-6").complete(
+        _messages(), temperature=1.0, max_tokens=500
+    )
+
+    assert requests[0]["max_tokens"] == 500
+
+
+@pytest.mark.parametrize("mode", ["complete", "acomplete", "stream", "astream"])
+def test_refusal_stop_reason_raises_llm_error(fake_anthropic_api, mode):
+    base_url, _ = fake_anthropic_api
+    provider = _provider(base_url)
+    options = {"temperature": 1.0, "extra_body": {"test_stop_reason": "refusal"}}
+
+    with pytest.raises(LLMError, match="refused"):
+        if mode == "complete":
+            provider.complete(_messages(), **options)
+        elif mode == "acomplete":
+            asyncio.run(provider.acomplete(_messages(), **options))
+        elif mode == "stream":
+            list(provider.stream(_messages(), **options))
+        else:
+
+            async def collect_chunks():
+                return [chunk async for chunk in provider.astream(_messages(), **options)]
+
+            asyncio.run(collect_chunks())
+
+
+@pytest.mark.parametrize("mode", ["complete", "acomplete", "stream", "astream"])
+def test_max_tokens_stop_reason_logs_possible_truncation(fake_anthropic_api, caplog, mode):
+    base_url, _ = fake_anthropic_api
+    provider = _provider(base_url)
+    options = {"temperature": 1.0, "extra_body": {"test_stop_reason": "max_tokens"}}
+
+    if mode == "complete":
+        provider.complete(_messages(), **options)
+    elif mode == "acomplete":
+        asyncio.run(provider.acomplete(_messages(), **options))
+    elif mode == "stream":
+        list(provider.stream(_messages(), **options))
+    else:
+
+        async def collect_chunks():
+            return [chunk async for chunk in provider.astream(_messages(), **options)]
+
+        asyncio.run(collect_chunks())
+
+    assert any("stopped at max_tokens" in record.message for record in caplog.records)
