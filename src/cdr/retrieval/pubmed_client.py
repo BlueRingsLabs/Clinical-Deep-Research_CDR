@@ -15,6 +15,8 @@ E-utilities reference: https://www.ncbi.nlm.nih.gov/books/NBK25500/
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from types import TracebackType
+from typing import Any
 
 import httpx
 
@@ -125,7 +127,7 @@ class PubMedClient:
             time.sleep(self._request_interval - elapsed)
         self._last_request = time.time()
 
-    def _build_params(self, **kwargs) -> dict[str, str]:
+    def _build_params(self, **kwargs: str | None) -> dict[str, str]:
         """Build request parameters."""
         params = {"db": "pubmed", "retmode": "xml"}
         if self._api_key:
@@ -209,7 +211,9 @@ class PubMedClient:
 
                 # Extract results
                 count_elem = root.find("Count")
-                total_count = int(count_elem.text) if count_elem is not None else 0
+                total_count = (
+                    int(count_elem.text) if count_elem is not None and count_elem.text else 0
+                )
 
                 pmids = [id_elem.text for id_elem in root.findall(".//IdList/Id") if id_elem.text]
 
@@ -319,13 +323,13 @@ class PubMedClient:
 
             # Title
             title_elem = article_elem.find("ArticleTitle")
-            title = title_elem.text if title_elem is not None else "No title"
+            title = title_elem.text if title_elem is not None and title_elem.text else "No title"
 
             # Abstract
             abstract_parts = []
-            for abstract in article_elem.findall(".//AbstractText"):
-                label = abstract.get("Label", "")
-                text = abstract.text or ""
+            for abstract_elem in article_elem.findall(".//AbstractText"):
+                label = abstract_elem.get("Label", "")
+                text = abstract_elem.text or ""
                 if label:
                     abstract_parts.append(f"{label}: {text}")
                 else:
@@ -421,7 +425,7 @@ class PubMedClient:
         return keywords
 
     def search_and_fetch(
-        self, query: str, max_results: int | None = None, **kwargs
+        self, query: str, max_results: int | None = None, **kwargs: Any
     ) -> list[Record]:
         """
         Convenience method: search and fetch in one call.
@@ -512,5 +516,10 @@ class PubMedClient:
     def __enter__(self) -> "PubMedClient":
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         self.close()

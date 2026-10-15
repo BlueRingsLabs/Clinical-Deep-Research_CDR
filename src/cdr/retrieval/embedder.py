@@ -4,7 +4,10 @@ Embedder
 Text embedding using sentence-transformers.
 """
 
+from typing import Any
+
 import numpy as np
+from numpy.typing import NDArray
 
 from cdr.config import get_settings
 from cdr.core.exceptions import EmbeddingError
@@ -59,8 +62,13 @@ class Embedder:
         with self._tracer.span("load_model", attributes={"model": self._model_name}) as span:
             try:
                 self._model = SentenceTransformer(self._model_name, device=device)
-                self._dimension = self._model.get_embedding_dimension()
+                dimension = self._model.get_embedding_dimension()
+                if dimension is None:
+                    raise EmbeddingError("Embedding model does not expose an output dimension")
+                self._dimension = dimension
                 span.set_attribute("dimension", self._dimension)
+            except EmbeddingError:
+                raise
             except Exception as e:
                 raise EmbeddingError(f"Failed to load model: {e}") from e
 
@@ -74,7 +82,7 @@ class Embedder:
         """Embedding dimension."""
         return self._dimension
 
-    def embed(self, text: str, use_cache: bool = True) -> np.ndarray:
+    def embed(self, text: str, use_cache: bool = True) -> NDArray[Any]:
         """
         Embed single text.
 
@@ -109,7 +117,7 @@ class Embedder:
 
     def embed_batch(
         self, texts: list[str], use_cache: bool = True, show_progress: bool = False
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """
         Embed batch of texts.
 
