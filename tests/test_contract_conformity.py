@@ -1685,7 +1685,7 @@ class TestCompositionalInference:
 
         assert result["composed_hypotheses"] == []
 
-    def test_compose_node_skipped_for_dod_level_2(self):
+    def test_compose_node_skipped_for_dod_level_2(self, caplog, capsys):
         """Composition should be skipped for DoD Level 2."""
         from cdr.core.enums import RunStatus, VerificationStatus
         from cdr.core.schemas import CDRState
@@ -1707,11 +1707,17 @@ class TestCompositionalInference:
 
         # DoD Level 2 - should skip composition
         config = {"configurable": {"dod_level": 2}}
+        caplog.set_level("DEBUG", logger="cdr.orchestration.nodes.synthesis_nodes")
         result = run_async(compose_node(state, config))
 
         assert result["composed_hypotheses"] == []
+        assert any(
+            record.levelname == "DEBUG" and "Composition skipped at DoD level 2" in record.message
+            for record in caplog.records
+        )
+        assert capsys.readouterr().out == ""
 
-    def test_compose_node_skipped_without_llm(self):
+    def test_compose_node_skipped_without_llm(self, caplog, capsys):
         """Composition should be skipped without LLM provider."""
         from cdr.core.enums import RunStatus, VerificationStatus
         from cdr.core.schemas import CDRState
@@ -1733,9 +1739,16 @@ class TestCompositionalInference:
 
         # DoD Level 3 but NO LLM - should skip
         config = {"configurable": {"dod_level": 3, "llm_provider": None}}
+        caplog.set_level("WARNING", logger="cdr.orchestration.nodes.synthesis_nodes")
         result = run_async(compose_node(state, config))
 
         assert result["composed_hypotheses"] == []
+        assert any(
+            record.levelname == "WARNING"
+            and "Composition unavailable because no LLM provider is configured" in record.message
+            for record in caplog.records
+        )
+        assert capsys.readouterr().out == ""
 
     def test_compose_node_skipped_insufficient_verified_claims(self):
         """Composition requires at least 2 verified claims."""
