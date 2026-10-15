@@ -343,8 +343,8 @@ class TestAuditFixes:
 
         # Also verify it doesn't use record.study_type
         assert "record.study_type" not in source, (
-            "RuleBasedScreener must NOT use record.study_type - "
-            "Record schema has no 'study_type' field, must infer from publication_type"
+            "RuleBasedScreener should use raw publication_type metadata instead of "
+            "the optional normalized study_type field"
         )
 
     def test_cdrstate_parsed_documents_is_dict(self):

@@ -364,8 +364,13 @@ class PubMedClient:
                     doi = article_id.text
                     break
 
-            # Study type inference from publication types
-            study_type = self._infer_study_type(article)  # noqa: F841 — loose end: parsed but not used yet
+            # Preserve PubMed's source labels alongside the normalized classification.
+            publication_types = [
+                publication_type.text.strip()
+                for publication_type in article.findall(".//PublicationType")
+                if publication_type.text and publication_type.text.strip()
+            ]
+            study_type = self._infer_study_type(article)
 
             # Compute content hash for deduplication
             content_hash = Record.compute_hash(title, abstract, doi)
@@ -379,6 +384,8 @@ class PubMedClient:
                 authors=authors,
                 year=year,
                 journal=journal,
+                publication_type=publication_types,
+                study_type=study_type,
                 doi=doi,
                 pmid=pmid,
                 mesh_terms=self._extract_mesh_terms(article),
@@ -391,7 +398,11 @@ class PubMedClient:
 
     def _infer_study_type(self, article: ET.Element) -> StudyType | None:
         """Infer study type from publication types."""
-        pub_types = [pt.text.lower() for pt in article.findall(".//PublicationType") if pt.text]
+        pub_types = [
+            pt.text.strip().lower()
+            for pt in article.findall(".//PublicationType")
+            if pt.text and pt.text.strip()
+        ]
 
         if "meta-analysis" in pub_types:
             return StudyType.META_ANALYSIS

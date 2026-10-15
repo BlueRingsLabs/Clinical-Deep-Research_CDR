@@ -60,6 +60,7 @@ def make_record(
     title: str = "Test Study",
     abstract: str = "A study of aspirin in patients with atrial fibrillation.",
     publication_type: list[str] | None = None,
+    study_type: StudyType | None = None,
 ) -> Record:
     """Create a Record for testing."""
     return Record(
@@ -70,6 +71,7 @@ def make_record(
         title=title,
         abstract=abstract,
         publication_type=publication_type or [],
+        study_type=study_type,
     )
 
 
@@ -213,6 +215,21 @@ class TestComparatorAlignmentGate:
 
 class TestStudyTypeConsistencyGate:
     """Tests for StudyTypeConsistencyGate."""
+
+    def test_prefers_normalized_record_study_type_before_text_fallback(self):
+        """A parsed PubMed type should be usable when title and abstract are ambiguous."""
+        gate = StudyTypeConsistencyGate(strict=False)
+        pico = make_pico(study_types=[StudyType.RCT])
+        record = make_record(
+            title="Aspirin efficacy study",
+            abstract="The trial enrolled eligible patients.",
+            study_type=StudyType.RCT,
+        )
+
+        result = gate.check_record(record, pico)
+
+        assert result.result == GateResult.PASS
+        assert result.metadata == {"category": "experimental", "specific_type": "rct"}
 
     def test_pass_when_rct_expected_and_found(self):
         """Should PASS when PICO requires RCT and evidence is RCT."""

@@ -23,6 +23,7 @@ Reference: https://www.ncbi.nlm.nih.gov/books/NBK25497/#chapter2.Usage_Guideline
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import numpy as np
@@ -78,6 +79,35 @@ class TestPubMedClient:
                 mock_tracer.return_value.span.return_value = mock_span
                 client = PubMedClient()
                 assert client._request_interval == 0.34  # Without API key
+
+    def test_parse_article_preserves_publication_types_and_inferred_study_type(self, client):
+        """PubMed classification should survive parsing into the normalized Record."""
+        from cdr.core.enums import StudyType
+
+        article = ET.fromstring(
+            """
+            <PubmedArticle>
+              <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                  <ArticleTitle>A randomized trial of aspirin</ArticleTitle>
+                  <Abstract><AbstractText>Trial abstract.</AbstractText></Abstract>
+                  <Journal><Title>Clinical Journal</Title></Journal>
+                  <PublicationTypeList>
+                    <PublicationType>Randomized Controlled Trial</PublicationType>
+                    <PublicationType>Journal Article</PublicationType>
+                  </PublicationTypeList>
+                </Article>
+              </MedlineCitation>
+            </PubmedArticle>
+            """
+        )
+
+        record = client._parse_article(article)
+
+        assert record is not None
+        assert record.publication_type == ["Randomized Controlled Trial", "Journal Article"]
+        assert record.study_type == StudyType.RCT
 
     def test_build_params_includes_api_key(self, client):
         """Test _build_params includes API key when configured."""

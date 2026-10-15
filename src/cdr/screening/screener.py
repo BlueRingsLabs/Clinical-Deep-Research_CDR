@@ -277,9 +277,10 @@ class RuleBasedScreener:
     def _apply_rules(self, record: Record) -> ScreeningDecision | None:
         """Apply exclusion rules. Returns decision if excluded, None if passes.
 
-        CRITICAL: Record schema does NOT have 'study_type' or 'id' fields.
+        CRITICAL:
         - Use record.record_id (not record.id)
-        - Infer study type from publication_type (PubMed) when needed
+        - Keep this source-agnostic screener on raw publication_type metadata
+          instead of depending on the optional normalized study_type field
 
         Refs: NCBI E-utilities, ClinicalTrials.gov API
         """
