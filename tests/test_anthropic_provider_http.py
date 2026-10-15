@@ -13,7 +13,7 @@ from cdr.config import LLMSettings
 from cdr.llm.anthropic_provider import AnthropicProvider
 from cdr.llm.base import Message
 
-CURRENT_CLAUDE_MODEL = "claude-sonnet-5"
+CURRENT_CLAUDE_MODEL = "claude-sonnet-5-5"
 
 
 class _RecordingHTTPServer(ThreadingHTTPServer):
@@ -174,12 +174,19 @@ def test_astream_uses_sdk_1_against_fake_http_server(fake_anthropic_api):
     assert "temperature" not in requests[0]
 
 
-def test_legacy_model_sampling_options_use_extra_body(fake_anthropic_api):
+@pytest.mark.parametrize(
+    "model",
+    [
+        "claude-sonnet-4-6",
+        "claude-3-5-sonnet-20241022",
+        "claude-3-haiku-20240307",
+        "claude-custom-deployment",
+    ],
+)
+def test_compatible_model_sampling_options_use_extra_body(fake_anthropic_api, model):
     base_url, requests = fake_anthropic_api
 
-    _provider(base_url, model="claude-sonnet-4-6").complete(
-        _messages(), temperature=0.2, top_p=0.8, top_k=20
-    )
+    _provider(base_url, model=model).complete(_messages(), temperature=0.2, top_p=0.8, top_k=20)
 
     assert requests[0]["temperature"] == 0.2
     assert requests[0]["top_p"] == 0.8
@@ -214,15 +221,27 @@ def test_new_model_warns_once_and_omits_unsupported_sampling_options(fake_anthro
     assert all(parameter in warnings[0].message for parameter in ("temperature", "top_p", "top_k"))
 
 
-def test_new_model_warns_for_top_p_slightly_below_default(fake_anthropic_api, caplog):
+def test_sampling_cutoff_model_omits_non_default_options(fake_anthropic_api, caplog):
     base_url, requests = fake_anthropic_api
 
-    _provider(base_url).complete(_messages(), temperature=1.0, top_p=0.995)
+    _provider(base_url, model="claude-sonnet-4-7").complete(
+        _messages(), temperature=0.2, top_p=0.8, top_k=20
+    )
 
     assert len(requests) == 1
-    assert "top_p" not in requests[0]
-    warnings = [
-        record.message for record in caplog.records if "ignores non-default" in record.message
-    ]
+    assert not {"temperature", "top_p", "top_k"}.intersection(requests[0])
+    warnings = [record for record in caplog.records if "ignores non-default" in record.message]
     assert len(warnings) == 1
-    assert "top_p=0.995" in warnings[0]
+
+
+@pytest.mark.parametrize("top_p", [0.99, 0.995])
+def test_new_model_preserves_compatible_top_p_value_without_warning(
+    fake_anthropic_api, caplog, top_p
+):
+    base_url, requests = fake_anthropic_api
+
+    _provider(base_url).complete(_messages(), temperature=1.0, top_p=top_p)
+
+    assert len(requests) == 1
+    assert requests[0]["top_p"] == top_p
+    assert not [record for record in caplog.records if "ignores non-default" in record.message]

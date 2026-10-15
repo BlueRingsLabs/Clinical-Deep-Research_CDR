@@ -55,7 +55,7 @@ class LLMSettings(BaseSettings):
 
     # Anthropic (FALLBACK)
     anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
-    anthropic_model: str = Field(default="claude-sonnet-5", alias="ANTHROPIC_MODEL")
+    anthropic_model: str = Field(default="claude-sonnet-5-5", alias="ANTHROPIC_MODEL")
 
     # Default provider: Gemini by default (1M+ tokens/day FREE)
     default_provider: Literal[

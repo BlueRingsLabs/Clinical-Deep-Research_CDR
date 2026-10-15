@@ -22,7 +22,7 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-_MODEL_VERSION = re.compile(r"^claude-(?:[a-z]+-)?(?P<major>\d+)-(?P<minor>\d+)(?:-|$)")
+_MODEL_VERSION = re.compile(r"^claude-(?:[a-z]+-)?(?P<major>\d+)(?:-(?P<minor>\d+))?(?:-|$)")
 _SAMPLING_PARAMETERS = ("temperature", "top_p", "top_k")
 
 
@@ -47,7 +47,7 @@ class AnthropicProvider(BaseLLMProvider):
 
     def __init__(
         self,
-        model: str = "claude-sonnet-5",
+        model: str = "claude-sonnet-5-5",
         api_key: str | None = None,
         base_url: str | None = None,
         timeout: float = 60.0,
@@ -57,7 +57,7 @@ class AnthropicProvider(BaseLLMProvider):
         Initialize Anthropic provider.
 
         Args:
-            model: Model name (claude-sonnet-5, etc.).
+            model: Model name (claude-sonnet-5-5, etc.).
             api_key: Anthropic API key.
             base_url: Custom base URL.
             timeout: Request timeout.
@@ -117,9 +117,10 @@ class AnthropicProvider(BaseLLMProvider):
 
         match = _MODEL_VERSION.match(model)
         if match is None:
-            return False
+            # Preserve caller-specified sampling for custom or newly named models.
+            return True
 
-        version = (int(match.group("major")), int(match.group("minor")))
+        version = (int(match.group("major")), int(match.group("minor") or 0))
         return version < (4, 7)
 
     def _request_options(self, temperature: float, kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -143,6 +144,15 @@ class AnthropicProvider(BaseLLMProvider):
             unsupported_options: dict[str, Any] = {}
             for parameter, value in sampling_options.items():
                 if value is None or _is_default_sampling_value(parameter, value):
+                    continue
+                if (
+                    parameter == "top_p"
+                    and isinstance(value, (int, float))
+                    and not isinstance(value, bool)
+                    and 0.99 <= value <= 1.0
+                ):
+                    # Anthropic accepts top_p >= 0.99 for backwards compatibility.
+                    extra_body[parameter] = value
                     continue
                 if parameter not in self._warned_unsupported_sampling_parameters:
                     unsupported_options[parameter] = value
