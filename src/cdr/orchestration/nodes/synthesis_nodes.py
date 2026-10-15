@@ -7,11 +7,15 @@ Extracted from graph.py monolith.
 
 from __future__ import annotations
 
+import logging
+
 from langchain_core.runnables import RunnableConfig
 
 from cdr.core.schemas import CDRState
 from cdr.observability.metrics import metrics
 from cdr.observability.tracer import tracer
+
+logger = logging.getLogger(__name__)
 
 
 async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
@@ -32,9 +36,11 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
         dod_level = configurable.get("dod_level", 1)
 
         span.set_attribute("dod_level", dod_level)
-        print(
-            f"[Synthesize] Processing {len(state.study_cards)} studies, "
-            f"{len(state.rob2_results)} RoB2 results (DoD Level {dod_level})"
+        logger.debug(
+            "Processing %d studies, %d RoB2 results (DoD Level %d)",
+            len(state.study_cards),
+            len(state.rob2_results),
+            dod_level,
         )
 
         from cdr.synthesis.synthesizer import EvidenceSynthesizer
@@ -50,7 +56,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
             valid_snippet_ids = {s.snippet_id for s in state.snippets}
 
         span.set_attribute("valid_snippet_count", len(valid_snippet_ids))
-        print(f"[Synthesize] Available snippets for claims: {len(valid_snippet_ids)}")
+        logger.debug("Available snippets for claims: %d", len(valid_snippet_ids))
 
         synthesizer = EvidenceSynthesizer(llm, model)
 
@@ -89,13 +95,16 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
                 rejected_claims.append(claim.claim_id)
 
         if rejected_claims:
-            print(
-                f"[Synthesize] GATE: Rejected {len(rejected_claims)} claims without valid snippets"
+            logger.warning(
+                "Synthesis gate rejected %d claims without valid snippets",
+                len(rejected_claims),
             )
             span.set_attribute("rejected_claims", rejected_claims)
 
-        print(
-            f"[Synthesize] Generated {len(validated_claims)} validated claims (of {len(result.claims)} total)"
+        logger.debug(
+            "Generated %d validated claims (of %d total)",
+            len(validated_claims),
+            len(result.claims),
         )
         span.set_attribute("claim_count", len(validated_claims))
         span.set_attribute("claim_count_raw", len(result.claims))
@@ -111,7 +120,7 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
         ]
 
         if rob2_failures:
-            print(f"[Synthesize] RoB2 failures detected for: {rob2_failures}")
+            logger.warning("RoB2 failures detected for studies: %s", rob2_failures)
             span.set_attribute("rob2_failures", rob2_failures)
 
             # Downgrade claims if they rely on studies with RoB2 failures
@@ -178,8 +187,11 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
                     downgraded_claims.append(claim)
 
             validated_claims = downgraded_claims
-            print(
-                f"[Synthesize] Downgraded {len([c for c in validated_claims if 'RoB2 assessment failed' in str(c.limitations)])} claims due to RoB2 failures"
+            logger.warning(
+                "Downgraded %d claims due to RoB2 failures",
+                len(
+                    [c for c in validated_claims if "RoB2 assessment failed" in str(c.limitations)]
+                ),
             )
 
         # CRITICAL: Populate answer field per CDRState contract
@@ -210,8 +222,9 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
             )
 
             # Log gate result
+            log_gate_line = logger.warning if assertion_gate_result.violations else logger.debug
             for line in assertion_gate_result.audit_trail:
-                print(f"[Synthesize] {line}")
+                log_gate_line("Assertion gate: %s", line)
 
             # If there are violations (even degraded), add warnings to answer
             if assertion_gate_result.violations:
@@ -246,9 +259,10 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
         # synthesis couldn't extract structured claims. This must be flagged.
         # =====================================================================
         if state.snippets and not validated_claims:
-            print(
-                f"[Synthesize] GATE: {len(state.snippets)} snippets exist but 0 claims generated. "
-                f"Evidence exists but synthesis failed to extract claims."
+            logger.warning(
+                "%d snippets exist but synthesis generated no claims; "
+                "evidence was available but claims could not be extracted",
+                len(state.snippets),
             )
             span.set_attribute("gate_blocked", True)
             span.set_attribute("gate_block_reason", "NO_CLAIMS_WITH_EVIDENCE")
@@ -283,9 +297,10 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
         # Markdown fallback uses heuristic parsing which is not reproducible
         # Refs: PRISMA 2020 (reproducibility), GRADE handbook
         if dod_level >= 2 and result.used_markdown_fallback:
-            print(
-                f"[Synthesize] DOD_LEVEL_2_BLOCKED: Markdown fallback not allowed "
-                f"for Research-grade (Level {dod_level})"
+            logger.warning(
+                "DoD Level %d blocked: Markdown fallback is not allowed for "
+                "research-grade synthesis",
+                dod_level,
             )
             span.set_attribute("dod_blocked", True)
             span.set_attribute("dod_block_reason", "MARKDOWN_FALLBACK_NOT_ALLOWED")
@@ -347,9 +362,10 @@ async def synthesize_node(state: CDRState, config: RunnableConfig) -> dict:
 
             if claims_with_incomplete_rationale:
                 missing_ids = [c.claim_id for c in claims_with_incomplete_rationale]
-                print(
-                    f"[Synthesize] DOD_LEVEL_3_BLOCKED: {len(claims_with_incomplete_rationale)} claims "
-                    f"have incomplete grade_rationale: {claims_missing_domains}"
+                logger.warning(
+                    "DoD Level 3 blocked: %d claims have incomplete grade_rationale in domains %s",
+                    len(claims_with_incomplete_rationale),
+                    claims_missing_domains,
                 )
                 span.set_attribute("dod_blocked", True)
                 span.set_attribute("dod_block_reason", "GRADE_RATIONALE_INCOMPLETE")
@@ -398,7 +414,7 @@ async def critique_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # If no claims to critique, return explicit empty critique
         if not state.claims:
-            print("[Critique] No claims to critique - returning empty critique")
+            logger.debug("Critique skipped because no claims were generated")
             empty_critique = Critique(
                 findings=[],
                 blockers=["No claims generated from synthesis"],
@@ -412,7 +428,7 @@ async def critique_node(state: CDRState, config: RunnableConfig) -> dict:
         model = configurable.get("model", "gpt-4o")
 
         if not llm:
-            print("[Critique] No LLM provider configured")
+            logger.warning("Critique unavailable because no LLM provider is configured")
             no_llm_critique = Critique(
                 findings=[],
                 blockers=["No LLM provider configured for critique"],
@@ -427,7 +443,7 @@ async def critique_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # synthesis_result is required for critique
         if not state.synthesis_result:
-            print("[Critique] No synthesis_result available - cannot critique")
+            logger.warning("Critique unavailable because synthesis_result is missing")
             no_synthesis_critique = Critique(
                 findings=[],
                 blockers=["No synthesis result available for critique"],
@@ -442,8 +458,10 @@ async def critique_node(state: CDRState, config: RunnableConfig) -> dict:
             state.question,
         )
 
-        print(
-            f"[Critique] Generated {len(result.findings)} findings, {len(result.blockers)} blockers"
+        logger.debug(
+            "Generated %d critique findings and %d blockers",
+            len(result.findings),
+            len(result.blockers),
         )
         span.set_attribute("finding_count", len(result.findings))
         span.set_attribute("blocker_count", len(result.blockers))
@@ -475,13 +493,16 @@ async def verify_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # If no claims, return empty verification result
         if not state.claims:
-            print("[Verify] No claims to verify")
+            logger.debug("Verification skipped because there are no claims")
             span.set_attribute("skipped_reason", "no_claims")
             return {"verification": []}
 
         # If no LLM, mark all as UNVERIFIABLE (explicit failure, not silent pass)
         if not llm:
-            print("[Verify] No LLM provider - marking all claims as UNVERIFIABLE")
+            logger.warning(
+                "No LLM provider is configured; marking %d claims as UNVERIFIABLE",
+                len(state.claims),
+            )
             span.set_attribute("skipped_reason", "no_llm")
             verification_results = []
             for claim in state.claims:
@@ -512,15 +533,15 @@ async def verify_node(state: CDRState, config: RunnableConfig) -> dict:
                     source_texts[record_id] = text
 
         # DEBUG: Log source_texts availability
-        print(f"[Verify] source_texts available for {len(source_texts)} records")
+        logger.debug("Source text is available for %d records", len(source_texts))
         if source_texts:
             sample_id = next(iter(source_texts))
             sample_len = len(source_texts[sample_id])
-            print(f"[Verify] Sample source_text: {sample_id} ({sample_len} chars)")
+            logger.debug("Sample source text: record %s (%d chars)", sample_id, sample_len)
 
         # If no snippets, verification cannot proceed
         if not snippets_dict:
-            print("[Verify] No snippets available - cannot verify claims")
+            logger.warning("No snippets are available; claims cannot be verified")
             span.set_attribute("skipped_reason", "no_snippets")
             verification_results = []
             for claim in state.claims:
@@ -534,8 +555,10 @@ async def verify_node(state: CDRState, config: RunnableConfig) -> dict:
             return {"verification": verification_results}
 
         # Perform real verification
-        print(
-            f"[Verify] Verifying {len(state.claims)} claims against {len(snippets_dict)} snippets"
+        logger.debug(
+            "Verifying %d claims against %d snippets",
+            len(state.claims),
+            len(snippets_dict),
         )
 
         verifier = Verifier(llm, model)
@@ -564,8 +587,11 @@ async def verify_node(state: CDRState, config: RunnableConfig) -> dict:
         span.set_attribute("claims_contradicted", contradicted_count)
         span.set_attribute("claims_total", len(verification_results))
 
-        print(
-            f"[Verify] Results: {verified_count} verified, {partial_count} partial, {contradicted_count} contradicted"
+        logger.debug(
+            "Verification results: %d verified, %d partial, %d contradicted",
+            verified_count,
+            partial_count,
+            contradicted_count,
         )
 
         return {"verification": verification_results}
@@ -598,18 +624,18 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # Compositional inference only for Level 3
         if dod_level < 3:
-            print(f"[Compose] Skipping for DoD level {dod_level} (requires Level 3)")
+            logger.debug("Composition skipped at DoD level %d; requires Level 3", dod_level)
             span.set_attribute("skipped_reason", f"dod_level_{dod_level}")
             return {"composed_hypotheses": []}
 
         # Must have claims and verification to compose
         if not state.claims:
-            print("[Compose] No claims available - cannot compose")
+            logger.debug("Composition skipped because no claims are available")
             span.set_attribute("skipped_reason", "no_claims")
             return {"composed_hypotheses": []}
 
         if not state.verification:
-            print("[Compose] No verification results - cannot compose")
+            logger.debug("Composition skipped because no verification results are available")
             span.set_attribute("skipped_reason", "no_verification")
             return {"composed_hypotheses": []}
 
@@ -625,8 +651,9 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
         verified_claims = [c for c in state.claims if c.claim_id in verified_claim_ids]
 
         if len(verified_claims) < 2:
-            print(
-                f"[Compose] Insufficient verified claims ({len(verified_claims)}) - need at least 2"
+            logger.debug(
+                "Composition skipped: %d verified claims are available; at least 2 are required",
+                len(verified_claims),
             )
             span.set_attribute("skipped_reason", "insufficient_claims")
             span.set_attribute("verified_claims_count", len(verified_claims))
@@ -634,11 +661,11 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # If no LLM, cannot perform composition
         if not llm:
-            print("[Compose] No LLM provider - cannot perform compositional inference")
+            logger.warning("Composition unavailable because no LLM provider is configured")
             span.set_attribute("skipped_reason", "no_llm")
             return {"composed_hypotheses": []}
 
-        print(f"[Compose] Composing from {len(verified_claims)} verified claims")
+        logger.debug("Composing from %d verified claims", len(verified_claims))
 
         # Run CompositionEngine
         from cdr.composition import CompositionEngine
@@ -650,6 +677,6 @@ async def compose_node(state: CDRState, config: RunnableConfig) -> dict:
         composed_dicts = [h.model_dump(mode="json") for h in composed]
 
         span.set_attribute("hypotheses_generated", len(composed_dicts))
-        print(f"[Compose] Generated {len(composed_dicts)} composed hypotheses")
+        logger.debug("Generated %d composed hypotheses", len(composed_dicts))
 
         return {"composed_hypotheses": composed_dicts}
