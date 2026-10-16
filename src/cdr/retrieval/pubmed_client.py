@@ -410,10 +410,6 @@ class PubMedClient:
             return StudyType.SYSTEMATIC_REVIEW
         if "randomized controlled trial" in pub_types:
             return StudyType.RCT
-        if "clinical trial" in pub_types:
-            return StudyType.RCT
-        if "observational study" in pub_types:
-            return StudyType.COHORT
         if "case reports" in pub_types:
             return StudyType.CASE_REPORT
 

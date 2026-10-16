@@ -109,6 +109,32 @@ class TestPubMedClient:
         assert record.publication_type == ["Randomized Controlled Trial", "Journal Article"]
         assert record.study_type == StudyType.RCT
 
+    @pytest.mark.parametrize("publication_type", ["Clinical Trial", "Observational Study"])
+    def test_ambiguous_publication_types_are_not_normalized(self, client, publication_type):
+        """Broad PubMed tags must not imply a more specific study design."""
+        article = ET.fromstring(
+            f"""
+            <PubmedArticle>
+              <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                  <ArticleTitle>Study title</ArticleTitle>
+                  <Journal><Title>Clinical Journal</Title></Journal>
+                  <PublicationTypeList>
+                    <PublicationType>{publication_type}</PublicationType>
+                  </PublicationTypeList>
+                </Article>
+              </MedlineCitation>
+            </PubmedArticle>
+            """
+        )
+
+        record = client._parse_article(article)
+
+        assert record is not None
+        assert record.publication_type == [publication_type]
+        assert record.study_type is None
+
     def test_build_params_includes_api_key(self, client):
         """Test _build_params includes API key when configured."""
         params = client._build_params(term="test query")
