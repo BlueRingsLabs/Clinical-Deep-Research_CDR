@@ -238,26 +238,19 @@ def evaluate_question_online(question: QuestionDict) -> EvalResult:
     t_start = time.perf_counter()
 
     try:
-        from cdr.orchestration.graph import run_graph
 
-        result_state = asyncio.get_event_loop().run_until_complete(run_graph(question_text))
-    except RuntimeError:
-        # No event loop — create one
-        try:
-            from cdr.orchestration.graph import run_graph
+        async def run_case() -> Any:
+            from cdr.llm.factory import create_provider_with_fallback
+            from cdr.orchestration.graph import CDRRunner
 
-            result_state = asyncio.run(run_graph(question_text))
-        except Exception as e:
-            return {
-                "question_id": qid,
-                "question": question_text,
-                "timestamp": datetime.now(UTC).isoformat(),
-                "mode": "online",
-                "status": "error",
-                "error": str(e),
-                "metrics": {},
-                "latency_ms": {},
-            }
+            llm = create_provider_with_fallback()
+            runner = CDRRunner(llm)
+            return await runner.run(
+                question_text,
+                literature_cutoff_year=question.get("literature_cutoff_year"),
+            )
+
+        result_state = asyncio.run(run_case())
     except Exception as e:
         return {
             "question_id": qid,

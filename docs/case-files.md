@@ -61,5 +61,11 @@ make eval-cases     # offline structural check of every case
 uv run python -m eval.eval_runner --dataset eval/cases/ --mode online   # real pipeline, needs a key
 ```
 
+For a `retrodiction` Case File, online evaluation passes `literature_cutoff_year` into the run.
+PubMed is restricted by publication date through December 31 of that year; ClinicalTrials.gov is
+omitted for cutoff-constrained runs. This is not a complete historical-information boundary:
+full-text sources and the model's training data may still contain later information, and the report
+records that limitation in its executed-search notes.
+
 Scoring against `known_answer` is still manual: read the report and compare. Automating that
 judgment reliably is itself an open problem, and a good one to pick up.

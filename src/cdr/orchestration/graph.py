@@ -220,6 +220,7 @@ class CDRRunner:
         formats: list[str] | None = None,
         dod_level: int | None = None,
         run_id: str | None = None,
+        literature_cutoff_year: int | None = None,
     ) -> CDRState:
         """Run the full CDR pipeline.
 
@@ -228,6 +229,7 @@ class CDRRunner:
             max_results: Maximum records to retrieve per source
             formats: Output formats (default: ["markdown", "json"])
             dod_level: Override DoD level for this run (default: use instance level)
+            literature_cutoff_year: Optional publication-year cutoff for retrodiction runs
             run_id: Optional run ID from API (if None, generates new UUID)
 
         Returns:
@@ -279,6 +281,7 @@ class CDRRunner:
                 "output_dir": self.output_dir,
                 "formats": formats or ["markdown", "json"],
                 "dod_level": effective_dod_level,
+                "literature_cutoff_year": literature_cutoff_year,
                 "run_store": self.run_store,  # Pass for node-level persistence
             }
 

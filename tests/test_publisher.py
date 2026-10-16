@@ -15,9 +15,11 @@ from cdr.core.schemas import (
     Critique,
     CritiqueResult,
     EvidenceClaim,
+    ExecutedSearch,
     PRISMACounts,
     RoB2DomainResult,
     RoB2Result,
+    SearchPlan,
     SynthesisResult,
 )
 from cdr.publisher.publisher import Publisher
@@ -184,6 +186,42 @@ class TestPublisherSchemaAlignment:
 
 class TestPublisherFormatting:
     """Tests for Publisher formatting helpers."""
+
+    def test_json_report_preserves_retrodiction_cutoff_and_limitation(self):
+        pico = PICO(
+            population="Adults with migraine",
+            intervention="magnesium",
+            comparator="placebo",
+            outcome="migraine frequency",
+        )
+        state = CDRState(
+            run_id="retro-1987",
+            question="What did evidence show by 1987?",
+            pico=pico,
+            search_plan=SearchPlan(
+                pico=pico,
+                pubmed_query="magnesium AND migraine",
+                literature_cutoff_year=1987,
+            ),
+            executed_searches=[
+                ExecutedSearch(
+                    database="PubMed",
+                    query_executed="magnesium AND migraine",
+                    results_count=1,
+                    results_fetched=1,
+                    literature_cutoff_year=1987,
+                    notes="Later model knowledge may leak into generated results.",
+                )
+            ],
+        )
+
+        report = json.loads(Publisher()._generate_json(state, SynthesisResult(), None, None))
+
+        assert report["search_plan"]["literature_cutoff_year"] == 1987
+        assert report["executed_searches"][0]["literature_cutoff_year"] == 1987
+        assert "model knowledge" in report["executed_searches"][0]["notes"]
+        strategy = Publisher()._format_search_strategy(state)
+        assert "ClinicalTrials.gov (not searched" in strategy
 
     def test_generate_json_serializes_current_critique_schema(self):
         """Critique output uses fields from the current aggregate schema."""

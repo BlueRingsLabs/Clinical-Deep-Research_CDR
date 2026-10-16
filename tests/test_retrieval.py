@@ -96,6 +96,29 @@ class TestPubMedClient:
         assert "term" in params
         assert "extra" not in params
 
+    def test_search_passes_publication_date_range_to_esearch(self, client):
+        """A retrodiction cutoff is sent as a PubMed publication-date range."""
+        import httpx
+
+        client._rate_limit = MagicMock()
+        client._client.get = MagicMock(
+            return_value=httpx.Response(
+                200,
+                text="<eSearchResult><Count>0</Count><IdList /></eSearchResult>",
+                request=httpx.Request("GET", "https://eutils.ncbi.nlm.nih.gov/"),
+            )
+        )
+
+        client.search(
+            "fish oil AND Raynaud syndrome",
+            literature_cutoff_year=1985,
+        )
+
+        params = client._client.get.call_args.kwargs["params"]
+        assert params["mindate"] == "1800/01/01"
+        assert params["maxdate"] == "1985/12/31"
+        assert params["datetype"] == "pdat"
+
     def test_search_filters_to_filter_string(self):
         """Test PubMedSearchFilters.to_filter_string()."""
         from cdr.retrieval.pubmed_client import PubMedSearchFilters

@@ -859,6 +859,20 @@ class TestCreateRunEndpoint:
         assert "run_id" in data
         assert data["status"] == "pending"
 
+    def test_create_run_passes_literature_cutoff_to_background_run(self, client):
+        """The API carries a retrodiction cutoff into its background execution."""
+        with patch("cdr.api.routes._execute_run", new_callable=AsyncMock) as execute_run:
+            response = client.post(
+                "/api/v1/runs",
+                json={
+                    "research_question": "What did evidence show about magnesium and migraine by 1987?",
+                    "literature_cutoff_year": 1987,
+                },
+            )
+
+        assert response.status_code == 202
+        assert execute_run.await_args.args[-1] == 1987
+
     def test_create_run_adds_to_runs_dict(self, client):
         """Created run is added to _runs."""
         with patch("cdr.api.routes._execute_run", new=AsyncMock()):

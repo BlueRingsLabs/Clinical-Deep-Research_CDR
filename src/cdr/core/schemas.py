@@ -133,6 +133,12 @@ class SearchPlan(BaseModel):
     date_range: tuple[str, str] | None = Field(
         default=None, description="Date range filter as (min_date, max_date) in YYYY/MM/DD format"
     )
+    literature_cutoff_year: int | None = Field(
+        default=None,
+        ge=1800,
+        le=2100,
+        description="Exclude literature published after this year for retrodiction runs",
+    )
     languages: list[str] = Field(
         default_factory=lambda: ["english"], description="Allowed languages"
     )
@@ -171,6 +177,9 @@ class ExecutedSearch(BaseModel):
     executed_at: datetime = Field(default_factory=datetime.utcnow)
     results_count: int = Field(..., ge=0, description="Number of results returned")
     results_fetched: int = Field(..., ge=0, description="Number of results actually fetched")
+    literature_cutoff_year: int | None = Field(
+        default=None, description="Publication-date cutoff applied to this search, if any"
+    )
     notes: str | None = Field(
         None, description="Any modifications or notes (e.g., 'query truncated')"
     )

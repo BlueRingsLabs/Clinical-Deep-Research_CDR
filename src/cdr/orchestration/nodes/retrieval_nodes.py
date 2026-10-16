@@ -61,7 +61,13 @@ async def plan_search_node(state: CDRState, config: RunnableConfig) -> dict:
         from cdr.interface.search_planner import SearchPlanner
 
         planner = SearchPlanner(llm, model)
-        search_plan = await planner.plan(state.pico)
+        literature_cutoff_year = configurable.get("literature_cutoff_year")
+        if literature_cutoff_year is None:
+            search_plan = await planner.plan(state.pico)
+        else:
+            search_plan = await planner.plan(
+                state.pico, literature_cutoff_year=literature_cutoff_year
+            )
 
         span.set_attribute("pubmed_query_length", len(search_plan.pubmed_query or ""))
 
@@ -110,13 +116,26 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
         pubmed_total_count = 0
         pubmed_fetched_count = 0
         pubmed_error_note = None
+        pubmed_date_from = None
+        pubmed_date_to = None
+        if state.search_plan.date_range:
+            pubmed_date_from, pubmed_date_to = state.search_plan.date_range
+        cutoff_year = state.search_plan.literature_cutoff_year
+        if cutoff_year is not None:
+            cutoff_date = f"{cutoff_year}/12/31"
+            if pubmed_date_to is None or pubmed_date_to > cutoff_date:
+                pubmed_date_to = cutoff_date
+            if pubmed_date_from is None:
+                pubmed_date_from = "1800/01/01"
         if state.search_plan.pubmed_query:
             try:
                 # PubMedClient.search is synchronous, returns PubMedSearchResult
-                search_result = pubmed.search(
-                    state.search_plan.pubmed_query,
-                    max_results=max_results,
-                )
+                search_kwargs = {"max_results": max_results}
+                if pubmed_date_from or pubmed_date_to:
+                    search_kwargs.update({"date_from": pubmed_date_from, "date_to": pubmed_date_to})
+                if cutoff_year is not None:
+                    search_kwargs["literature_cutoff_year"] = cutoff_year
+                search_result = pubmed.search(state.search_plan.pubmed_query, **search_kwargs)
                 pubmed_total_count = search_result.total_count
                 print(
                     f"[Retrieve] PubMed found {search_result.total_count} results, fetching {len(search_result.pmids)} PMIDs"
@@ -143,6 +162,17 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
 
         # Track executed PubMed search for PRISMA-S
         if state.search_plan.pubmed_query:
+            pubmed_notes = []
+            if cutoff_year is not None:
+                pubmed_notes.extend(
+                    [
+                        f"Publication dates limited to {pubmed_date_from} through {pubmed_date_to} (pdat).",
+                        "ClinicalTrials.gov was skipped because the registry search is not constrained by this publication-date cutoff.",
+                        "The cutoff does not constrain full-text sources or the provider model's training data; later information may still leak into generated results.",
+                    ]
+                )
+            if pubmed_error_note:
+                pubmed_notes.append(pubmed_error_note)
             executed_searches.append(
                 ExecutedSearch(
                     database="PubMed",
@@ -151,7 +181,8 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
                     executed_at=datetime.now(UTC),
                     results_count=pubmed_total_count,
                     results_fetched=pubmed_fetched_count,
-                    notes=pubmed_error_note,
+                    literature_cutoff_year=cutoff_year,
+                    notes=" ".join(pubmed_notes) or None,
                 )
             )
 
@@ -162,7 +193,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
         ct_fetched_count = 0
         ct_error_note = None
         ct_query_truncated = False
-        if state.search_plan.ct_gov_query:
+        if state.search_plan.ct_gov_query and cutoff_year is None:
             try:
                 from cdr.retrieval.ct_client import CTSearchFilters
 
@@ -211,7 +242,7 @@ async def retrieve_node(state: CDRState, config: RunnableConfig) -> dict:
                 ct_error_note = f"Search failed: {e}"
 
         # Track executed CT.gov search for PRISMA-S
-        if state.search_plan.ct_gov_query:
+        if state.search_plan.ct_gov_query and cutoff_year is None:
             notes_parts = []
             if ct_query_truncated:
                 notes_parts.append("Query truncated by CT.gov client (exceeded 500-char limit)")

@@ -1270,6 +1270,20 @@
             "title": "Dod Level",
             "description": "Definition of Done level (1=Basic, 2=Full, 3=Research)",
             "default": 1
+          },
+          "literature_cutoff_year": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2100.0,
+                "minimum": 1800.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Literature Cutoff Year",
+            "description": "Exclude literature published after this year for retrodiction runs"
           }
         },
         "type": "object",
@@ -1425,6 +1439,17 @@
               }
             ],
             "title": "Date Range"
+          },
+          "literature_cutoff_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Literature Cutoff Year"
           },
           "languages": {
             "items": {

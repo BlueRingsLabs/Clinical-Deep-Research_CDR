@@ -14,7 +14,7 @@ PRISMA-S requires:
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -253,6 +253,111 @@ class TestRetrieveNodePRISMAS:
             assert ct_exec.query_planned == ct_query
             # No truncation note
             assert ct_exec.notes is None or "truncat" not in (ct_exec.notes or "").lower()
+
+    def test_retrieve_node_applies_cutoff_and_skips_registry(self, mock_state):
+        """Cutoff runs constrain PubMed and avoid unfiltered current registry data."""
+        from cdr.orchestration.graph import retrieve_node
+
+        plan = mock_state.search_plan.model_copy(update={"literature_cutoff_year": 1985})
+        state = mock_state.model_copy(update={"search_plan": plan})
+        config = {"configurable": {"max_results": 50}}
+
+        with (
+            patch("cdr.retrieval.pubmed_client.PubMedClient") as mock_pubmed_cls,
+            patch("cdr.retrieval.ct_client.ClinicalTrialsClient") as mock_ct_cls,
+        ):
+            mock_pubmed = MagicMock()
+            mock_pubmed.search.return_value = MagicMock(total_count=2, pmids=[])
+            mock_pubmed_cls.return_value = mock_pubmed
+            mock_ct = MagicMock()
+            mock_ct_cls.return_value = mock_ct
+
+            result = asyncio.run(retrieve_node(state, config))
+
+        mock_pubmed.search.assert_called_once_with(
+            plan.pubmed_query,
+            max_results=50,
+            date_from="1800/01/01",
+            date_to="1985/12/31",
+            literature_cutoff_year=1985,
+        )
+        mock_ct.search.assert_not_called()
+        assert [search.database for search in result["executed_searches"]] == ["PubMed"]
+        search = result["executed_searches"][0]
+        assert search.literature_cutoff_year == 1985
+        assert "training data" in search.notes
+        assert "ClinicalTrials.gov was skipped" in search.notes
+
+
+class TestSearchPlanCutoff:
+    def test_search_planner_records_cutoff(self):
+        """The SearchPlanner persists the cutoff even when generated query JSON omits it."""
+        from types import SimpleNamespace
+
+        from cdr.interface.search_planner import SearchPlanner
+
+        pico = PICO(
+            population="Adults with migraine",
+            intervention="magnesium",
+            comparator="placebo",
+            outcome="migraine frequency",
+        )
+        llm = MagicMock()
+        llm.acomplete = AsyncMock(
+            return_value=SimpleNamespace(
+                content='{"pubmed_query":"magnesium AND migraine","ct_gov_query":"magnesium migraine"}'
+            )
+        )
+
+        plan = asyncio.run(SearchPlanner(llm).plan(pico, literature_cutoff_year=1987))
+
+        assert plan.literature_cutoff_year == 1987
+
+    def test_search_planner_validates_cutoff(self):
+        """Invalid cutoffs are rejected instead of bypassing Pydantic validation."""
+        from types import SimpleNamespace
+
+        from cdr.interface.search_planner import SearchPlanner
+
+        pico = PICO(
+            population="Adults with migraine",
+            intervention="magnesium",
+            comparator="placebo",
+            outcome="migraine frequency",
+        )
+        llm = MagicMock()
+        llm.acomplete = AsyncMock(
+            return_value=SimpleNamespace(content='{"pubmed_query":"magnesium AND migraine"}')
+        )
+
+        with pytest.raises(ValueError):
+            asyncio.run(SearchPlanner(llm).plan(pico, literature_cutoff_year=1700))
+
+    def test_plan_search_node_carries_configured_cutoff(self):
+        """The pipeline attaches the request cutoff to the immutable SearchPlan."""
+        from cdr.orchestration.nodes.retrieval_nodes import plan_search_node
+
+        pico = PICO(
+            population="Adults with migraine",
+            intervention="magnesium",
+            comparator="placebo",
+            outcome="migraine frequency",
+        )
+        state = CDRState(
+            run_id="cutoff-plan", question="Does magnesium prevent migraine?", pico=pico
+        )
+        planned = SearchPlan(pico=pico, pubmed_query="magnesium AND migraine")
+
+        with patch("cdr.interface.search_planner.SearchPlanner") as planner_cls:
+            planner_cls.return_value.plan = AsyncMock(return_value=planned)
+            asyncio.run(
+                plan_search_node(
+                    state,
+                    {"configurable": {"literature_cutoff_year": 1987}},
+                )
+            )
+
+        planner_cls.return_value.plan.assert_awaited_once_with(pico, literature_cutoff_year=1987)
 
 
 class TestReportDataPRISMAS:

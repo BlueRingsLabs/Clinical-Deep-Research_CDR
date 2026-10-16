@@ -60,7 +60,7 @@ class SearchPlanner:
         self.llm = llm_provider
         self.model = model
 
-    async def plan(self, pico: PICO) -> SearchPlan:
+    async def plan(self, pico: PICO, literature_cutoff_year: int | None = None) -> SearchPlan:
         """Generate search plan from PICO.
 
         Args:
@@ -86,6 +86,13 @@ class SearchPlanner:
 
             print(f"[SearchPlanner] LLM response (first 500 chars): {response.content[:500]}")
             plan = self._parse_response(response.content, pico)
+            if literature_cutoff_year is not None:
+                plan = SearchPlan.model_validate(
+                    {
+                        **plan.model_dump(),
+                        "literature_cutoff_year": literature_cutoff_year,
+                    }
+                )
             print(f"[SearchPlanner] Generated PubMed query: {plan.pubmed_query}")
             print(f"[SearchPlanner] Generated CT.gov query: {plan.ct_gov_query}")
 

@@ -52,6 +52,12 @@ class RunRequest(BaseModel):
         ge=1,
         le=3,
     )
+    literature_cutoff_year: int | None = Field(
+        default=None,
+        description="Exclude literature published after this year for retrodiction runs",
+        ge=1800,
+        le=2100,
+    )
 
 
 class RunResponse(BaseModel):
@@ -171,6 +177,7 @@ class SearchPlanResponse(BaseModel):
     pubmed_query: str
     ct_gov_query: str
     date_range: list[str] | None = None
+    literature_cutoff_year: int | None = None
     languages: list[str] = []
     max_results_per_source: int = 100
     created_at: str | None = None
@@ -414,6 +421,7 @@ async def create_run(
             "updated_at": now,
             "dod_level": request.dod_level,
             "model": request.model,
+            "literature_cutoff_year": request.literature_cutoff_year,
         }
 
         # Schedule background execution
@@ -425,6 +433,7 @@ async def create_run(
             request.output_formats,
             request.model,
             request.dod_level,
+            request.literature_cutoff_year,
         )
 
         metrics.counter("cdr.api.runs_created")
@@ -564,6 +573,7 @@ async def get_run_detail(run_id: str) -> RunDetailResponse:
                 pubmed_query=sp.pubmed_query,
                 ct_gov_query=sp.ct_gov_query,
                 date_range=list(sp.date_range) if sp.date_range else None,
+                literature_cutoff_year=getattr(sp, "literature_cutoff_year", None),
                 languages=sp.languages or [],
                 max_results_per_source=sp.max_results_per_source,
                 created_at=sp.created_at.isoformat()
@@ -832,6 +842,7 @@ async def get_run_search_plan(run_id: str) -> SearchPlanResponse:
         pubmed_query=sp.pubmed_query,
         ct_gov_query=sp.ct_gov_query,
         date_range=list(sp.date_range) if sp.date_range else None,
+        literature_cutoff_year=getattr(sp, "literature_cutoff_year", None),
         languages=sp.languages or [],
         max_results_per_source=sp.max_results_per_source,
         created_at=sp.created_at.isoformat()
@@ -2184,6 +2195,7 @@ async def _execute_run(
     formats: list[str],
     model: str,
     dod_level: int = 1,
+    literature_cutoff_year: int | None = None,
 ) -> None:
     """Execute a CDR run in the background.
 
@@ -2194,6 +2206,7 @@ async def _execute_run(
         formats: Output formats
         model: LLM model to use
         dod_level: Definition of Done level (1-3)
+        literature_cutoff_year: Optional publication-year cutoff for retrodiction runs
     """
     run = _runs[run_id]
     run["status"] = RunStatus.RUNNING.value  # Correct: RUNNING not IN_PROGRESS
@@ -2225,6 +2238,7 @@ async def _execute_run(
             max_results=max_results,
             formats=formats,
             dod_level=dod_level,
+            literature_cutoff_year=literature_cutoff_year,
             run_id=run_id,
         )
 
