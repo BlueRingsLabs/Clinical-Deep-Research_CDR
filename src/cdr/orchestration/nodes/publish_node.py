@@ -454,6 +454,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                     "pubmed_query": state.search_plan.pubmed_query,
                     "ct_gov_query": state.search_plan.ct_gov_query,
                     "date_range": state.search_plan.date_range,
+                    "literature_cutoff_year": state.search_plan.literature_cutoff_year,
                     "languages": state.search_plan.languages,
                     "max_results_per_source": state.search_plan.max_results_per_source,
                     "created_at": state.search_plan.created_at.isoformat()
@@ -473,6 +474,7 @@ async def publish_node(state: CDRState, config: RunnableConfig) -> dict:
                     "executed_at": es.executed_at.isoformat() if es.executed_at else None,
                     "results_count": es.results_count,
                     "results_fetched": es.results_fetched,
+                    "literature_cutoff_year": es.literature_cutoff_year,
                     "notes": es.notes,
                 }
                 for es in state.executed_searches

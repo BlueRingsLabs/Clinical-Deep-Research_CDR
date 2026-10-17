@@ -143,6 +143,7 @@ class PubMedClient:
         max_results: int | None = None,
         date_from: str | None = None,
         date_to: str | None = None,
+        literature_cutoff_year: int | None = None,
         publication_types: list[str] | None = None,
         filters: PubMedSearchFilters | None = None,
     ) -> PubMedSearchResult:
@@ -156,6 +157,7 @@ class PubMedClient:
             max_results: Override default max results.
             date_from: Start date (YYYY/MM/DD).
             date_to: End date (YYYY/MM/DD).
+            literature_cutoff_year: Restrict publication dates through December 31 of this year.
             publication_types: Filter by publication type (legacy).
             filters: Structured filters using PubMedSearchFilters.
 
@@ -184,6 +186,14 @@ class PubMedClient:
                 # Legacy filter parameters
                 pt_filter = " OR ".join(f'"{pt}"[pt]' for pt in publication_types)
                 full_query = f"({query}) AND ({pt_filter})"
+
+            if literature_cutoff_year is not None:
+                cutoff_date = f"{literature_cutoff_year}/12/31"
+                if date_to is None or date_to > cutoff_date:
+                    date_to = cutoff_date
+                if date_from is None:
+                    # NCBI requires both bounds for an arbitrary date range.
+                    date_from = "1800/01/01"
 
             # Log the full query for reproducibility
             print(f"[PubMed] Full query: {full_query}")

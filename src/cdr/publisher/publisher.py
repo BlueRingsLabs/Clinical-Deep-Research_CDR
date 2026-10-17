@@ -409,6 +409,23 @@ class Publisher:
             },
             "research_question": state.question,
             "pico": state.pico.model_dump() if state.pico else None,
+            "search_plan": (
+                {
+                    "pubmed_query": state.search_plan.pubmed_query,
+                    "ct_gov_query": state.search_plan.ct_gov_query,
+                    "date_range": list(state.search_plan.date_range)
+                    if state.search_plan.date_range
+                    else None,
+                    "literature_cutoff_year": state.search_plan.literature_cutoff_year,
+                    "languages": state.search_plan.languages,
+                    "max_results_per_source": state.search_plan.max_results_per_source,
+                    "created_at": state.search_plan.created_at.isoformat()
+                    if state.search_plan.created_at
+                    else None,
+                }
+                if state.search_plan
+                else None
+            ),
             "prisma_counts": state.prisma_counts.model_dump() if state.prisma_counts else None,
             # PRISMA-S: Executed search details
             "executed_searches": [
@@ -419,6 +436,7 @@ class Publisher:
                     "executed_at": search.executed_at.isoformat() if search.executed_at else None,
                     "results_count": search.results_count,
                     "results_fetched": search.results_fetched,
+                    "literature_cutoff_year": search.literature_cutoff_year,
                     "notes": search.notes,
                 }
                 for search in state.executed_searches
@@ -714,8 +732,14 @@ class Publisher:
         lines = ["Databases searched:"]
 
         if state.search_plan:
-            for db in ["PubMed", "ClinicalTrials.gov"]:
-                lines.append(f"- {db}")
+            if state.search_plan.literature_cutoff_year is not None:
+                lines.append(
+                    f"- PubMed (publication date through {state.search_plan.literature_cutoff_year})"
+                )
+                lines.append("- ClinicalTrials.gov (not searched for cutoff-constrained runs)")
+            else:
+                for db in ["PubMed", "ClinicalTrials.gov"]:
+                    lines.append(f"- {db}")
 
             if state.search_plan.pubmed_query:
                 lines.append(

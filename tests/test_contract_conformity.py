@@ -1170,6 +1170,7 @@ class TestRuntimePublishNode:
             PICO,
             CDRState,
             EvidenceClaim,
+            ExecutedSearch,
             ScreeningDecision,
             SearchPlan,
             SynthesisResult,
@@ -1188,6 +1189,7 @@ class TestRuntimePublishNode:
             pubmed_query='("ACE inhibitors"[MeSH]) AND (hypertension)',
             ct_gov_query="ACE inhibitors AND hypertension",
             date_range=("2020/01/01", "2024/12/31"),
+            literature_cutoff_year=1985,
             languages=["english"],
             max_results_per_source=100,
         )
@@ -1215,6 +1217,16 @@ class TestRuntimePublishNode:
             status=RunStatus.RUNNING,
             pico=pico,
             search_plan=search_plan,
+            executed_searches=[
+                ExecutedSearch(
+                    database="PubMed",
+                    query_executed="ACE inhibitors AND hypertension",
+                    results_count=2,
+                    results_fetched=2,
+                    literature_cutoff_year=1985,
+                    notes="Historical cutoff caveat.",
+                )
+            ],
             retrieved_records=[self._make_record("rec_001", "ACE Study", "ACE inhibitors study")],
             screened=[ScreeningDecision(record_id="rec_001", included=True)],
             snippets=[
@@ -1240,9 +1252,12 @@ class TestRuntimePublishNode:
         assert sp["pubmed_query"] == '("ACE inhibitors"[MeSH]) AND (hypertension)'
         assert sp["ct_gov_query"] == "ACE inhibitors AND hypertension"
         assert sp["date_range"] == ("2020/01/01", "2024/12/31")
+        assert sp["literature_cutoff_year"] == 1985
         assert sp["languages"] == ["english"]
         assert sp["max_results_per_source"] == 100
         assert sp["created_at"] is not None  # ISO format string
+        assert report["executed_searches"][0]["literature_cutoff_year"] == 1985
+        assert report["executed_searches"][0]["notes"] == "Historical cutoff caveat."
 
     def test_publish_node_includes_evaluation_report(self, tmp_path):
         """publish_node must include evaluation metrics in report_data.

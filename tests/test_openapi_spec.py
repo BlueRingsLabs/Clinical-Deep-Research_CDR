@@ -118,6 +118,14 @@ class TestOpenAPISchemaStructure:
         version = schema["info"]["version"]
         assert version  # non-empty
 
+    def test_run_request_exposes_literature_cutoff(self, schema):
+        """Retrodiction callers can request a publication-year cutoff."""
+        field = schema["components"]["schemas"]["RunRequest"]["properties"][
+            "literature_cutoff_year"
+        ]
+        assert {entry["type"] for entry in field["anyOf"]} == {"integer", "null"}
+        assert field["anyOf"][0]["minimum"] == 1800
+
     def test_schema_has_paths(self, schema):
         """Schema contains paths section."""
         assert "paths" in schema

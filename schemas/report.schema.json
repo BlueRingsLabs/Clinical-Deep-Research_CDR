@@ -151,6 +151,12 @@
           "minItems": 2,
           "maxItems": 2
         },
+        "literature_cutoff_year": {
+          "type": ["integer", "null"],
+          "minimum": 1800,
+          "maximum": 2100,
+          "description": "Exclude literature published after this year for retrodiction runs"
+        },
         "languages": {
           "type": "array",
           "items": { "type": "string" }
@@ -173,6 +179,7 @@
         "executed_at": { "type": ["string", "null"], "format": "date-time" },
         "results_count": { "type": "integer", "minimum": 0 },
         "results_fetched": { "type": "integer", "minimum": 0 },
+        "literature_cutoff_year": { "type": ["integer", "null"] },
         "notes": { "type": ["string", "null"] }
       }
     },
