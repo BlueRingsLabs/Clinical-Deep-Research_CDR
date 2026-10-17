@@ -15,6 +15,7 @@ from cdr.core.enums import (
     RecordSource,
     RoB2Judgment,
     RunStatus,
+    StudyType,
     VerificationStatus,
 )
 from cdr.core.schemas import (
@@ -102,6 +103,14 @@ class TestRecord:
         id_type, id_value = record.get_best_identifier()
         assert id_type == "doi"
         assert id_value == sample_record["doi"]
+
+    def test_record_accepts_optional_normalized_study_type(self, sample_record: dict) -> None:
+        """Test normalized study type is optional and enum-validated."""
+        record = Record(**sample_record, study_type=StudyType.RCT)
+        assert record.study_type is StudyType.RCT
+
+        with pytest.raises(ValidationError):
+            Record(**sample_record, study_type="invalid_study_type")
 
 
 class TestScreeningDecision:

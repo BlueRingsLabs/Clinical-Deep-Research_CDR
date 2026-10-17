@@ -24,6 +24,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from cdr.core.enums import StudyType
+
 if TYPE_CHECKING:
     from cdr.core.schemas import PICO, EvidenceClaim, Record, Snippet
 
@@ -577,6 +579,24 @@ class StudyTypeConsistencyGate:
                 )
                 return "secondary", specific_type.replace(" ", "_")
 
+        # Use the normalized source classification before falling back to prose.
+        normalized_types = {
+            StudyType.RCT: ("experimental", "rct"),
+            StudyType.COHORT: ("observational", "cohort"),
+            StudyType.CASE_CONTROL: ("observational", "case_control"),
+            StudyType.CROSS_SECTIONAL: ("observational", "cross_sectional"),
+            StudyType.CASE_SERIES: ("case_level", "case_series"),
+            StudyType.CASE_REPORT: ("case_level", "case_report"),
+            StudyType.SYSTEMATIC_REVIEW: ("secondary", "systematic_review"),
+            StudyType.META_ANALYSIS: ("secondary", "meta_analysis"),
+            StudyType.NARRATIVE_REVIEW: ("secondary", "narrative_review"),
+            StudyType.GUIDELINE: ("secondary", "guideline"),
+            StudyType.EDITORIAL: ("secondary", "editorial"),
+            StudyType.LETTER: ("secondary", "letter"),
+        }
+        if record.study_type in normalized_types:
+            return normalized_types[record.study_type]
+
         # Check abstract for clues
         abstract = (record.abstract or "").lower()
         title = record.title.lower()
@@ -601,8 +621,6 @@ class StudyTypeConsistencyGate:
 
     def check_record(self, record: Record, pico: PICO) -> GateCheckResult:
         """Check if record study type matches PICO requirements."""
-        from cdr.core.enums import StudyType
-
         if not pico.study_types:
             # No study type restriction
             return GateCheckResult(gate_name=self.NAME, result=GateResult.SKIP)

@@ -213,6 +213,10 @@ class Record(BaseModel):
     year: int | None = Field(default=None, ge=1800, le=2100)
     journal: str | None = None
     publication_type: list[str] = Field(default_factory=list)
+    study_type: StudyType | None = Field(
+        default=None,
+        description="Normalized study design when it can be inferred from source metadata",
+    )
 
     # Content
     abstract: str | None = None
