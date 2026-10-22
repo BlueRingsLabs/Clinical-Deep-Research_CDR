@@ -431,8 +431,8 @@ test.describe('Complete Evidence-First Artifact E2E', () => {
       const evalSection = page.locator('[data-testid="evaluation"], .evaluation, [class*="evaluation"]');
       
       if (await evalSection.count() > 0) {
-        // Grade A
-        await expect(page.getByText('A', { exact: true })).toBeVisible({ timeout: 5_000 });
+        // Grade A. The per-dimension grades can be "A" too, so target the overall one.
+        await expect(page.getByTestId('overall-grade')).toHaveText('A', { timeout: 5_000 });
         // Score 0.92 or 92%
         await expect(page.getByText('92', { exact: false })).toBeVisible();
       }

@@ -486,7 +486,7 @@ export default function RunDetail() {
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm text-gray-700">Overall</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl font-bold text-primary-600">{evaluation.overall_grade}</span>
+                      <span className="text-2xl font-bold text-primary-600" data-testid="overall-grade">{evaluation.overall_grade}</span>
                       <span className="text-sm text-gray-500">{(evaluation.overall_score * 100).toFixed(0)}%</span>
                     </div>
                   </div>
