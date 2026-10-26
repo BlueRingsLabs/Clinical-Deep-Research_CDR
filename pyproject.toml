@@ -39,7 +39,7 @@ dependencies = [
     "transformers>=5.20.0",
     
     # Parsing
-    "pymupdf>=1.28.2",
+    "pymupdf>=2.0",
     "unstructured>=0.27.27",
     "beautifulsoup4>=4.15.0",
     "lxml>=6.1.3",
