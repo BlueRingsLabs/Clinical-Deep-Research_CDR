@@ -190,6 +190,46 @@ class TestOpenAPIEndpoints:
         # POST should have a requestBody
         assert "requestBody" in create or "200" in create.get("responses", {})
 
+    def test_primary_endpoints_include_examples(self, schema):
+        """The five most-used endpoints expose examples in OpenAPI."""
+        paths = schema["paths"]
+        create = paths["/api/v1/runs"]["post"]
+        request_examples = create["requestBody"]["content"]["application/json"]["examples"]
+        request_value = request_examples["clinical-question"]["value"]
+        assert "type 2 diabetes" in request_value["research_question"]
+        assert "continuous glucose monitoring" in request_value["research_question"]
+        accepted = create["responses"]["202"]["content"]["application/json"]
+        assert accepted["schema"]["$ref"].endswith("/RunResponse")
+        assert accepted["examples"]["accepted"]["value"]["status"] == "pending"
+
+        status_response = paths["/api/v1/runs/{run_id}"]["get"]["responses"]["200"]
+        status_content = status_response["content"]["application/json"]
+        assert status_content["schema"]["$ref"].endswith("/RunStatusResponse")
+        assert status_content["examples"]["pending-run"]["value"]["progress"]["percentage"] == 0
+
+        report_content = paths["/api/v1/runs/{run_id}/report"]["get"]["responses"]["200"][
+            "content"
+        ]["application/json"]
+        assert report_content["schema"]["$ref"].endswith("/ReportResponse")
+        assert report_content["examples"]["available-formats"]["value"]["formats_available"] == [
+            "json",
+            "markdown",
+            "pdf",
+        ]
+
+        health = paths["/api/v1/health"]["get"]["responses"]["200"]["content"]["application/json"]
+        assert health["examples"]["healthy"]["value"]["status"] == "healthy"
+
+        export = paths["/api/v1/runs/{run_id}/export/{format}"]["get"]
+        export_content = export["responses"]["200"]["content"]
+        assert export_content["application/json"]["examples"]
+        assert export_content["text/markdown"]["examples"]
+        assert export_content["application/pdf"]["schema"]["format"] == "binary"
+        format_parameter = next(
+            param for param in export["parameters"] if param["name"] == "format"
+        )
+        assert format_parameter["schema"]["examples"] == ["json", "markdown", "pdf"]
+
     def test_all_endpoints_have_responses(self, schema):
         """Every endpoint has at least one response defined."""
         paths = schema["paths"]
