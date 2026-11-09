@@ -78,7 +78,7 @@ Changelog = "https://github.com/BlueRingsLabs/Clinical-Deep-Research_CDR/blob/ma
 [dependency-groups]
 dev = [
     "pytest>=9.2.0",
-    "pytest-asyncio>=1.4.1",
+    "pytest-asyncio>=1.4.1.post1",
     "pytest-cov>=7.1.0",
     "hypothesis>=6.170.13",
     "ruff>=0.17.3",
