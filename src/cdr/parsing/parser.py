@@ -78,7 +78,7 @@ def _detect_section(text: str) -> Section | None:
 
 class PDFParser:
     """
-    PDF parser using PyMuPDF (fitz).
+    PDF parser using PyMuPDF.
 
     Usage:
         parser = PDFParser()
@@ -90,9 +90,9 @@ class PDFParser:
         self._tracer = get_tracer("cdr.parsing.pdf")
 
         try:
-            import fitz
+            import pymupdf
 
-            self._fitz = fitz
+            self._pymupdf = pymupdf
         except ImportError as e:
             raise ParsingError("PyMuPDF not installed. Run: pip install pymupdf") from e
 
@@ -116,7 +116,7 @@ class PDFParser:
                 elements: list[ParsedElement] = []
                 current_section: Section | None = None
 
-                with self._fitz.open(path) as doc:
+                with self._pymupdf.open(path) as doc:
                     page_count = len(doc)
                     for page_num in range(page_count):
                         page = doc[page_num]

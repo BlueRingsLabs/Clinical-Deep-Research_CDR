@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import fitz
+import pymupdf
 import pytest
 
 from cdr.core.exceptions import ParsingError
@@ -11,7 +11,7 @@ from cdr.parsing import Parser, PDFParser
 
 
 def make_pdf(path: Path, texts: tuple[str, ...]) -> None:
-    with fitz.open() as document:
+    with pymupdf.open() as document:
         for text in texts:
             page = document.new_page()
             if text:
@@ -25,11 +25,11 @@ def make_pdf(path: Path, texts: tuple[str, ...]) -> None:
 def test_pdf_parse_retains_page_count_after_close(tmp_path, monkeypatch, texts):
     path = tmp_path / "sample.pdf"
     make_pdf(path, texts)
-    document = fitz.open(path)
+    document = pymupdf.open(path)
     parser = PDFParser()
     tracer = MagicMock()
     monkeypatch.setattr(parser, "_tracer", tracer)
-    monkeypatch.setattr(fitz, "open", lambda _path: document)
+    monkeypatch.setattr(pymupdf, "open", lambda _path: document)
 
     parsed = parser.parse(path)
 
@@ -47,13 +47,13 @@ def test_pdf_parse_retains_page_count_after_close(tmp_path, monkeypatch, texts):
 def test_pdf_parse_closes_document_on_extraction_error(tmp_path, monkeypatch):
     path = tmp_path / "sample.pdf"
     make_pdf(path, ("Synthetic page",))
-    document = fitz.open(path)
-    monkeypatch.setattr(fitz, "open", lambda _path: document)
+    document = pymupdf.open(path)
+    monkeypatch.setattr(pymupdf, "open", lambda _path: document)
 
     def fail_extraction(*args, **kwargs):
         raise RuntimeError("synthetic extraction error")
 
-    monkeypatch.setattr(fitz.Page, "get_text", fail_extraction)
+    monkeypatch.setattr(pymupdf.Page, "get_text", fail_extraction)
     try:
         with pytest.raises(ParsingError, match="synthetic extraction error") as exc_info:
             PDFParser().parse(path)
