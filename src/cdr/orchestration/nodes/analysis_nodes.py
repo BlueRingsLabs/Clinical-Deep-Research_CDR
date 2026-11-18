@@ -7,10 +7,14 @@ Extracted from graph.py monolith.
 
 from __future__ import annotations
 
+import logging
+
 from langchain_core.runnables import RunnableConfig
 
 from cdr.core.schemas import CDRState
 from cdr.observability.tracer import tracer
+
+logger = logging.getLogger(__name__)
 
 
 async def extract_data_node(state: CDRState, config: RunnableConfig) -> dict:
@@ -36,7 +40,7 @@ async def extract_data_node(state: CDRState, config: RunnableConfig) -> dict:
         extraction_errors: list[str] = []
 
         included = state.get_included_records()
-        print(f"[Extract] Processing {len(included)} records")
+        logger.debug("Processing %d records for extraction", len(included))
 
         for record in included:
             parsed = state.parsed_documents.get(record.record_id, {})
@@ -54,17 +58,19 @@ async def extract_data_node(state: CDRState, config: RunnableConfig) -> dict:
                     pmid=pmid_value,
                 )
                 study_cards.append(card)
-                print(f"[Extract] Card extracted for {record.record_id}")
+                logger.debug("Study card extracted for %s", record.record_id)
             except Exception as e:
                 # NO SILENT FAILURES: Record the error explicitly
                 error_msg = f"Extraction failed for {record.record_id}: {e!s}"
-                print(f"[Extract] ERROR: {error_msg}")
+                logger.warning("%s", error_msg)
                 extraction_errors.append(error_msg)
                 span.set_attribute(f"extract_error_{record.record_id}", str(e))
 
         span.set_attribute("cards_extracted", len(study_cards))
         span.set_attribute("extraction_errors", len(extraction_errors))
-        print(f"[Extract] Total cards: {len(study_cards)}, Errors: {len(extraction_errors)}")
+        logger.debug(
+            "Extracted %d study cards; %d errors", len(study_cards), len(extraction_errors)
+        )
 
         # Add errors to state for transparency
         updated_errors = list(state.errors) + extraction_errors
@@ -134,8 +140,10 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
             else:
                 rct_studies.append(card)
 
-        print(
-            f"[RiskOfBias] Routing: {len(rct_studies)} RCTs (RoB2), {len(observational_studies)} observational (ROBINS-I)"
+        logger.debug(
+            "Routing %d RCTs (RoB2), %d observational studies (ROBINS-I)",
+            len(rct_studies),
+            len(observational_studies),
         )
         span.set_attribute("rct_count", len(rct_studies))
         span.set_attribute("observational_count", len(observational_studies))
@@ -164,8 +172,8 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
                     rob2_parts.append(f"## Abstract\n{sections['abstract']}")
                 if rob2_parts:
                     text = "\n\n".join(rob2_parts)
-                    print(
-                        f"[RoB2] Using structured sections for {card.record_id} (Methods+Results)"
+                    logger.debug(
+                        "Using structured sections for %s (Methods+Results)", card.record_id
                     )
 
             study_info = {
@@ -178,10 +186,10 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
             try:
                 result = assessor.assess(card.record_id, text, study_info)
                 rob2_results.append(result)
-                print(f"[RoB2] Assessed {card.record_id}: {result.overall_judgment.value}")
+                logger.debug("RoB2 assessed %s: %s", card.record_id, result.overall_judgment.value)
             except Exception as e:
                 error_msg = f"RoB2 assessment failed for {card.record_id}: {e!s}"
-                print(f"[RoB2] ERROR: {error_msg}")
+                logger.warning("%s", error_msg)
                 assessment_errors.append(error_msg)
                 span.set_attribute(f"rob2_error_{card.record_id}", str(e))
 
@@ -219,10 +227,12 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
             try:
                 result = robins_i_assessor.assess(card.record_id, text, study_info)
                 robins_i_results.append(result)
-                print(f"[ROBINS-I] Assessed {card.record_id}: {result.overall_judgment.value}")
+                logger.debug(
+                    "ROBINS-I assessed %s: %s", card.record_id, result.overall_judgment.value
+                )
             except Exception as e:
                 error_msg = f"ROBINS-I assessment failed for {card.record_id}: {e!s}"
-                print(f"[ROBINS-I] ERROR: {error_msg}")
+                logger.warning("%s", error_msg)
                 assessment_errors.append(error_msg)
                 span.set_attribute(f"robinsi_error_{card.record_id}", str(e))
 
@@ -247,8 +257,11 @@ async def assess_rob2_node(state: CDRState, config: RunnableConfig) -> dict:
         span.set_attribute("rob2_count", len(rob2_results))
         span.set_attribute("robins_i_count", len(robins_i_results))
         span.set_attribute("assessment_errors", len(assessment_errors))
-        print(
-            f"[RiskOfBias] Total: {len(rob2_results)} RoB2, {len(robins_i_results)} ROBINS-I, {len(assessment_errors)} errors"
+        logger.debug(
+            "Assessed %d RoB2 and %d ROBINS-I studies; %d errors",
+            len(rob2_results),
+            len(robins_i_results),
+            len(assessment_errors),
         )
 
         updated_errors = list(state.errors) + assessment_errors
