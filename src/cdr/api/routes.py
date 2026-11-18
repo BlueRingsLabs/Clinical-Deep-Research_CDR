@@ -7,10 +7,10 @@ FastAPI routes for the Clinical Deep Research system.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, Path, status
 from pydantic import BaseModel, Field
 
 from cdr.core.enums import RunStatus
@@ -385,9 +385,48 @@ async def list_runs() -> list[RunSummaryResponse]:
     return summaries
 
 
-@router.post("/runs", response_model=RunResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/runs",
+    response_model=RunResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={
+        202: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "accepted": {
+                            "summary": "Run accepted",
+                            "description": "Synthetic response; processing continues in the background.",
+                            "value": {
+                                "run_id": "a1b2c3d4",
+                                "status": "pending",
+                                "message": "Run a1b2c3d4 created and queued for execution",
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
 async def create_run(
-    request: RunRequest,
+    request: Annotated[
+        RunRequest,
+        Body(
+            openapi_examples={
+                "clinical-question": {
+                    "summary": "Start a clinical evidence run",
+                    "description": "Synthetic example; the run is processed asynchronously.",
+                    "value": {
+                        "research_question": "In adults with type 2 diabetes treated with basal insulin, does real-time continuous glucose monitoring compared with self-monitoring of blood glucose reduce HbA1c after 6 months?",
+                        "max_results": 100,
+                        "output_formats": ["markdown", "json"],
+                        "dod_level": 1,
+                    },
+                }
+            }
+        ),
+    ],
     background_tasks: BackgroundTasks,
 ) -> RunResponse:
     """Start a new CDR systematic review run.
@@ -445,7 +484,31 @@ async def create_run(
         )
 
 
-@router.get("/runs/{run_id}", response_model=RunStatusResponse)
+@router.get(
+    "/runs/{run_id}",
+    response_model=RunStatusResponse,
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "pending-run": {
+                            "summary": "Run status",
+                            "description": "Synthetic response for a run that has not started yet.",
+                            "value": {
+                                "run_id": "a1b2c3d4",
+                                "status": "pending",
+                                "progress": {"current_node": "pending", "percentage": 0},
+                                "errors": [],
+                                "report_path": None,
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
 async def get_run_status(run_id: str) -> RunStatusResponse:
     """Get the status of a CDR run.
 
@@ -929,7 +992,34 @@ async def get_run_pico(run_id: str) -> PICOResponse:
     )
 
 
-@router.get("/runs/{run_id}/report", response_model=ReportResponse)
+@router.get(
+    "/runs/{run_id}/report",
+    response_model=ReportResponse,
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "available-formats": {
+                            "summary": "Report download links",
+                            "description": "Synthetic response showing formats available for a completed run.",
+                            "value": {
+                                "run_id": "a1b2c3d4",
+                                "generated_at": "2026-11-02T12:00:00Z",
+                                "formats_available": ["json", "markdown", "pdf"],
+                                "download_urls": {
+                                    "json": "/api/v1/runs/a1b2c3d4/export/json",
+                                    "markdown": "/api/v1/runs/a1b2c3d4/export/markdown",
+                                    "pdf": "/api/v1/runs/a1b2c3d4/export/pdf",
+                                },
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
 async def get_run_report(run_id: str) -> ReportResponse:
     """Get report metadata for export.
 
@@ -1052,13 +1142,78 @@ async def get_run_evaluation(run_id: str) -> EvaluationReportResponse:
     )
 
 
-@router.get("/runs/{run_id}/export/{format}")
-async def export_run(run_id: str, format: str):
+@router.get(
+    "/runs/{run_id}/export/{format}",
+    responses={
+        200: {
+            "description": "Downloaded report in the requested format.",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "json-export": {
+                            "summary": "JSON report export",
+                            "description": "Synthetic export payload; the actual response is an attachment.",
+                            "value": {
+                                "run_id": "a1b2c3d4",
+                                "status": "completed",
+                                "created_at": "2026-11-02T11:45:00Z",
+                                "updated_at": "2026-11-02T12:00:00Z",
+                                "pico": {
+                                    "population": "Adults with type 2 diabetes using basal insulin",
+                                    "intervention": "Real-time continuous glucose monitoring",
+                                    "comparator": "Self-monitoring of blood glucose",
+                                    "outcome": "HbA1c change at 6 months",
+                                    "study_types": ["RCT"],
+                                },
+                                "search_plan": {
+                                    "pubmed_query": "type 2 diabetes AND basal insulin AND continuous glucose monitoring AND HbA1c",
+                                    "ct_gov_query": "type 2 diabetes continuous glucose monitoring basal insulin",
+                                },
+                                "prisma_counts": {
+                                    "records_identified": 120,
+                                    "records_screened": 100,
+                                    "records_excluded": 90,
+                                    "reports_assessed": 10,
+                                    "studies_included": 5,
+                                },
+                                "claims": [],
+                                "snippets": [],
+                                "study_cards": [],
+                                "hypotheses": [],
+                                "answer": "Illustrative synthetic summary.",
+                            },
+                        }
+                    }
+                },
+                "text/markdown": {
+                    "examples": {
+                        "markdown-export": {
+                            "summary": "Markdown report export",
+                            "description": "Synthetic report excerpt; the actual response is an attachment.",
+                            "value": "# CDR Report: a1b2c3d4\n\n**Status**: completed",
+                        }
+                    }
+                },
+                "application/pdf": {"schema": {"type": "string", "format": "binary"}},
+            },
+        }
+    },
+)
+async def export_run(
+    run_id: str,
+    format: Annotated[
+        str,
+        Path(
+            description="Export format: json, markdown, or pdf.",
+            examples=["json", "markdown", "pdf"],
+        ),
+    ],
+):
     """Export run results in specified format.
 
     Args:
         run_id: The run ID
-        format: Export format (json or markdown)
+        format: Export format (json, markdown, or pdf)
 
     Returns:
         Exported content as file download
@@ -2159,7 +2314,23 @@ async def parse_question(question: str) -> PICOResponse:
         ) from e
 
 
-@router.get("/health")
+@router.get(
+    "/health",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "healthy": {
+                            "summary": "Healthy service",
+                            "value": {"status": "healthy", "version": "0.1.0", "service": "cdr"},
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
 async def health_check() -> dict:
     """Health check endpoint.
 
